@@ -1,11 +1,5 @@
 import Foundation
 
-/// Walks `ProtectionLocation.allowlist` and checks every file against
-/// hash-based (`HashScanner`, always) and pattern-based (`YaraScanner`,
-/// optional) detection. Fully offline — `VirusTotalClient` is a separate,
-/// explicitly optional supplementary lookup the UI triggers per finding,
-/// never a dependency of this scan (the plan's own requirement: don't make
-/// the scanner non-functional offline).
 public struct ProtectionScanner: Sendable {
     private let locations: [ProtectionLocation]
     private let hashScanner: HashScanner
@@ -22,38 +16,67 @@ public struct ProtectionScanner: Sendable {
     }
 
     public func scan() async throws -> [ThreatFinding] {
-        var findings: [ThreatFinding] = []
+        try await scan(onProgress: nil)
+    }
+
+    public func scan(onProgress: (@Sendable (ScanProgress) -> Void)? = nil) async throws -> [ThreatFinding] {
         let fileManager = FileManager.default
+        let roots = locations.flatMap { $0.resolvedPaths(fileManager: fileManager) }
+        let totalItems = onProgress == nil ? nil : try await countFiles(under: roots, fileManager: fileManager)
 
-        for location in locations {
-            for root in location.resolvedPaths(fileManager: fileManager) {
-                var isDirectory: ObjCBool = false
-                guard fileManager.fileExists(atPath: root, isDirectory: &isDirectory), isDirectory.boolValue else {
-                    continue
-                }
+        var findings: [ThreatFinding] = []
+        var itemsProcessed = 0
 
-                for await item in FTSWrapper.walk(root: root) where item.kind == .file {
-                    if let hashFinding = hashScanner.scan(path: item.path, size: item.size) {
-                        findings.append(hashFinding)
-                        continue // already flagged by hash; skip the slower YARA pass
-                    }
+        for root in roots {
+            var isDirectory: ObjCBool = false
+            guard fileManager.fileExists(atPath: root, isDirectory: &isDirectory), isDirectory.boolValue else {
+                continue
+            }
 
-                    if let yaraScanner,
-                       let matches = try? yaraScanner.scan(filePath: item.path),
-                       let firstMatch = matches.first {
-                        findings.append(
-                            ThreatFinding(
-                                path: item.path,
-                                size: item.size,
-                                detectionMethod: .yara,
-                                identifier: firstMatch.ruleIdentifier
-                            )
+            for await item in FTSWrapper.walk(root: root) where item.kind == .file {
+                try Task.checkCancellation()
+
+                if let hashFinding = hashScanner.scan(path: item.path, size: item.size) {
+                    findings.append(hashFinding)
+                } else if let yaraScanner,
+                          let matches = try? yaraScanner.scan(filePath: item.path),
+                          let firstMatch = matches.first {
+                    findings.append(
+                        ThreatFinding(
+                            path: item.path,
+                            size: item.size,
+                            detectionMethod: .yara,
+                            identifier: firstMatch.ruleIdentifier
                         )
-                    }
+                    )
                 }
+
+                itemsProcessed += 1
+                onProgress?(ScanProgress(itemsProcessed: itemsProcessed, totalItems: totalItems, currentPath: item.path))
             }
         }
 
         return findings
+    }
+
+    /// Counts filenames only — never reads file content — so this is cheap
+    /// relative to the real hash/YARA pass above. Skipped entirely
+    /// (`onProgress == nil`) when the caller doesn't want progress at all.
+    /// `async throws` (not just `async`) purely so it can also honor
+    /// cancellation — a user cancelling mid-pre-count shouldn't have to wait
+    /// for the count to finish before the real scan even starts.
+    private func countFiles(under roots: [String], fileManager: FileManager) async throws -> Int {
+        var count = 0
+        for root in roots {
+            var isDirectory: ObjCBool = false
+            guard fileManager.fileExists(atPath: root, isDirectory: &isDirectory), isDirectory.boolValue else {
+                continue
+            }
+            for await item in FTSWrapper.walk(root: root) where item.kind == .file {
+                try Task.checkCancellation()
+                count += 1
+            }
+        }
+        return count
     }
 }
