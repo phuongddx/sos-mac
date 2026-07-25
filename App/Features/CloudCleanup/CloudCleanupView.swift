@@ -70,8 +70,17 @@ struct CloudCleanupView: View {
                     hue: Theme.hue(for: .cloudCleanup)
                 )
             } else if state.isLoading {
-                ProgressView("Loading…")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                VStack(spacing: Theme.Spacing.md) {
+                    ProgressView()
+                    if let progress = state.scanProgress {
+                        ScanProgressPanel(progress: progress, countOnlyLabel: { "\($0.formatted()) files listed…" })
+                    } else {
+                        Text("Loading…")
+                            .font(.system(size: Theme.TextSize.sm))
+                            .foregroundStyle(Theme.muted)
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if state.duplicateGroups.isEmpty {
                 EmptyStateView(
                     systemImage: "checkmark.circle",

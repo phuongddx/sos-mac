@@ -17,6 +17,7 @@ struct CloudCleanupConfig {
 struct CloudAPIProviderState {
     var isAuthenticated = false
     var isLoading = false
+    var scanProgress: ScanProgress?
     var files: [CloudFileMetadata] = []
     var duplicateGroups: [CloudDuplicateGroup] = []
     var errorMessage: String?
@@ -84,6 +85,7 @@ final class CloudCleanupViewModel {
     func loadFiles(_ kind: APIProviderKind) async {
         apiStates[kind]?.isLoading = true
         apiStates[kind]?.errorMessage = nil
+        apiStates[kind]?.scanProgress = nil
 
         do {
             var allFiles: [CloudFileMetadata] = []
@@ -102,6 +104,7 @@ final class CloudCleanupViewModel {
                 allFiles.append(contentsOf: page.files)
                 cursor = page.nextCursor
                 pageCount += 1
+                apiStates[kind]?.scanProgress = ScanProgress(itemsProcessed: allFiles.count)
             } while cursor != nil && pageCount < maxPages
 
             if cursor != nil {
