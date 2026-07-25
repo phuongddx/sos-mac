@@ -7,7 +7,7 @@ struct SOSMacApp: App {
         WindowGroup {
             RootView()
         }
-        .modelContainer(for: IgnoredItem.self)
+        .modelContainer(for: [IgnoredItem.self, QuarantineRecord.self])
     }
 }
 
@@ -21,6 +21,7 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
     case duplicateFinder = "Duplicate Finder"
     case performance = "Performance"
     case cloudCleanup = "Cloud Cleanup"
+    case protection = "Protection"
 
     var id: String { rawValue }
 
@@ -35,6 +36,7 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
         case .duplicateFinder: return "doc.on.doc"
         case .performance: return "gauge.with.dots.needle.50percent"
         case .cloudCleanup: return "icloud"
+        case .protection: return "shield.lefthalf.filled"
         }
     }
 }
@@ -44,15 +46,12 @@ struct RootView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(SidebarDestination.allCases, selection: $selection) { destination in
-                Label(destination.rawValue, systemImage: destination.systemImage)
-                    .tag(destination)
-            }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+            SidebarView(selection: $selection)
+                .navigationSplitViewColumnWidth(min: 200, ideal: 232)
         } detail: {
             switch selection {
             case .dashboard, nil:
-                DashboardPlaceholderView()
+                DashboardView(onSelect: { selection = $0 })
             case .smartCare:
                 SmartCareView()
             case .junkCleaner:
@@ -69,18 +68,82 @@ struct RootView: View {
                 PerformanceView()
             case .cloudCleanup:
                 CloudCleanupView()
+            case .protection:
+                ProtectionView()
             }
         }
         .frame(minWidth: 720, minHeight: 480)
     }
 }
 
-struct DashboardPlaceholderView: View {
+/// Matches the mockup's sidebar: nav-item rows with icon + label (accent-
+/// filled when active), grouped with an "Essential Trio" section label, and
+/// a footer with a real storage gauge + app version. Deliberately excludes
+/// Settings — that screen isn't built yet (Phase 9's licensing/monetization
+/// work), and a nav item with nowhere to go would be dead UI.
+private struct SidebarView: View {
+    @Binding var selection: SidebarDestination?
+
     var body: some View {
-        ContentUnavailableView(
-            "SOS Mac",
-            systemImage: "sparkles",
-            description: Text("Dashboard lands in a later phase — pick a module from the sidebar.")
-        )
+        ScrollView {
+            VStack(alignment: .leading, spacing: 1) {
+                row(.dashboard)
+                row(.smartCare)
+
+                SidebarSectionLabel(text: "Essential Trio")
+                row(.junkCleaner)
+                row(.uninstaller)
+                row(.updater)
+
+                Spacer().frame(height: Theme.Spacing.sm)
+                row(.spaceLens)
+                row(.duplicateFinder)
+                row(.performance)
+                row(.cloudCleanup)
+                row(.protection)
+            }
+            .padding(Theme.Spacing.md)
+        }
+        .safeAreaInset(edge: .bottom) { SidebarFooterView() }
+        .background(.regularMaterial)
+    }
+
+    private func row(_ destination: SidebarDestination) -> some View {
+        Button {
+            selection = destination
+        } label: {
+            SidebarNavRow(
+                title: destination.rawValue,
+                systemImage: destination.systemImage,
+                isActive: selection == destination
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct SidebarFooterView: View {
+    private let storage = VolumeStorageInfo.current()
+
+    private var versionString: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+            if let storage {
+                StorageGaugeMiniView(
+                    usedFraction: storage.usedFraction,
+                    label: "\(storage.usedDescription)/\(storage.totalDescription)"
+                )
+            }
+            Text("SOS Mac \(versionString)")
+                .font(.system(size: 11))
+                .foregroundStyle(Theme.muted)
+                .frame(maxWidth: .infinity, alignment: .center)
+        }
+        .padding(Theme.Spacing.md)
+        .overlay(Rectangle().frame(height: 1).foregroundStyle(Theme.border), alignment: .top)
+        .background(.regularMaterial)
     }
 }
