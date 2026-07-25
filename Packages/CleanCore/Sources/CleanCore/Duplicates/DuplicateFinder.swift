@@ -48,28 +48,31 @@ public struct DuplicateFinder: Scanner {
         try await findExactDuplicateGroups().groups.flatMap(\.items)
     }
 
-    public func findExactDuplicateGroups() async throws -> DuplicateScanResult {
+    public func findExactDuplicateGroups(onProgress: (@Sendable (ScanProgress) -> Void)? = nil) async throws -> DuplicateScanResult {
         let sizeBuckets = await SizeGrouper().group(rootPath: rootPath)
         var hashGroups: [String: [ScanItem]] = [:]
         var skippedCount = 0
 
-        for (_, items) in sizeBuckets {
+        // Total is only knowable once listing (SizeGrouper's own walk) has
+        // finished — every candidate that will actually be hashed is a
+        // same-size bucket with 2+ members; a singleton-size file is never
+        // hashed at all, so it doesn't belong in the total either.
+        let totalToHash = sizeBuckets.values.filter { $0.count >= 2 }.reduce(0) { $0 + $1.count }
+        var itemsProcessed = 0
+
+        for (_, items) in sizeBuckets where items.count >= 2 {
             for item in items {
-                // Hashing thousands of same-size files can take real time;
-                // without this, cancelling a scan only stops before/after
-                // this whole function, not the expensive work inside it.
                 try Task.checkCancellation()
 
                 do {
                     let hash = try StreamingHasher.sha256(ofFileAtPath: item.path)
                     hashGroups[hash, default: []].append(item)
                 } catch {
-                    // Unreadable (permission denied, deleted mid-scan, I/O
-                    // error) — drop the item, never guess/merge it into a
-                    // bucket by exact size alone, but don't hide that it
-                    // happened either.
                     skippedCount += 1
                 }
+
+                itemsProcessed += 1
+                onProgress?(ScanProgress(itemsProcessed: itemsProcessed, totalItems: totalToHash, currentPath: item.path))
             }
         }
 
@@ -79,7 +82,7 @@ public struct DuplicateFinder: Scanner {
         return DuplicateScanResult(groups: groups, skippedCount: skippedCount)
     }
 
-    public func findSimilarImageGroups(hammingThreshold: Int = 10) async throws -> DuplicateScanResult {
+    public func findSimilarImageGroups(hammingThreshold: Int = 10, onProgress: (@Sendable (ScanProgress) -> Void)? = nil) async throws -> DuplicateScanResult {
         var imageItems: [ScanItem] = []
         for await item in FTSWrapper.walk(root: rootPath) where item.kind == .file {
             try Task.checkCancellation()
@@ -91,13 +94,14 @@ public struct DuplicateFinder: Scanner {
 
         var hashed: [(item: ScanItem, hash: UInt64)] = []
         var skippedCount = 0
-        for item in imageItems {
+        for (index, item) in imageItems.enumerated() {
             try Task.checkCancellation()
             if let hash = PerceptualHasher.dHash(imageAtPath: item.path) {
                 hashed.append((item, hash))
             } else {
                 skippedCount += 1
             }
+            onProgress?(ScanProgress(itemsProcessed: index + 1, totalItems: imageItems.count, currentPath: item.path))
         }
 
         try Task.checkCancellation()
