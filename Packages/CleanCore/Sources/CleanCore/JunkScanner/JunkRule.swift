@@ -95,4 +95,11 @@ extension JunkRule {
             requiresPrivilegedHelper: true
         )
     ]
+
+    /// The Smart Care one-click flow's rule set — deliberately narrower than
+    /// `allowlist`, kept as one named, auditable list per the Phase 5 spec's
+    /// own instruction, rather than re-deriving eligibility ad hoc at each
+    /// call site. Excludes anything requiring the not-yet-built privileged
+    /// helper, so Smart Care never silently depends on it.
+    public static let smartCareEligible: [JunkRule] = allowlist.filter { !$0.requiresPrivilegedHelper }
 }

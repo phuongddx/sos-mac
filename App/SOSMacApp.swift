@@ -13,6 +13,7 @@ struct SOSMacApp: App {
 
 enum SidebarDestination: String, CaseIterable, Identifiable {
     case dashboard = "Dashboard"
+    case smartCare = "Smart Care"
     case junkCleaner = "Junk & Cache Scanner"
     case uninstaller = "Uninstaller"
     case updater = "Updater"
@@ -25,6 +26,7 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
     var systemImage: String {
         switch self {
         case .dashboard: return "sparkles"
+        case .smartCare: return "wand.and.stars"
         case .junkCleaner: return "trash"
         case .uninstaller: return "xmark.bin"
         case .updater: return "arrow.triangle.2.circlepath"
@@ -49,6 +51,8 @@ struct RootView: View {
             switch selection {
             case .dashboard, nil:
                 DashboardPlaceholderView()
+            case .smartCare:
+                SmartCareView()
             case .junkCleaner:
                 JunkCleanerView()
             case .uninstaller:

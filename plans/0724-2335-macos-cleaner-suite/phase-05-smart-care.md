@@ -27,3 +27,6 @@ Pure UX/orchestration layer gluing together Phases 1-4's engines into a single "
 ## Risks / rollback
 - The main risk is scope creep — it's tempting to let Smart Care do "everything" including risky operations. Keep the Smart-Care-eligible rule list explicitly narrow (see step 2) and resist expanding it without deliberate review.
 - Rollback: this phase only orchestrates; disabling it doesn't affect any individual module's standalone operation.
+
+## Implementation note (2026-07-25)
+The "N apps look unused → link to Uninstaller" requirement (bullet 4 above) was **not implemented** — there is no "last used date" tracking anywhere in `InstalledAppsEnumerator`/Uninstaller (Phase 1) to build an "unused" heuristic from, and the spec's own "if wired" phrasing anticipated this might not be ready. Rather than fabricate a fake signal, this was dropped entirely for this phase. Revisit once Uninstaller (or a future phase) adds real last-used-date tracking per app; until then Smart Care only surfaces Junk & Cache + exact Duplicate Files + a read-only Performance health snapshot.
