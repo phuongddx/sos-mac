@@ -93,6 +93,22 @@ public struct ArenaTree: Sendable {
         return path
     }
 
+    /// Returns the number of nodes below `index`, excluding the node itself.
+    /// This is deliberately computed on demand because Space Lens renders only
+    /// one selected inspector at a time; storing a second count per node would
+    /// increase memory for every scanned filesystem item.
+    public func descendantCount(of index: Int32) -> Int {
+        var count = 0
+        var pending = children(of: index)
+
+        while let next = pending.popLast() {
+            count += 1
+            pending.append(contentsOf: children(of: next))
+        }
+
+        return count
+    }
+
     /// Recomputes every directory's size as the sum of its children's sizes.
     /// A node's parent always has a strictly smaller index than the node
     /// itself (a child can only be added after its parent already exists),

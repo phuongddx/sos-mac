@@ -51,4 +51,25 @@ struct DiskTreeScannerTests {
         #expect(result.tree.nodes.count == 2) // root + file.txt
         #expect(result.tree.nodes[0].size == (result.items.first?.size ?? -1))
     }
+
+    @Test func reportsDescendantCountsForDirectories() async throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try fm.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? fm.removeItem(at: root) }
+
+        let nested = root.appendingPathComponent("nested")
+        try fm.createDirectory(at: nested, withIntermediateDirectories: true)
+        try Data(repeating: 0x41, count: 10).write(to: root.appendingPathComponent("a.txt"))
+        try Data(repeating: 0x42, count: 10).write(to: nested.appendingPathComponent("b.txt"))
+        try Data(repeating: 0x43, count: 10).write(to: nested.appendingPathComponent("c.txt"))
+
+        let result = await DiskTreeScanner(rootPath: root.path).buildTree()
+        let nestedIndex = try #require(
+            result.tree.children(of: 0).first { result.tree.pathComponent(of: $0) == "nested" }
+        )
+
+        #expect(result.tree.descendantCount(of: nestedIndex) == 2)
+        #expect(result.tree.descendantCount(of: 0) == 4)
+    }
 }
