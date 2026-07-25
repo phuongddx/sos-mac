@@ -19,6 +19,7 @@ struct JunkCleanerView: View {
                 viewModel = JunkCleanerViewModel(modelContext: modelContext)
             }
         }
+        .onDisappear { viewModel?.cancelScan() }
         .navigationTitle("Junk & Cache Scanner")
     }
 }
@@ -36,17 +37,18 @@ private struct JunkCleanerContentView: View {
                     message: "Finds caches and logs that are safe to remove.",
                     hue: Theme.hue(for: .junkCleaner),
                     actionTitle: "Start Scan",
-                    action: { Task { await viewModel.startScan() } }
+                    action: { viewModel.startScan() }
                 )
 
             case .scanning:
-                VStack(spacing: Theme.Spacing.md) {
-                    ProgressView()
-                    Text("Scanning your Mac for junk and cache files…")
-                        .font(.system(size: Theme.TextSize.sm))
-                        .foregroundStyle(Theme.muted)
+                VStack(spacing: Theme.Spacing.lg) {
+                    ScanProgressPanel(progress: viewModel.progressTracker.progress, steps: scanningSteps)
+                        .frame(maxWidth: 420)
+                    Button("Cancel") { viewModel.cancelScan() }
+                        .buttonStyle(.bordered)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(Theme.Spacing.giant)
 
             case .results, .cleaning:
                 resultsList
@@ -136,6 +138,20 @@ private struct JunkCleanerContentView: View {
         case .safe: return .safe
         case .caution: return .attention
         case .risky: return .risk
+        }
+    }
+
+    /// Rule `i` is done once `itemsProcessed > i` completed rules have been
+    /// reported; the very next rule in order is `.active`; everything after
+    /// that is `.pending`. There's no per-rule "started" signal from the
+    /// engine (only "rule N completed"), so rule 0 shows `.active`
+    /// immediately at `itemsProcessed == 0` — the best available
+    /// approximation without adding a start-of-rule callback nobody else needs.
+    private var scanningSteps: [ScanProgressPanel.StepModel] {
+        let completedCount = viewModel.progressTracker.progress?.itemsProcessed ?? 0
+        return viewModel.ruleLabels.enumerated().map { index, label in
+            let state: StepRowView.StepState = index < completedCount ? .done : (index == completedCount ? .active : .pending)
+            return ScanProgressPanel.StepModel(name: label, meta: nil, state: state)
         }
     }
 

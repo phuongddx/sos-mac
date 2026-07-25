@@ -24,6 +24,9 @@ final class JunkCleanerViewModel {
     private let privilegedHelperClient: PrivilegedHelperClient
     private let modelContext: ModelContext
 
+    let progressTracker = ScanProgressTracker()
+    private var scanTask: Task<Void, Never>?
+
     init(
         modelContext: ModelContext,
         scanner: JunkScanner = JunkScanner(),
@@ -38,12 +41,33 @@ final class JunkCleanerViewModel {
         items.filter { selectedPaths.contains($0.path) }.reduce(0) { $0 + $1.size }
     }
 
-    func startScan() async {
+    /// The categories this scan covers, in the order `JunkScanner` walks
+    /// them — used to render one `StepRowView` per rule while scanning.
+    var ruleLabels: [String] { JunkRule.allowlist.map(\.label) }
+
+    func startScan() {
+        scanTask?.cancel()
+        scanTask = Task { [weak self] in
+            await self?.performScan()
+        }
+    }
+
+    func cancelScan() {
+        scanTask?.cancel()
+        scanTask = nil
+        if phase == .scanning { phase = .idle }
+    }
+
+    private func performScan() async {
         phase = .scanning
         errorMessage = nil
+        progressTracker.start()
         do {
             let ignoredPaths = try fetchIgnoredPaths()
-            let scanned = try await scanner.scan()
+            let scanned = try await scanner.scan(onProgress: { [weak self] progress in
+                Task { @MainActor in self?.progressTracker.record(progress) }
+            })
+            guard !Task.isCancelled else { return }
             items = scanned.filter { !ignoredPaths.contains($0.path) }
             // Only pre-select items that are both rule-classified safe and
             // don't need the not-yet-built privileged helper — never
@@ -55,6 +79,7 @@ final class JunkCleanerViewModel {
             )
             phase = .results
         } catch {
+            guard !Task.isCancelled else { return }
             errorMessage = error.localizedDescription
             phase = .idle
         }
