@@ -20,7 +20,12 @@ public struct DiskTreeScanner: Scanner {
         return result.items
     }
 
-    public func buildTree() async -> (tree: ArenaTree, items: [ScanItem]) {
+    /// `onProgress` reports the running scanned-item count every 2,000 items
+    /// — a full home directory can legitimately take a long time (real
+    /// disks, iCloud placeholder files, large `~/Library` trees), and
+    /// without live feedback a slow-but-working scan is indistinguishable
+    /// from a hung one in the UI.
+    public func buildTree(onProgress: (@Sendable (Int) -> Void)? = nil) async -> (tree: ArenaTree, items: [ScanItem]) {
         var arena = ArenaTree()
         var indexByPath: [String: Int32] = [:]
         var items: [ScanItem] = []
@@ -62,6 +67,10 @@ public struct DiskTreeScanner: Scanner {
                 indexByPath[item.path] = nodeIndex
             }
             items.append(item)
+
+            if let onProgress, items.count % 2000 == 0 {
+                onProgress(items.count)
+            }
         }
 
         arena.recomputeDirectorySizes()
