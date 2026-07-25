@@ -18,6 +18,7 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
     case updater = "Updater"
     case spaceLens = "Space Lens"
     case duplicateFinder = "Duplicate Finder"
+    case performance = "Performance"
 
     var id: String { rawValue }
 
@@ -29,6 +30,7 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
         case .updater: return "arrow.triangle.2.circlepath"
         case .spaceLens: return "square.grid.3x3.fill"
         case .duplicateFinder: return "doc.on.doc"
+        case .performance: return "gauge.with.dots.needle.50percent"
         }
     }
 }
@@ -57,6 +59,8 @@ struct RootView: View {
                 SpaceLensView()
             case .duplicateFinder:
                 DuplicateFinderView()
+            case .performance:
+                PerformanceView()
             }
         }
         .frame(minWidth: 720, minHeight: 480)

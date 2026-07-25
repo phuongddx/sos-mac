@@ -9,20 +9,36 @@
 /* Begin PBXBuildFile section */
 		08900F6991F02A43C569DDF4 /* CleanCore in Frameworks */ = {isa = PBXBuildFile; productRef = B0AE3ED04E1697D2D60C38DF /* CleanCore */; };
 		0F7066083A4CA069EBEFE499 /* UninstallerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99BA9DCEA375A8537944594 /* UninstallerView.swift */; };
+		119ABFBC2B48E424ABAE34FF /* MenuBarHelper.app in Resources */ = {isa = PBXBuildFile; fileRef = C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		29AC5FD388B0CFD5BBEE361C /* TreemapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 35EB24D1CC05056D12B5D6DD /* TreemapKit */; };
+		3E38F672530103701AC5A976 /* PerformanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFABD43DC705D2ADFED69B24 /* PerformanceView.swift */; };
 		3EF1CD052576C9A843228DF1 /* DuplicateFinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763ECBD32513F45F9539E313 /* DuplicateFinderView.swift */; };
 		47A95B1665E814CEB837631D /* IgnoredItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 565503C45E57F760D1ABCE61 /* IgnoredItem.swift */; };
+		4E688FAFBD4C19198A4B7168 /* PerformanceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60AE4D0BE44E292519DD599 /* PerformanceViewModel.swift */; };
 		524602F1BD6F72FD380E92A0 /* SpaceLensView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556CD64042D3F9B34D459D96 /* SpaceLensView.swift */; };
 		6ABC1C18339FFC501B35A3AF /* UpdaterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DAA0AD06134B381646E567 /* UpdaterView.swift */; };
 		6DE0567BF263811BF9B5FAC0 /* SpaceLensViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FEC6E072C20E77D60A0C25 /* SpaceLensViewModel.swift */; };
 		74C7BE36C015752F317B82C5 /* UpdaterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B273DE218A656524EA73BAF /* UpdaterViewModel.swift */; };
+		77854C6493918A65D3F8873A /* CleanCore in Frameworks */ = {isa = PBXBuildFile; productRef = 89061E0DFCA37E66808CEF57 /* CleanCore */; };
 		8A7D4331AFFDCB5D68F6FE3C /* JunkCleanerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09BAF8424C039491F5324208 /* JunkCleanerViewModel.swift */; };
 		920A4CDCE15A91C7105AF525 /* TreemapCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169861D77A35617E7FED9E0A /* TreemapCanvasView.swift */; };
 		96A2FFBEDA9B53B465AEB41A /* JunkCleanerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575242D8CA34B18FD76DD4FE /* JunkCleanerView.swift */; };
 		BFB9A6BD1B872593B8AE2E6E /* DuplicateFinderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */; };
+		C525BF54959EB6033641B5C1 /* MenuBarMetricsMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E854DD88191E34B25816AF4E /* MenuBarMetricsMonitor.swift */; };
 		D43BD385637D22053A3464D6 /* SOSMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B658F774CB266713577506C2 /* SOSMacApp.swift */; };
+		EFDE7593D4F73BCC2E1BEAF7 /* MenuBarHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */; };
 		FB8C8083C6100E2742DDB309 /* UninstallerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12B3FBB6D8691969DF7F3C4 /* UninstallerViewModel.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C01DE2D8B6FC01A6AE906E61 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1AE0FE96F145338D24088645 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0F44861A6320DC1CC94A51C6;
+			remoteInfo = MenuBarHelper;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		09BAF8424C039491F5324208 /* JunkCleanerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JunkCleanerViewModel.swift; sourceTree = "<group>"; };
@@ -31,6 +47,7 @@
 		16FEC6E072C20E77D60A0C25 /* SpaceLensViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceLensViewModel.swift; sourceTree = "<group>"; };
 		3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderViewModel.swift; sourceTree = "<group>"; };
 		556CD64042D3F9B34D459D96 /* SpaceLensView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceLensView.swift; sourceTree = "<group>"; };
+		55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarHelperApp.swift; sourceTree = "<group>"; };
 		565503C45E57F760D1ABCE61 /* IgnoredItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IgnoredItem.swift; sourceTree = "<group>"; };
 		575242D8CA34B18FD76DD4FE /* JunkCleanerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JunkCleanerView.swift; sourceTree = "<group>"; };
 		5C3280BFF2C7337B3913B507 /* SOSMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SOSMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -39,11 +56,23 @@
 		A75763649B41522A9F8B4952 /* CleanCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CleanCore; path = Packages/CleanCore; sourceTree = SOURCE_ROOT; };
 		B658F774CB266713577506C2 /* SOSMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSMacApp.swift; sourceTree = "<group>"; };
 		C12B3FBB6D8691969DF7F3C4 /* UninstallerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallerViewModel.swift; sourceTree = "<group>"; };
+		C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C99BA9DCEA375A8537944594 /* UninstallerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallerView.swift; sourceTree = "<group>"; };
+		D60AE4D0BE44E292519DD599 /* PerformanceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceViewModel.swift; sourceTree = "<group>"; };
+		E854DD88191E34B25816AF4E /* MenuBarMetricsMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarMetricsMonitor.swift; sourceTree = "<group>"; };
 		F8220BACD07F979662C76390 /* TreemapKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TreemapKit; path = Packages/TreemapKit; sourceTree = SOURCE_ROOT; };
+		FFABD43DC705D2ADFED69B24 /* PerformanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		41DEE14E9A4BACC2D4D46D6B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				77854C6493918A65D3F8873A /* CleanCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5D865B8AA9D189C5B1F3D3F6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -56,10 +85,29 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		031D2175453B3650FA05DA1D /* MenuBarHelper */ = {
+			isa = PBXGroup;
+			children = (
+				55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */,
+				E854DD88191E34B25816AF4E /* MenuBarMetricsMonitor.swift */,
+			);
+			path = MenuBarHelper;
+			sourceTree = "<group>";
+		};
+		1BF0A0A0738033607422A86F /* Performance */ = {
+			isa = PBXGroup;
+			children = (
+				FFABD43DC705D2ADFED69B24 /* PerformanceView.swift */,
+				D60AE4D0BE44E292519DD599 /* PerformanceViewModel.swift */,
+			);
+			path = Performance;
+			sourceTree = "<group>";
+		};
 		1EF263C6E220E9F85C22ED11 = {
 			isa = PBXGroup;
 			children = (
 				629744F5A23957F4DCE526F7 /* App */,
+				031D2175453B3650FA05DA1D /* MenuBarHelper */,
 				3591A759099A03CB61D76D3E /* Packages */,
 				2C72880C804DAEB47011B4D1 /* Products */,
 			);
@@ -68,6 +116,7 @@
 		2C72880C804DAEB47011B4D1 /* Products */ = {
 			isa = PBXGroup;
 			children = (
+				C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */,
 				5C3280BFF2C7337B3913B507 /* SOSMac.app */,
 			);
 			name = Products;
@@ -142,6 +191,7 @@
 			children = (
 				671C469600944E06C25BC1BB /* Duplicates */,
 				75587A67795E3A1691986E0E /* JunkCleaner */,
+				1BF0A0A0738033607422A86F /* Performance */,
 				E2993D55C7DD4927D96A0D94 /* SpaceLens */,
 				8B74B25ED049194EC9F0B617 /* Uninstaller */,
 				F85E9F32DD7D83C5989962AB /* Updater */,
@@ -161,16 +211,38 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0F44861A6320DC1CC94A51C6 /* MenuBarHelper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95ECA58646F994FD067855E9 /* Build configuration list for PBXNativeTarget "MenuBarHelper" */;
+			buildPhases = (
+				AB80D1051861F62752A8916E /* Sources */,
+				41DEE14E9A4BACC2D4D46D6B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MenuBarHelper;
+			packageProductDependencies = (
+				89061E0DFCA37E66808CEF57 /* CleanCore */,
+			);
+			productName = MenuBarHelper;
+			productReference = C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */;
+			productType = "com.apple.product-type.application";
+		};
 		80C8485EDEE67072AE469396 /* SOSMac */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FA6CE02A7FF097ED56E043C7 /* Build configuration list for PBXNativeTarget "SOSMac" */;
 			buildPhases = (
 				07981996A865C11D7ED39BE2 /* Sources */,
+				F72DCA3DE9322EC7E3B6DD57 /* Resources */,
 				5D865B8AA9D189C5B1F3D3F6 /* Frameworks */,
+				3EF987C894E07827539BF3AF /* Embed Menu Bar Helper */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				00F4A648FA5165ECDCC18104 /* PBXTargetDependency */,
 			);
 			name = SOSMac;
 			packageProductDependencies = (
@@ -190,6 +262,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					0F44861A6320DC1CC94A51C6 = {
+						ProvisioningStyle = Automatic;
+					};
 					80C8485EDEE67072AE469396 = {
 						ProvisioningStyle = Automatic;
 					};
@@ -213,10 +288,43 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				0F44861A6320DC1CC94A51C6 /* MenuBarHelper */,
 				80C8485EDEE67072AE469396 /* SOSMac */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F72DCA3DE9322EC7E3B6DD57 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				119ABFBC2B48E424ABAE34FF /* MenuBarHelper.app in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3EF987C894E07827539BF3AF /* Embed Menu Bar Helper */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Embed Menu Bar Helper";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nDEST=\"${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/Library/LoginItems\"\nmkdir -p \"$DEST\"\nrm -rf \"$DEST/MenuBarHelper.app\"\ncp -R \"${BUILT_PRODUCTS_DIR}/MenuBarHelper.app\" \"$DEST/MenuBarHelper.app\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		07981996A865C11D7ED39BE2 /* Sources */ = {
@@ -228,6 +336,8 @@
 				47A95B1665E814CEB837631D /* IgnoredItem.swift in Sources */,
 				96A2FFBEDA9B53B465AEB41A /* JunkCleanerView.swift in Sources */,
 				8A7D4331AFFDCB5D68F6FE3C /* JunkCleanerViewModel.swift in Sources */,
+				3E38F672530103701AC5A976 /* PerformanceView.swift in Sources */,
+				4E688FAFBD4C19198A4B7168 /* PerformanceViewModel.swift in Sources */,
 				D43BD385637D22053A3464D6 /* SOSMacApp.swift in Sources */,
 				524602F1BD6F72FD380E92A0 /* SpaceLensView.swift in Sources */,
 				6DE0567BF263811BF9B5FAC0 /* SpaceLensViewModel.swift in Sources */,
@@ -239,7 +349,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AB80D1051861F62752A8916E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EFDE7593D4F73BCC2E1BEAF7 /* MenuBarHelperApp.swift in Sources */,
+				C525BF54959EB6033641B5C1 /* MenuBarMetricsMonitor.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		00F4A648FA5165ECDCC18104 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0F44861A6320DC1CC94A51C6 /* MenuBarHelper */;
+			targetProxy = C01DE2D8B6FC01A6AE906E61 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		11A7D6A6B6FE83DA1E263017 /* Debug */ = {
@@ -361,6 +488,29 @@
 			};
 			name = Release;
 		};
+		63B55EEBC4CA3EDCDC29EB24 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nextlabs.sosmac.menubarhelper;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
 		8435F0E149C316B13A1F39F9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -382,6 +532,29 @@
 				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
+		};
+		D39A22D7BB2474E9378584BB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.nextlabs.sosmac.menubarhelper;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
 		};
 		E4BE66DC3F832BE8A37AC457 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -417,6 +590,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
+		95ECA58646F994FD067855E9 /* Build configuration list for PBXNativeTarget "MenuBarHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				63B55EEBC4CA3EDCDC29EB24 /* Debug */,
+				D39A22D7BB2474E9378584BB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		FA6CE02A7FF097ED56E043C7 /* Build configuration list for PBXNativeTarget "SOSMac" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -443,6 +625,10 @@
 		35EB24D1CC05056D12B5D6DD /* TreemapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = TreemapKit;
+		};
+		89061E0DFCA37E66808CEF57 /* CleanCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CleanCore;
 		};
 		B0AE3ED04E1697D2D60C38DF /* CleanCore */ = {
 			isa = XCSwiftPackageProductDependency;

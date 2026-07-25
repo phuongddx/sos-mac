@@ -32,3 +32,33 @@ targets:
         product: CleanCore
       - package: TreemapKit
         product: TreemapKit
+      - target: MenuBarHelper
+    postbuildScripts:
+      - name: Embed Menu Bar Helper
+        script: |
+          set -e
+          DEST="${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/Library/LoginItems"
+          mkdir -p "$DEST"
+          rm -rf "$DEST/MenuBarHelper.app"
+          cp -R "${BUILT_PRODUCTS_DIR}/MenuBarHelper.app" "$DEST/MenuBarHelper.app"
+
+  MenuBarHelper:
+    type: application
+    platform: macOS
+    sources:
+      - path: MenuBarHelper
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac.menubarhelper
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+    dependencies:
+      - package: CleanCore
+        product: CleanCore
