@@ -73,6 +73,35 @@ struct JunkScannerTests {
         #expect(item.requiresPrivilegedHelper)
         #expect(item.severity == .caution)
     }
+
+    @Test func reportsProgressOncePerCompletedRule() async throws {
+        let fm = FileManager.default
+        let fakeHome = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try fm.createDirectory(at: fakeHome, withIntermediateDirectories: true)
+        defer { try? fm.removeItem(at: fakeHome) }
+
+        let caches = fakeHome.appendingPathComponent("Caches")
+        try fm.createDirectory(at: caches, withIntermediateDirectories: true)
+        try "x".write(to: caches.appendingPathComponent("a.cache"), atomically: true, encoding: .utf8)
+
+        let logs = fakeHome.appendingPathComponent("Logs")
+        try fm.createDirectory(at: logs, withIntermediateDirectories: true)
+        try "x".write(to: logs.appendingPathComponent("a.log"), atomically: true, encoding: .utf8)
+
+        let rules: [JunkRule] = [
+            JunkRule(id: "user-caches", label: "User App Caches", kind: .directPath(caches.path), defaultSeverity: .safe),
+            JunkRule(id: "user-logs", label: "User Logs", kind: .directPath(logs.path), defaultSeverity: .safe)
+        ]
+        let scanner = JunkScanner(rules: rules)
+
+        let container = ProgressContainer()
+        _ = try await scanner.scan(onProgress: { container.reported.append($0) })
+
+        #expect(container.reported.count == 2)
+        #expect(container.reported.map(\.itemsProcessed) == [1, 2])
+        #expect(container.reported.allSatisfy { $0.totalItems == 2 })
+        #expect(container.reported.map(\.currentPath) == ["User App Caches", "User Logs"])
+    }
 }
 
 /// `FileManager`/`FileAttributeKey` has no public setter for a file's access
@@ -87,4 +116,9 @@ private func setAccessAndModificationDate(_ date: Date, atPath path: String) {
         timeval(tv_sec: seconds, tv_usec: 0)
     ]
     _ = times.withUnsafeBufferPointer { utimes(path, $0.baseAddress) }
+}
+
+/// Helper class for capturing progress reports in tests (avoids Swift 6 Sendable capture issues).
+private final class ProgressContainer: @unchecked Sendable {
+    var reported: [ScanProgress] = []
 }

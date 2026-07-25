@@ -13,11 +13,15 @@ public struct JunkScanner: Scanner {
     }
 
     public func scan() async throws -> [ScanItem] {
+        try await scan(onProgress: nil)
+    }
+
+    public func scan(onProgress: (@Sendable (ScanProgress) -> Void)? = nil) async throws -> [ScanItem] {
         var results: [ScanItem] = []
         let currentTime = now()
         let fileManager = FileManager.default
 
-        for rule in rules {
+        for (index, rule) in rules.enumerated() {
             for root in rule.resolvedRoots(fileManager: fileManager) {
                 var isDirectory: ObjCBool = false
                 guard fileManager.fileExists(atPath: root, isDirectory: &isDirectory), isDirectory.boolValue else {
@@ -25,6 +29,7 @@ public struct JunkScanner: Scanner {
                 }
 
                 for await item in FTSWrapper.walk(root: root) where item.kind == .file {
+                    try Task.checkCancellation()
                     results.append(
                         ScanItem(
                             path: item.path,
@@ -38,6 +43,7 @@ public struct JunkScanner: Scanner {
                     )
                 }
             }
+            onProgress?(ScanProgress(itemsProcessed: index + 1, totalItems: rules.count, currentPath: rule.label))
         }
 
         return results
