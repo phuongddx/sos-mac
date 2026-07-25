@@ -25,7 +25,7 @@ public struct DiskTreeScanner: Scanner {
     /// disks, iCloud placeholder files, large `~/Library` trees), and
     /// without live feedback a slow-but-working scan is indistinguishable
     /// from a hung one in the UI.
-    public func buildTree(onProgress: (@Sendable (Int) -> Void)? = nil) async -> (tree: ArenaTree, items: [ScanItem]) {
+    public func buildTree(onProgress: (@Sendable (ScanProgress) -> Void)? = nil) async -> (tree: ArenaTree, items: [ScanItem]) {
         var arena = ArenaTree()
         var indexByPath: [String: Int32] = [:]
         var items: [ScanItem] = []
@@ -69,7 +69,7 @@ public struct DiskTreeScanner: Scanner {
             items.append(item)
 
             if let onProgress, items.count % 2000 == 0 {
-                onProgress(items.count)
+                onProgress(ScanProgress(itemsProcessed: items.count, totalItems: nil, currentPath: nil))
             }
         }
 

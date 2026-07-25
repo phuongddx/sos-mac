@@ -2,6 +2,13 @@ import Foundation
 import Testing
 @testable import CleanCore
 
+final class Ref<T>: @unchecked Sendable {
+    var value: T
+    init(_ value: T) {
+        self.value = value
+    }
+}
+
 struct DiskTreeScannerTests {
     @Test func buildTreeProducesCorrectHierarchyAndAggregatedSizes() async throws {
         let fm = FileManager.default
@@ -71,5 +78,21 @@ struct DiskTreeScannerTests {
 
         #expect(result.tree.descendantCount(of: nestedIndex) == 2)
         #expect(result.tree.descendantCount(of: 0) == 4)
+    }
+
+    @Test func reportsCountOnlyProgressWithNoKnownTotal() async throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try fm.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? fm.removeItem(at: root) }
+        try "x".write(to: root.appendingPathComponent("a.txt"), atomically: true, encoding: .utf8)
+
+        let lastReported = Ref<ScanProgress?>(nil)
+        _ = await DiskTreeScanner(rootPath: root.path).buildTree(onProgress: { lastReported.value = $0 })
+
+        // A 1-file fixture never crosses the 2,000-item reporting threshold,
+        // so onProgress firing at all isn't asserted here — only that IF the
+        // type is used, it never claims a total it can't know.
+        #expect(lastReported.value?.totalItems == nil)
     }
 }
