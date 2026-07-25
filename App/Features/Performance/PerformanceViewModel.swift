@@ -20,6 +20,9 @@ final class PerformanceViewModel {
 
     private(set) var launchAtLoginStatus: SMAppService.Status = .notRegistered
     private(set) var errorMessage: String?
+    private(set) var maintenanceMessage: String?
+
+    let privilegedHelperClient = PrivilegedHelperClient()
 
     private var previousCPUTicks: CPUTicks?
 
@@ -67,6 +70,45 @@ final class PerformanceViewModel {
                 try LoginItemsManager.registerMainAppAsLoginItem()
             }
             launchAtLoginStatus = LoginItemsManager.mainAppLoginItemStatus()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Free up RAM / Flush DNS route through `PrivilegedHelperClient` since
+    /// `purge`/`killall -HUP mDNSResponder` need root. `.requiresApproval` is
+    /// the expected, common first-run state — `SMAppService.daemon`
+    /// mandates a System Settings approval, not a failure to silently
+    /// swallow (see Phase 8's own requirement).
+    func freeUpRAM() async {
+        await runPrivilegedMaintenance(actionName: "Free up RAM") { [privilegedHelperClient] in
+            try await privilegedHelperClient.purgeMemory()
+        }
+    }
+
+    func flushDNSCache() async {
+        await runPrivilegedMaintenance(actionName: "Flush DNS Cache") { [privilegedHelperClient] in
+            try await privilegedHelperClient.flushDNSCache()
+        }
+    }
+
+    private func runPrivilegedMaintenance(actionName: String, operation: () async throws -> Void) async {
+        errorMessage = nil
+        maintenanceMessage = nil
+        do {
+            try await operation()
+            maintenanceMessage = "\(actionName) completed."
+        } catch PrivilegedHelperError.notRegistered {
+            do {
+                try privilegedHelperClient.register()
+                maintenanceMessage = "Privileged helper installed — approve it in System Settings > General > Login Items, then try again."
+                SMAppService.openSystemSettingsLoginItems()
+            } catch {
+                errorMessage = "Couldn't install the privileged helper: \(error.localizedDescription)"
+            }
+        } catch PrivilegedHelperError.requiresApproval {
+            maintenanceMessage = "Approve the privileged helper in System Settings > General > Login Items, then try again."
+            SMAppService.openSystemSettingsLoginItems()
         } catch {
             errorMessage = error.localizedDescription
         }

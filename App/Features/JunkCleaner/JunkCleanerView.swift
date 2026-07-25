@@ -30,85 +30,124 @@ private struct JunkCleanerContentView: View {
         VStack(spacing: 0) {
             switch viewModel.phase {
             case .idle:
-                ContentUnavailableView(
-                    "Scan for junk",
+                EmptyStateView(
                     systemImage: "trash",
-                    description: Text("Finds caches and logs that are safe to remove.")
+                    title: "Scan for junk",
+                    message: "Finds caches and logs that are safe to remove.",
+                    actionTitle: "Start Scan",
+                    action: { Task { await viewModel.startScan() } }
                 )
-                Button("Start Scan") {
-                    Task { await viewModel.startScan() }
-                }
-                .padding()
 
             case .scanning:
-                ProgressView("Scanning…")
-                    .padding()
+                VStack(spacing: Theme.Spacing.md) {
+                    ProgressView()
+                    Text("Scanning your Mac for junk and cache files…")
+                        .font(.system(size: Theme.TextSize.sm))
+                        .foregroundStyle(Theme.muted)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             case .results, .cleaning:
                 resultsList
                 footer
 
             case .done(let reclaimedBytes):
-                ContentUnavailableView(
-                    "Cleaned up",
-                    systemImage: "checkmark.circle",
-                    description: Text("Reclaimed \(ByteFormatter.string(fromByteCount: reclaimedBytes))")
-                )
-                Button("Done") { viewModel.backToResults() }
-                    .padding()
+                VStack(spacing: Theme.Spacing.lg) {
+                    SummaryCardView(
+                        bigNumber: ByteFormatter.string(fromByteCount: reclaimedBytes),
+                        caption: "reclaimed"
+                    )
+                    Button("Done") { viewModel.backToResults() }
+                        .buttonStyle(.borderedProminent)
+                        .tint(Theme.accent)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(Theme.Spacing.xxxl)
             }
 
             if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
-                    .foregroundStyle(.red)
+                    .font(.system(size: Theme.TextSize.sm))
+                    .foregroundStyle(Theme.danger)
                     .padding()
             }
         }
+        .background(Theme.background)
     }
 
     private var resultsList: some View {
         List {
             ForEach(viewModel.items) { item in
-                HStack {
-                    Toggle(isOn: Binding(
-                        get: { viewModel.selectedPaths.contains(item.path) },
-                        set: { isOn in
-                            if isOn { viewModel.selectedPaths.insert(item.path) }
-                            else { viewModel.selectedPaths.remove(item.path) }
+                itemRow(item)
+                    .listRowBackground(Theme.surface)
+            }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(Theme.background)
+    }
+
+    private func itemRow(_ item: ScanItem) -> some View {
+        HStack(spacing: Theme.Spacing.md) {
+            Toggle(isOn: Binding(
+                get: { viewModel.selectedPaths.contains(item.path) },
+                set: { isOn in
+                    if isOn { viewModel.selectedPaths.insert(item.path) }
+                    else { viewModel.selectedPaths.remove(item.path) }
+                }
+            )) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text((item.path as NSString).lastPathComponent)
+                        .font(.system(size: Theme.TextSize.sm, weight: .medium))
+                        .foregroundStyle(Theme.foreground)
+                    HStack(spacing: Theme.Spacing.sm) {
+                        if let label = item.sourceLabel {
+                            Text(label)
+                                .font(.system(size: 12))
+                                .foregroundStyle(Theme.muted)
                         }
-                    )) {
-                        VStack(alignment: .leading) {
-                            Text((item.path as NSString).lastPathComponent)
-                            if let label = item.sourceLabel {
-                                Text(label)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
+                        BadgeView(text: item.severity.rawValue.capitalized, style: badgeStyle(for: item.severity))
+                        if item.requiresPrivilegedHelper {
+                            BadgeView(text: "Needs Helper", style: .neutral)
                         }
                     }
-                    .disabled(item.requiresPrivilegedHelper)
-
-                    Spacer()
-                    Text(ByteFormatter.string(fromByteCount: item.size))
-                        .foregroundStyle(.secondary)
-
-                    Button("Ignore") { viewModel.ignore(item) }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.secondary)
                 }
             }
+            .toggleStyle(.checkbox)
+
+            Spacer(minLength: 0)
+
+            Text(ByteFormatter.string(fromByteCount: item.size))
+                .font(.system(size: Theme.TextSize.sm))
+                .foregroundStyle(Theme.muted)
+                .monospacedDigit()
+
+            Button("Ignore") { viewModel.ignore(item) }
+                .buttonStyle(.plain)
+                .foregroundStyle(Theme.muted)
+        }
+        .padding(.vertical, Theme.Spacing.xs)
+    }
+
+    private func badgeStyle(for severity: Severity) -> BadgeStyle {
+        switch severity {
+        case .safe: return .safe
+        case .caution: return .attention
+        case .risky: return .risk
         }
     }
 
     private var footer: some View {
-        HStack {
-            Text("Total: \(ByteFormatter.string(fromByteCount: viewModel.totalSelectedBytes))")
-            Spacer()
+        StickyFooterView(
+            totalLabel: "Total reclaimable",
+            totalValue: ByteFormatter.string(fromByteCount: viewModel.totalSelectedBytes)
+        ) {
             Button("Clean") {
                 Task { await viewModel.clean() }
             }
+            .buttonStyle(.borderedProminent)
+            .tint(Theme.accent)
             .disabled(viewModel.selectedPaths.isEmpty || viewModel.phase == .cleaning)
         }
-        .padding()
     }
 }

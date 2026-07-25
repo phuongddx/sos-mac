@@ -21,11 +21,17 @@ final class JunkCleanerViewModel {
 
     private let scanner: JunkScanner
     private let cleaner = DefaultCleaner()
+    private let privilegedHelperClient: PrivilegedHelperClient
     private let modelContext: ModelContext
 
-    init(modelContext: ModelContext, scanner: JunkScanner = JunkScanner()) {
+    init(
+        modelContext: ModelContext,
+        scanner: JunkScanner = JunkScanner(),
+        privilegedHelperClient: PrivilegedHelperClient = PrivilegedHelperClient()
+    ) {
         self.modelContext = modelContext
         self.scanner = scanner
+        self.privilegedHelperClient = privilegedHelperClient
     }
 
     var totalSelectedBytes: Int64 {
@@ -58,12 +64,35 @@ final class JunkCleanerViewModel {
         let toClean = items.filter { selectedPaths.contains($0.path) }
         guard !toClean.isEmpty else { return }
         phase = .cleaning
+
+        let normalItems = toClean.filter { !$0.requiresPrivilegedHelper }
+        let privilegedItems = toClean.filter(\.requiresPrivilegedHelper)
+
         do {
-            let result = try await cleaner.clean(toClean)
-            let succeededPaths = Set(result.succeeded.map(\.path))
+            let result = try await cleaner.clean(normalItems)
+            var succeeded = result.succeeded
+            var failed = result.failed
+
+            // Root-owned system-cache paths route through the Phase 8
+            // privileged helper instead of the local trashItem-based
+            // Cleaner, which can't touch them from a user-context process.
+            for item in privilegedItems {
+                do {
+                    try await privilegedHelperClient.trashSystemPath(item.path)
+                    succeeded.append(item)
+                } catch {
+                    failed.append(CleanResult.FailedItem(item: item, reason: error.localizedDescription))
+                }
+            }
+
+            let succeededPaths = Set(succeeded.map(\.path))
             items.removeAll { succeededPaths.contains($0.path) }
             selectedPaths.subtract(succeededPaths)
-            phase = .done(reclaimedBytes: result.reclaimedBytes)
+            let reclaimedBytes = succeeded.reduce(Int64(0)) { $0 + $1.size }
+            phase = .done(reclaimedBytes: reclaimedBytes)
+            if !failed.isEmpty {
+                errorMessage = "\(failed.count) item\(failed.count == 1 ? "" : "s") couldn't be removed: \(failed.first?.reason ?? "")"
+            }
         } catch {
             errorMessage = error.localizedDescription
             phase = .results
