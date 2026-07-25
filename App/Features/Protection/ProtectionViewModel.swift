@@ -25,6 +25,7 @@ final class ProtectionViewModel {
     private let quarantineManager = QuarantineManager()
     private let virusTotalClient: VirusTotalClient?
     private var scanTask: Task<Void, Never>?
+    let progressTracker = ScanProgressTracker()
 
     init(
         modelContext: ModelContext,
@@ -54,8 +55,11 @@ final class ProtectionViewModel {
     private func performScan() async {
         phase = .scanning
         errorMessage = nil
+        progressTracker.start()
         do {
-            findings = try await scanner.scan()
+            findings = try await scanner.scan(onProgress: { [weak self] progress in
+                Task { @MainActor in self?.progressTracker.record(progress) }
+            })
             selectedPaths = [] // never auto-select a quarantine target — same invariant as Duplicates/SmartCare/CloudCleanup
             phase = .results
         } catch {

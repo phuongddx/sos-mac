@@ -44,12 +44,14 @@ private struct ProtectionContentView: View {
                 quarantineSection
 
             case .scanning:
-                VStack(spacing: Theme.Spacing.md) {
-                    ProgressView()
-                    Text("Checking common malware-drop locations…")
-                        .font(.system(size: Theme.TextSize.sm))
-                        .foregroundStyle(Theme.muted)
-                }
+                ScanProgressPanel(
+                    progress: viewModel.progressTracker.progress,
+                    ticker: viewModel.progressTracker.progress.map { "\($0.itemsProcessed.formatted()) files scanned" },
+                    etaText: viewModel.progressTracker.estimatedTimeRemainingText,
+                    showCurrentPath: true,
+                    countOnlyLabel: { "Scanned \($0.formatted()) files…" }
+                )
+                .frame(maxWidth: 480)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             case .results, .quarantining:
