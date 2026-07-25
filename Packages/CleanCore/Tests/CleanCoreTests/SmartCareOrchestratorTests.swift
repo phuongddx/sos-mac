@@ -12,9 +12,14 @@ private struct FakeScanner: CleanCore.Scanner {
     }
 
     func scan() async throws -> [ScanItem] {
+        try await scan(onProgress: nil)
+    }
+
+    func scan(onProgress: (@Sendable (ScanProgress) -> Void)?) async throws -> [ScanItem] {
         if delayNanoseconds > 0 {
             try await Task.sleep(nanoseconds: delayNanoseconds)
         }
+        onProgress?(ScanProgress(itemsProcessed: items.count, totalItems: items.count))
         return items
     }
 }
@@ -87,6 +92,19 @@ struct SmartCareOrchestratorTests {
 
         #expect(started.values == Set(["Junk & Cache", "Duplicate Files"]))
         #expect(finished.values == Set(["Junk & Cache", "Duplicate Files"]))
+    }
+
+    @Test func onItemProgressForwardsPerModuleUpdatesTaggedWithModuleName() async {
+        let reported = LockedSet()
+        let orchestrator = SmartCareOrchestrator(scanners: [
+            .init(name: "Junk & Cache", scanner: FakeScanner(items: [
+                ScanItem(path: "/tmp/a.cache", size: 10, kind: .file)
+            ]))
+        ])
+
+        _ = await orchestrator.run(onItemProgress: { name, _ in reported.insert(name) })
+
+        #expect(reported.values == Set(["Junk & Cache"]))
     }
 }
 

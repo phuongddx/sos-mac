@@ -29,6 +29,7 @@ public struct SmartCareOrchestrator: Sendable {
     /// partial-failure handling in this codebase.
     public func run(
         onModuleStart: (@Sendable (String) -> Void)? = nil,
+        onItemProgress: (@Sendable (String, ScanProgress) -> Void)? = nil,
         onModuleFinish: (@Sendable (String, Result<[ScanItem], Error>) -> Void)? = nil
     ) async -> SmartCareReport {
         await withTaskGroup(of: SmartCareModuleResult.self) { group in
@@ -36,7 +37,9 @@ public struct SmartCareOrchestrator: Sendable {
                 onModuleStart?(named.name)
                 group.addTask {
                     do {
-                        let items = try await named.scanner.scan()
+                        let items = try await named.scanner.scan(onProgress: { progress in
+                            onItemProgress?(named.name, progress)
+                        })
                         onModuleFinish?(named.name, .success(items))
                         return SmartCareModuleResult(id: named.name, items: items)
                     } catch {
