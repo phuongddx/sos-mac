@@ -73,10 +73,10 @@ struct DuplicateFinderView: View {
 
     private var scanningView: some View {
         VStack(spacing: Theme.Spacing.lg) {
-            StepRowView(
-                name: "Scanning \(viewModel.mode.rawValue.lowercased())…",
-                meta: nil,
-                state: .active
+            ScanProgressPanel(
+                progress: viewModel.progressTracker.progress,
+                showCurrentPath: true,
+                steps: scanningSteps
             )
             .frame(maxWidth: 420)
 
@@ -85,6 +85,23 @@ struct DuplicateFinderView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(Theme.Spacing.giant)
+    }
+
+    /// `DuplicateFinder`'s listing phase (`SizeGrouper`/the image-collecting
+    /// walk) never calls `onProgress` at all — only the hashing loop does,
+    /// and always with a real `totalItems` once it starts — so `progress`
+    /// being non-nil is exactly "hashing has begun," with no in-between
+    /// state to special-case.
+    private var scanningSteps: [ScanProgressPanel.StepModel] {
+        let isHashing = viewModel.progressTracker.progress != nil
+        return [
+            .init(name: "Scanning \(viewModel.mode.rawValue.lowercased())…", meta: nil, state: isHashing ? .done : .active),
+            .init(
+                name: viewModel.mode == .exact ? "Hashing files…" : "Comparing images…",
+                meta: isHashing ? nil : "Waiting…",
+                state: isHashing ? .active : .pending
+            )
+        ]
     }
 
     // MARK: - Results
