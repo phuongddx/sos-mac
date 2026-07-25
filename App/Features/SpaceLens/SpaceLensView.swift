@@ -120,9 +120,13 @@ struct SpaceLensView: View {
             ProgressView()
                 .controlSize(.large)
                 .tint(Theme.accent)
-            Text(viewModel.scannedItemCount > 0 ? "Scanned \(viewModel.scannedItemCount.formatted()) items…" : "Scanning…")
-                .font(.system(size: Theme.TextSize.sm))
-                .foregroundStyle(Theme.muted)
+            if let progress = viewModel.progressTracker.progress {
+                ScanProgressPanel(progress: progress)
+            } else {
+                Text("Scanning…")
+                    .font(.system(size: Theme.TextSize.sm))
+                    .foregroundStyle(Theme.muted)
+            }
             Button("Cancel") { viewModel.cancelScan() }
                 .buttonStyle(.bordered)
         }

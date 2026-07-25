@@ -43,7 +43,7 @@ final class SpaceLensViewModel {
     var rootPath: String
     private(set) var phase: Phase = .idle
     private(set) var errorMessage: String?
-    private(set) var scannedItemCount = 0
+    let progressTracker = ScanProgressTracker()
     var viewMode: ViewMode = .tree {
         didSet { selectedItem = nil }
     }
@@ -280,18 +280,18 @@ final class SpaceLensViewModel {
         layoutCacheKey = nil
         layoutCacheResult = []
         errorMessage = nil
-        scannedItemCount = 0
+        progressTracker.reset()
         phase = .idle
     }
 
     private func performScan() async {
         phase = .scanning
         errorMessage = nil
-        scannedItemCount = 0
+        progressTracker.start()
 
         let scanner = DiskTreeScanner(rootPath: rootPath)
-        let result = await scanner.buildTree(onProgress: { [weak self] count in
-            Task { @MainActor in self?.scannedItemCount = count }
+        let result = await scanner.buildTree(onProgress: { [weak self] progress in
+            Task { @MainActor in self?.progressTracker.record(progress) }
         })
         guard !Task.isCancelled else { return }
         guard !result.tree.nodes.isEmpty else {
