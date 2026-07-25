@@ -15,8 +15,12 @@
 		119ABFBC2B48E424ABAE34FF /* MenuBarHelper.app in Resources */ = {isa = PBXBuildFile; fileRef = C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		12A18A19EEF8BE2ED712F44D /* QuarantineRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */; };
 		1B4936A4A6291F165CB9595D /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D556598CDC035EE94F81C8 /* DashboardView.swift */; };
+		1D3798F980BB1E4064A8BD92 /* AuroraCareScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59147E006B726F9138C2B12 /* AuroraCareScreenshotTests.swift */; };
+		2773C6BA3401153349B7A752 /* AuroraBloomModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */; };
+		283D3A9E02E9DFF48AFB6210 /* HealthDialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FCCD11654F615F38FBC7AE /* HealthDialView.swift */; };
 		29AC5FD388B0CFD5BBEE361C /* TreemapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 35EB24D1CC05056D12B5D6DD /* TreemapKit */; };
 		302D413F61D134A94F8799EF /* SidebarNavRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68651E3F484F9D5B790F279C /* SidebarNavRow.swift */; };
+		38E490DE64DB1DC787E4D64D /* ElevationModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */; };
 		3E38F672530103701AC5A976 /* PerformanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFABD43DC705D2ADFED69B24 /* PerformanceView.swift */; };
 		3E60D9BD9B7CB5E0B6D9A6F9 /* PrivilegedHelper in Resources */ = {isa = PBXBuildFile; fileRef = 166E1A0591F7BDC42C0E7853 /* PrivilegedHelper */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		3EF1CD052576C9A843228DF1 /* DuplicateFinderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 763ECBD32513F45F9539E313 /* DuplicateFinderView.swift */; };
@@ -42,6 +46,7 @@
 		96A2FFBEDA9B53B465AEB41A /* JunkCleanerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575242D8CA34B18FD76DD4FE /* JunkCleanerView.swift */; };
 		9C256ECFD03A15A92272C000 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2212133287D5A40215D51B3F /* Assets.xcassets */; };
 		A292BD79FDE867EC711A8E5B /* SummaryCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0AC3C62BF924A8FD115848 /* SummaryCardView.swift */; };
+		B013D80A5181BB873E15F75A /* HeroPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1592F9B76A607BFA0C5D29 /* HeroPanelView.swift */; };
 		B3BA61A0E30BB10F63410FE9 /* BadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E0B72A04198D2C4C56BD2A9 /* BadgeView.swift */; };
 		B8C5878B6778CB1B3A13E84F /* ProtectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A434E7961B33074CE62CB1F /* ProtectionView.swift */; };
 		BD71724FAF539B30C395699C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25382720F5D7E946EA383D8 /* EmptyStateView.swift */; };
@@ -65,6 +70,13 @@
 			remoteGlobalIDString = 1E8F47B298496F8078E1C1BB;
 			remoteInfo = PrivilegedHelper;
 		};
+		5FE012B8D398D8E5565D8400 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1AE0FE96F145338D24088645 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 80C8485EDEE67072AE469396;
+			remoteInfo = SOSMac;
+		};
 		C01DE2D8B6FC01A6AE906E61 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1AE0FE96F145338D24088645 /* Project object */;
@@ -84,6 +96,7 @@
 		19C39CA1766D163871E0E7CE /* SmartCareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCareView.swift; sourceTree = "<group>"; };
 		1C8BE73AC42934229155564A /* StepRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepRowView.swift; sourceTree = "<group>"; };
 		2212133287D5A40215D51B3F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		25FCCD11654F615F38FBC7AE /* HealthDialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDialView.swift; sourceTree = "<group>"; };
 		3378D6B53CDCB0474385C0B8 /* CloudCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCleanupView.swift; sourceTree = "<group>"; };
 		34D556598CDC035EE94F81C8 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderViewModel.swift; sourceTree = "<group>"; };
@@ -97,6 +110,7 @@
 		60925814F21D41B971FD4766 /* VolumeStorageInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeStorageInfo.swift; sourceTree = "<group>"; };
 		68651E3F484F9D5B790F279C /* SidebarNavRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarNavRow.swift; sourceTree = "<group>"; };
 		6E0B72A04198D2C4C56BD2A9 /* BadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgeView.swift; sourceTree = "<group>"; };
+		73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevationModifier.swift; sourceTree = "<group>"; };
 		763ECBD32513F45F9539E313 /* DuplicateFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderView.swift; sourceTree = "<group>"; };
 		7B273DE218A656524EA73BAF /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
 		8F0AC3C62BF924A8FD115848 /* SummaryCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryCardView.swift; sourceTree = "<group>"; };
@@ -105,8 +119,10 @@
 		A75763649B41522A9F8B4952 /* CleanCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CleanCore; path = Packages/CleanCore; sourceTree = SOURCE_ROOT; };
 		AD009D570D83BC9D450F00E2 /* HelperOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperOperations.swift; sourceTree = "<group>"; };
 		AEE74DC5C8E5A6D70E4BDB9E /* ASWebAuthSessionPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASWebAuthSessionPresenter.swift; sourceTree = "<group>"; };
+		B59147E006B726F9138C2B12 /* AuroraCareScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraCareScreenshotTests.swift; sourceTree = "<group>"; };
 		B658F774CB266713577506C2 /* SOSMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSMacApp.swift; sourceTree = "<group>"; };
 		B8E6150D819C892387C01600 /* StickyFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyFooterView.swift; sourceTree = "<group>"; };
+		BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraBloomModifier.swift; sourceTree = "<group>"; };
 		C12B3FBB6D8691969DF7F3C4 /* UninstallerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallerViewModel.swift; sourceTree = "<group>"; };
 		C25382720F5D7E946EA383D8 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -114,9 +130,11 @@
 		D60AE4D0BE44E292519DD599 /* PerformanceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceViewModel.swift; sourceTree = "<group>"; };
 		D78116D60A7591C3E1D1E111 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		E244407C254EC7244F5679A6 /* SmartCareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCareViewModel.swift; sourceTree = "<group>"; };
+		E5454942F08539F2B5554DD6 /* SOSMacUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SOSMacUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E613731BF2E7935588A184F1 /* CloudCleanupViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCleanupViewModel.swift; sourceTree = "<group>"; };
 		E80C73390FD3C0119541F076 /* ProtectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtectionViewModel.swift; sourceTree = "<group>"; };
 		E854DD88191E34B25816AF4E /* MenuBarMetricsMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarMetricsMonitor.swift; sourceTree = "<group>"; };
+		EB1592F9B76A607BFA0C5D29 /* HeroPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroPanelView.swift; sourceTree = "<group>"; };
 		EB67B89413B962973465246B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		F8220BACD07F979662C76390 /* TreemapKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TreemapKit; path = Packages/TreemapKit; sourceTree = SOURCE_ROOT; };
 		FD7ECA1B33611E22001EF44C /* HelperXPCListenerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperXPCListenerDelegate.swift; sourceTree = "<group>"; };
@@ -178,6 +196,7 @@
 				031D2175453B3650FA05DA1D /* MenuBarHelper */,
 				3591A759099A03CB61D76D3E /* Packages */,
 				E611D953C857CEE55508FCE2 /* PrivilegedHelper */,
+				BDC8CFB2E7DB46D06FD11255 /* SOSMacUITests */,
 				2C72880C804DAEB47011B4D1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -188,6 +207,7 @@
 				C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */,
 				166E1A0591F7BDC42C0E7853 /* PrivilegedHelper */,
 				5C3280BFF2C7337B3913B507 /* SOSMac.app */,
+				E5454942F08539F2B5554DD6 /* SOSMacUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -271,9 +291,13 @@
 		7BFDB829AB2B5D575B0FDD4E /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */,
 				6E0B72A04198D2C4C56BD2A9 /* BadgeView.swift */,
 				99909B8A48785AADED1E723A /* CareCardModifier.swift */,
+				73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */,
 				C25382720F5D7E946EA383D8 /* EmptyStateView.swift */,
+				25FCCD11654F615F38FBC7AE /* HealthDialView.swift */,
+				EB1592F9B76A607BFA0C5D29 /* HeroPanelView.swift */,
 				FEDD20C09B7740A9A836FD75 /* ModuleCardView.swift */,
 				4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */,
 				68651E3F484F9D5B790F279C /* SidebarNavRow.swift */,
@@ -310,6 +334,14 @@
 				34D556598CDC035EE94F81C8 /* DashboardView.swift */,
 			);
 			path = Dashboard;
+			sourceTree = "<group>";
+		};
+		BDC8CFB2E7DB46D06FD11255 /* SOSMacUITests */ = {
+			isa = PBXGroup;
+			children = (
+				B59147E006B726F9138C2B12 /* AuroraCareScreenshotTests.swift */,
+			);
+			path = SOSMacUITests;
 			sourceTree = "<group>";
 		};
 		E2993D55C7DD4927D96A0D94 /* SpaceLens */ = {
@@ -424,6 +456,24 @@
 			productReference = 5C3280BFF2C7337B3913B507 /* SOSMac.app */;
 			productType = "com.apple.product-type.application";
 		};
+		DAAC64D4060DF2CB19ED3851 /* SOSMacUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 46D5731BCCA0FAE906FC870A /* Build configuration list for PBXNativeTarget "SOSMacUITests" */;
+			buildPhases = (
+				DFE9DE70BC28EA3A5DDA5627 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				79CAAECBA8FF717DA80ED8AF /* PBXTargetDependency */,
+			);
+			name = SOSMacUITests;
+			packageProductDependencies = (
+			);
+			productName = SOSMacUITests;
+			productReference = E5454942F08539F2B5554DD6 /* SOSMacUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -441,6 +491,10 @@
 					};
 					80C8485EDEE67072AE469396 = {
 						ProvisioningStyle = Automatic;
+					};
+					DAAC64D4060DF2CB19ED3851 = {
+						ProvisioningStyle = Automatic;
+						TestTargetID = 80C8485EDEE67072AE469396;
 					};
 				};
 			};
@@ -465,6 +519,7 @@
 				0F44861A6320DC1CC94A51C6 /* MenuBarHelper */,
 				1E8F47B298496F8078E1C1BB /* PrivilegedHelper */,
 				80C8485EDEE67072AE469396 /* SOSMac */,
+				DAAC64D4060DF2CB19ED3851 /* SOSMacUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -527,6 +582,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				89A677FD9979FA784AE0C17A /* ASWebAuthSessionPresenter.swift in Sources */,
+				2773C6BA3401153349B7A752 /* AuroraBloomModifier.swift in Sources */,
 				B3BA61A0E30BB10F63410FE9 /* BadgeView.swift in Sources */,
 				0980BEA718F6AC9A78614779 /* CareCardModifier.swift in Sources */,
 				728C27220348DC8271916BB8 /* CloudCleanupView.swift in Sources */,
@@ -534,7 +590,10 @@
 				1B4936A4A6291F165CB9595D /* DashboardView.swift in Sources */,
 				3EF1CD052576C9A843228DF1 /* DuplicateFinderView.swift in Sources */,
 				BFB9A6BD1B872593B8AE2E6E /* DuplicateFinderViewModel.swift in Sources */,
+				38E490DE64DB1DC787E4D64D /* ElevationModifier.swift in Sources */,
 				BD71724FAF539B30C395699C /* EmptyStateView.swift in Sources */,
+				283D3A9E02E9DFF48AFB6210 /* HealthDialView.swift in Sources */,
+				B013D80A5181BB873E15F75A /* HeroPanelView.swift in Sources */,
 				47A95B1665E814CEB837631D /* IgnoredItem.swift in Sources */,
 				96A2FFBEDA9B53B465AEB41A /* JunkCleanerView.swift in Sources */,
 				8A7D4331AFFDCB5D68F6FE3C /* JunkCleanerViewModel.swift in Sources */,
@@ -584,6 +643,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		DFE9DE70BC28EA3A5DDA5627 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1D3798F980BB1E4064A8BD92 /* AuroraCareScreenshotTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -597,9 +664,33 @@
 			target = 1E8F47B298496F8078E1C1BB /* PrivilegedHelper */;
 			targetProxy = 19F8C565045FEFF465001229 /* PBXContainerItemProxy */;
 		};
+		79CAAECBA8FF717DA80ED8AF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 80C8485EDEE67072AE469396 /* SOSMac */;
+			targetProxy = 5FE012B8D398D8E5565D8400 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		062591212FB2EC2D1574C9E8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nextlabs.sosmac.uitests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+				TEST_TARGET_NAME = SOSMac;
+			};
+			name = Debug;
+		};
 		11A7D6A6B6FE83DA1E263017 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -682,6 +773,25 @@
 				SWIFT_VERSION = 6.0;
 			};
 			name = Debug;
+		};
+		3EDFDDB200302644CE6A3613 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nextlabs.sosmac.uitests;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+				TEST_TARGET_NAME = SOSMac;
+			};
+			name = Release;
 		};
 		4BD3B715D50CB37CDB334725 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -852,6 +962,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		46D5731BCCA0FAE906FC870A /* Build configuration list for PBXNativeTarget "SOSMacUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				062591212FB2EC2D1574C9E8 /* Debug */,
+				3EDFDDB200302644CE6A3613 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		7204ECF185D832CD34AA5F6F /* Build configuration list for PBXProject "SOSMac" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

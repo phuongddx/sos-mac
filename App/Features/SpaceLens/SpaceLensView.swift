@@ -17,6 +17,7 @@ struct SpaceLensView: View {
             }
         }
         .background(Theme.background)
+        .auroraBloom()
         .navigationTitle("Space Lens")
         .onDisappear { viewModel.cancelScan() }
         .sheet(isPresented: reviewPresented) {
@@ -80,7 +81,7 @@ struct SpaceLensView: View {
         VStack(spacing: Theme.Spacing.lg) {
             Image(systemName: "square.grid.3x3.fill")
                 .font(.system(size: 34))
-                .foregroundStyle(Theme.accent)
+                .foregroundStyle(Theme.hue(for: .spaceLens))
             Text("Map your storage")
                 .font(.system(size: Theme.TextSize.lg, weight: .semibold))
                 .foregroundStyle(Theme.foreground)
@@ -233,6 +234,7 @@ struct SpaceLensView: View {
         }
         .padding(Theme.Spacing.lg)
         .background(Theme.surface, in: RoundedRectangle(cornerRadius: Theme.Radius.md))
+        .elevation(.raised)
     }
 
     private func detailRow(_ label: String, _ value: String) -> some View {

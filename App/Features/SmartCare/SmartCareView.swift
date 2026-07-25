@@ -17,6 +17,7 @@ struct SmartCareView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.background)
+        .auroraBloom()
         .navigationTitle("Smart Care")
         .onDisappear { viewModel.cancelScan() }
     }
@@ -57,6 +58,7 @@ struct SmartCareView: View {
             systemImage: "wand.and.stars",
             title: "Run Smart Care",
             message: "Smart Care runs Junk & Cache cleanup and Duplicate Finder together, with a quick health check — nothing is deleted without your review.",
+            hue: Theme.hue(for: .smartCare),
             actionTitle: "Run Smart Care",
             action: { viewModel.startScan() }
         )

@@ -34,6 +34,7 @@ private struct JunkCleanerContentView: View {
                     systemImage: "trash",
                     title: "Scan for junk",
                     message: "Finds caches and logs that are safe to remove.",
+                    hue: Theme.hue(for: .junkCleaner),
                     actionTitle: "Start Scan",
                     action: { Task { await viewModel.startScan() } }
                 )
@@ -73,6 +74,7 @@ private struct JunkCleanerContentView: View {
             }
         }
         .background(Theme.background)
+        .auroraBloom()
     }
 
     private var resultsList: some View {

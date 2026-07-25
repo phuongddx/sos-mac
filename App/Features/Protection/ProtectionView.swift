@@ -37,6 +37,7 @@ private struct ProtectionContentView: View {
                     systemImage: "shield.lefthalf.filled",
                     title: "Scan for known threats",
                     message: "Checks Downloads, login items, and browser extensions against known-bad signatures. Complements — never replaces — XProtect and Gatekeeper.",
+                    hue: Theme.hue(for: .protection),
                     actionTitle: "Start Scan",
                     action: { viewModel.startScan() }
                 )
@@ -83,6 +84,7 @@ private struct ProtectionContentView: View {
             }
         }
         .background(Theme.background)
+        .auroraBloom()
         .onDisappear { viewModel.cancelScan() }
     }
 

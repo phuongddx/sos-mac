@@ -20,6 +20,7 @@ struct UpdaterView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.background)
+        .auroraBloom()
         .navigationTitle("Updater")
         .task {
             viewModel.loadApps()
@@ -34,6 +35,7 @@ struct UpdaterView: View {
             systemImage: "arrow.triangle.2.circlepath",
             title: "Looking for installed applications",
             message: "Scanning your Mac for installed apps and checking their versions. If nothing turns up, try checking again.",
+            hue: Theme.hue(for: .updater),
             actionTitle: "Check Again"
         ) {
             viewModel.loadApps()

@@ -13,6 +13,7 @@ struct UninstallerView: View {
         content
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Theme.background)
+            .auroraBloom()
             .navigationTitle("Uninstaller")
             .task { viewModel.loadApps() }
     }
@@ -40,7 +41,8 @@ struct UninstallerView: View {
                 EmptyStateView(
                     systemImage: "xmark.bin",
                     title: "No applications found",
-                    message: "SOS Mac couldn't find any applications in /Applications or ~/Applications."
+                    message: "SOS Mac couldn't find any applications in /Applications or ~/Applications.",
+                    hue: Theme.hue(for: .uninstaller)
                 )
             } else {
                 List(viewModel.apps) { row in
@@ -108,13 +110,16 @@ struct UninstallerView: View {
                 .strokeBorder(Theme.border, lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.sm))
+        .elevation(.raised)
     }
 
     private func appIcon(for name: String) -> some View {
-        ZStack {
+        let hue = Theme.hue(for: .uninstaller)
+        return ZStack {
             RoundedRectangle(cornerRadius: 7)
-                .fill(Theme.accent)
+                .fill(LinearGradient(colors: [hue, hue.opacity(0.75)], startPoint: .topLeading, endPoint: .bottomTrailing))
                 .frame(width: 30, height: 30)
+                .shadow(color: hue.opacity(0.35), radius: 5, x: 0, y: 3)
             Text(String(name.prefix(1)).uppercased())
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(.white)
@@ -210,6 +215,7 @@ struct UninstallerView: View {
                 .strokeBorder(Theme.border, lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.sm))
+        .elevation(.raised)
     }
 
     private var selectedBytes: Int64 {

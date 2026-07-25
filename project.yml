@@ -73,6 +73,20 @@ targets:
       - package: CleanCore
         product: CleanCore
 
+  SOSMacUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: SOSMacUITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac.uitests
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+    dependencies:
+      - target: SOSMac
+
   PrivilegedHelper:
     type: tool
     platform: macOS
@@ -93,3 +107,16 @@ targets:
     dependencies:
       - package: CleanCore
         product: CleanCore
+
+schemes:
+  SOSMac:
+    build:
+      targets:
+        SOSMac: all
+        SOSMacUITests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - SOSMacUITests

@@ -44,6 +44,19 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
 struct RootView: View {
     @State private var selection: SidebarDestination? = .dashboard
 
+    /// UI-test-only appearance override, set via `SOSMAC_UITEST_APPEARANCE`
+    /// launch environment ("light"/"dark") so screenshot verification doesn't
+    /// depend on — or mutate — the user's actual system appearance. `nil`
+    /// (the default in every normal launch) leaves the system appearance in
+    /// full control, exactly as before.
+    private var uiTestColorScheme: ColorScheme? {
+        switch ProcessInfo.processInfo.environment["SOSMAC_UITEST_APPEARANCE"] {
+        case "light": return .light
+        case "dark": return .dark
+        default: return nil
+        }
+    }
+
     var body: some View {
         NavigationSplitView {
             SidebarView(selection: $selection)
@@ -73,6 +86,7 @@ struct RootView: View {
             }
         }
         .frame(minWidth: 720, minHeight: 480)
+        .preferredColorScheme(uiTestColorScheme)
     }
 }
 
@@ -115,10 +129,12 @@ private struct SidebarView: View {
             SidebarNavRow(
                 title: destination.rawValue,
                 systemImage: destination.systemImage,
+                hue: Theme.hue(for: destination),
                 isActive: selection == destination
             )
         }
         .buttonStyle(.plain)
+        .accessibilityIdentifier("sidebar-nav-\(destination.rawValue)")
     }
 }
 

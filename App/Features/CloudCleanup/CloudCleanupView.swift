@@ -36,6 +36,7 @@ struct CloudCleanupView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.background)
+        .auroraBloom()
         .navigationTitle("Cloud Cleanup")
     }
 
@@ -65,7 +66,8 @@ struct CloudCleanupView: View {
                 EmptyStateView(
                     systemImage: "link",
                     title: "Connect \(kind.rawValue)",
-                    message: "Sign in to scan for duplicates and free up space."
+                    message: "Sign in to scan for duplicates and free up space.",
+                    hue: Theme.hue(for: .cloudCleanup)
                 )
             } else if state.isLoading {
                 ProgressView("Loading…")
@@ -74,7 +76,8 @@ struct CloudCleanupView: View {
                 EmptyStateView(
                     systemImage: "checkmark.circle",
                     title: "No duplicates found",
-                    message: "\(kind.rawValue) is clean — no duplicate files were found in your account."
+                    message: "\(kind.rawValue) is clean — no duplicate files were found in your account.",
+                    hue: Theme.hue(for: .cloudCleanup)
                 )
             } else {
                 duplicatesList(state.duplicateGroups, kind: kind)
@@ -212,6 +215,7 @@ struct CloudCleanupView: View {
                     systemImage: "icloud",
                     title: "iCloud Drive",
                     message: "Scan locally-synced iCloud Drive files for exact duplicates.",
+                    hue: Theme.hue(for: .cloudCleanup),
                     actionTitle: "Scan"
                 ) {
                     Task { await viewModel.loadICloudFiles() }

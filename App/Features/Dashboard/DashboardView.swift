@@ -1,12 +1,13 @@
 import SwiftUI
 
-/// Matches `index.html`'s dashboard layout: storage card, Smart Care CTA,
-/// and a module grid. Deliberately omits the mockup's health ring and
-/// recent-activity feed — neither has a real backing data source yet
-/// (no Protection/health scoring module, no persisted cross-session
-/// activity log), and every ViewModel in this app resets to `.idle` each
-/// time its view is (re)created, so there is no real "last scanned" history
-/// to show. See plans/0725-1315-apply-open-design-system/phase-03-dashboard.md.
+/// Matches `index.html`'s dashboard layout: aurora hero (storage bar behind
+/// a hairline divider, one primary CTA) + hue-coded module grid. Deliberately
+/// omits the mockup's health ring and recent-activity feed — neither has a
+/// real backing data source yet (no Protection/health scoring module, no
+/// persisted cross-session activity log), and every ViewModel in this app
+/// resets to `.idle` each time its view is (re)created, so there is no real
+/// "last scanned" history to show, and no honest health score to compute.
+/// See plans/0725-1315-apply-open-design-system/phase-03-dashboard.md.
 struct DashboardView: View {
     let onSelect: (SidebarDestination) -> Void
 
@@ -16,76 +17,52 @@ struct DashboardView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.xxxl) {
-                header
-                topRow
+                hero
                 modulesSection
             }
             .padding(Theme.Spacing.xxxl)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.background)
+        .auroraBloom()
         .navigationTitle("Dashboard")
     }
 
-    private var header: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text("Dashboard")
-                .font(.system(size: Theme.TextSize.xl, weight: .semibold))
-                .foregroundStyle(Theme.foreground)
-            Text("Pick a module below, or run Smart Care for a guided pass across the essentials.")
-                .font(.system(size: Theme.TextSize.sm))
-                .foregroundStyle(Theme.muted)
-        }
+    private var hero: some View {
+        HeroPanelView(
+            eyebrow: "System status",
+            title: "Pick a module, or run Smart Care",
+            subtitle: "A guided pass across the essentials cleans, optimizes, and reviews in one go — nothing is changed until you approve it.",
+            hue: Theme.hue(for: .dashboard),
+            primaryActionTitle: "Run Smart Care",
+            primaryAction: { onSelect(.smartCare) },
+            trailing: { storageStat }
+        )
     }
 
-    private var topRow: some View {
-        HStack(alignment: .top, spacing: Theme.Spacing.xl) {
-            storageCard
-            smartCareCard
-        }
-    }
-
-    private var storageCard: some View {
+    @ViewBuilder
+    private var storageStat: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.md) {
             Text("Storage")
                 .font(.system(size: Theme.TextSize.base, weight: .semibold))
                 .foregroundStyle(Theme.foreground)
             if let storage {
-                Text("\(storage.usedDescription) used of \(storage.totalDescription) · \(storage.freeDescription) free")
+                Text("\(storage.usedDescription) used of \(storage.totalDescription)")
                     .font(.system(size: Theme.TextSize.sm))
                     .foregroundStyle(Theme.muted)
                 ProgressBarView(progress: storage.usedFraction)
                     .frame(height: 10)
+                Text("\(storage.freeDescription) free")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Theme.muted)
+                    .monospacedDigit()
             } else {
                 Text("Storage info unavailable")
                     .font(.system(size: Theme.TextSize.sm))
                     .foregroundStyle(Theme.muted)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .careCard()
-    }
-
-    private var smartCareCard: some View {
-        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
-            ZStack {
-                RoundedRectangle(cornerRadius: Theme.Radius.sm)
-                    .fill(Theme.accent.opacity(0.14))
-                    .frame(width: 36, height: 36)
-                Image(systemName: "wand.and.stars").foregroundStyle(Theme.accent)
-            }
-            Text("Run Smart Care")
-                .font(.system(size: Theme.TextSize.base, weight: .semibold))
-                .foregroundStyle(Theme.foreground)
-            Text("Clean, optimize, and review in one guided pass.")
-                .font(.system(size: Theme.TextSize.sm))
-                .foregroundStyle(Theme.muted)
-            Button("Run Smart Care") { onSelect(.smartCare) }
-                .buttonStyle(.borderedProminent)
-                .tint(Theme.accent)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .careCard()
+        .frame(width: 240, alignment: .leading)
     }
 
     private var modulesSection: some View {
@@ -99,42 +76,50 @@ struct DashboardView: View {
             ) {
                 ModuleCardView(
                     systemImage: "trash", title: "Junk & Cache", subtitle: "Cache & temp files",
-                    stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral
+                    stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral,
+                    hue: Theme.hue(for: .junkCleaner)
                 ) { onSelect(.junkCleaner) }
 
                 ModuleCardView(
                     systemImage: "xmark.bin", title: "Uninstaller", subtitle: "Apps & leftovers",
-                    stat: "Not reviewed this session", badgeText: "Open", badgeStyle: .neutral
+                    stat: "Not reviewed this session", badgeText: "Open", badgeStyle: .neutral,
+                    hue: Theme.hue(for: .uninstaller)
                 ) { onSelect(.uninstaller) }
 
                 ModuleCardView(
                     systemImage: "arrow.triangle.2.circlepath", title: "Updater", subtitle: "App updates",
-                    stat: "Not checked this session", badgeText: "Open", badgeStyle: .neutral
+                    stat: "Not checked this session", badgeText: "Open", badgeStyle: .neutral,
+                    hue: Theme.hue(for: .updater)
                 ) { onSelect(.updater) }
 
                 ModuleCardView(
                     systemImage: "square.grid.3x3.fill", title: "Space Lens", subtitle: "Disk usage map",
-                    stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral
+                    stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral,
+                    hue: Theme.hue(for: .spaceLens)
                 ) { onSelect(.spaceLens) }
 
                 ModuleCardView(
                     systemImage: "doc.on.doc", title: "Duplicate Finder", subtitle: "Exact & similar files",
-                    stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral
+                    stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral,
+                    hue: Theme.hue(for: .duplicateFinder)
                 ) { onSelect(.duplicateFinder) }
 
                 ModuleCardView(
                     systemImage: "gauge.with.dots.needle.50percent", title: "Performance", subtitle: "Live system metrics",
-                    stat: performanceStat, badgeText: "Live", badgeStyle: .safe
+                    stat: performanceStat, badgeText: "Live", badgeStyle: .safe,
+                    hue: Theme.hue(for: .performance)
                 ) { onSelect(.performance) }
 
                 ModuleCardView(
                     systemImage: "icloud", title: "Cloud Cleanup", subtitle: "Drive · Dropbox · OneDrive · iCloud",
-                    stat: "Not opened this session", badgeText: "Open", badgeStyle: .neutral
+                    stat: "Not opened this session", badgeText: "Open", badgeStyle: .neutral,
+                    hue: Theme.hue(for: .cloudCleanup)
                 ) { onSelect(.cloudCleanup) }
 
                 ModuleCardView(
                     systemImage: "shield.lefthalf.filled", title: "Protection", subtitle: "Known-signature malware scan",
-                    stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral
+                    stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral,
+                    hue: Theme.hue(for: .protection)
                 ) { onSelect(.protection) }
             }
         }

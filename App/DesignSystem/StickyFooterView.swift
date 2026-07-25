@@ -22,5 +22,13 @@ struct StickyFooterView<Trailing: View>: View {
         .padding(.vertical, Theme.Spacing.lg)
         .background(.regularMaterial)
         .overlay(Rectangle().frame(height: 1).foregroundStyle(Theme.border), alignment: .top)
+        .clipShape(
+            UnevenRoundedRectangle(
+                topLeadingRadius: 0,
+                bottomLeadingRadius: Theme.Radius.lg,
+                bottomTrailingRadius: Theme.Radius.lg,
+                topTrailingRadius: 0
+            )
+        )
     }
 }

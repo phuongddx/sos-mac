@@ -40,6 +40,7 @@ struct DuplicateFinderView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.background)
+        .auroraBloom()
         .navigationTitle("Duplicate Finder")
         .onDisappear { viewModel.cancelScan() }
     }
@@ -52,6 +53,7 @@ struct DuplicateFinderView: View {
                 systemImage: "doc.on.doc",
                 title: "Find Duplicates",
                 message: "Scans for exact duplicate files, or visually similar images.",
+                hue: Theme.hue(for: .duplicateFinder),
                 actionTitle: "Start Scan",
                 action: { viewModel.startScan() }
             )

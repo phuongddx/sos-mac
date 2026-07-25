@@ -40,6 +40,7 @@ struct PerformanceView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Theme.background)
+        .auroraBloom()
         .navigationTitle("Performance")
         .task { await viewModel.runPollingLoop() }
     }
@@ -89,12 +90,12 @@ struct PerformanceView: View {
                 Text(String(format: "%.0f%%", cpu))
                     .font(.system(size: Theme.TextSize.xl, weight: .bold))
                     .foregroundStyle(Theme.foreground)
-                ProgressBarView(progress: cpu / 100, tint: Theme.accent)
+                ProgressBarView(progress: cpu / 100, style: AnyShapeStyle(Theme.accent))
             } else {
                 Text("—")
                     .font(.system(size: Theme.TextSize.xl, weight: .bold))
                     .foregroundStyle(Theme.muted)
-                ProgressBarView(progress: 0, tint: Theme.accent)
+                ProgressBarView(progress: 0, style: AnyShapeStyle(Theme.accent))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -111,7 +112,7 @@ struct PerformanceView: View {
                 Text(String(format: "%.0f%%", percent * 100))
                     .font(.system(size: Theme.TextSize.xl, weight: .bold))
                     .foregroundStyle(Theme.foreground)
-                ProgressBarView(progress: percent, tint: Theme.warn)
+                ProgressBarView(progress: percent, style: AnyShapeStyle(Theme.warn))
                 Text("\(ByteFormatter.string(fromByteCount: Int64(mem.usedBytes))) / \(ByteFormatter.string(fromByteCount: Int64(mem.totalBytes)))")
                     .font(.system(size: 12.5))
                     .foregroundStyle(Theme.muted)
@@ -119,7 +120,7 @@ struct PerformanceView: View {
                 Text("—")
                     .font(.system(size: Theme.TextSize.xl, weight: .bold))
                     .foregroundStyle(Theme.muted)
-                ProgressBarView(progress: 0, tint: Theme.warn)
+                ProgressBarView(progress: 0, style: AnyShapeStyle(Theme.warn))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
