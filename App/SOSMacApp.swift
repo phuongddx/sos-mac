@@ -20,6 +20,7 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
     case spaceLens = "Space Lens"
     case duplicateFinder = "Duplicate Finder"
     case performance = "Performance"
+    case cloudCleanup = "Cloud Cleanup"
 
     var id: String { rawValue }
 
@@ -33,6 +34,7 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
         case .spaceLens: return "square.grid.3x3.fill"
         case .duplicateFinder: return "doc.on.doc"
         case .performance: return "gauge.with.dots.needle.50percent"
+        case .cloudCleanup: return "icloud"
         }
     }
 }
@@ -65,6 +67,8 @@ struct RootView: View {
                 DuplicateFinderView()
             case .performance:
                 PerformanceView()
+            case .cloudCleanup:
+                CloudCleanupView()
             }
         }
         .frame(minWidth: 720, minHeight: 480)
