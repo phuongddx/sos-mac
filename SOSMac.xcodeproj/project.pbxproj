@@ -21,6 +21,7 @@
 		283D3A9E02E9DFF48AFB6210 /* HealthDialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FCCD11654F615F38FBC7AE /* HealthDialView.swift */; };
 		29AC5FD388B0CFD5BBEE361C /* TreemapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 35EB24D1CC05056D12B5D6DD /* TreemapKit */; };
 		302D413F61D134A94F8799EF /* SidebarNavRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68651E3F484F9D5B790F279C /* SidebarNavRow.swift */; };
+		35F78EF4F974AD83A4552DD8 /* ScanProgressPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5B55EEB5382ACCBAD08487 /* ScanProgressPanel.swift */; };
 		38E490DE64DB1DC787E4D64D /* ElevationModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */; };
 		3E38F672530103701AC5A976 /* PerformanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFABD43DC705D2ADFED69B24 /* PerformanceView.swift */; };
 		3E60D9BD9B7CB5E0B6D9A6F9 /* PrivilegedHelper in Resources */ = {isa = PBXBuildFile; fileRef = 166E1A0591F7BDC42C0E7853 /* PrivilegedHelper */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -102,6 +103,7 @@
 		34D556598CDC035EE94F81C8 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderViewModel.swift; sourceTree = "<group>"; };
 		4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBarView.swift; sourceTree = "<group>"; };
+		4F5B55EEB5382ACCBAD08487 /* ScanProgressPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanProgressPanel.swift; sourceTree = "<group>"; };
 		5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuarantineRecord.swift; sourceTree = "<group>"; };
 		556CD64042D3F9B34D459D96 /* SpaceLensView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceLensView.swift; sourceTree = "<group>"; };
 		55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarHelperApp.swift; sourceTree = "<group>"; };
@@ -302,6 +304,7 @@
 				EB1592F9B76A607BFA0C5D29 /* HeroPanelView.swift */,
 				FEDD20C09B7740A9A836FD75 /* ModuleCardView.swift */,
 				4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */,
+				4F5B55EEB5382ACCBAD08487 /* ScanProgressPanel.swift */,
 				BC67E979C262C1B384952044 /* ScanProgressTracker.swift */,
 				68651E3F484F9D5B790F279C /* SidebarNavRow.swift */,
 				1C8BE73AC42934229155564A /* StepRowView.swift */,
@@ -609,6 +612,7 @@
 				77C50036ABEC8F54C3F86362 /* ProtectionViewModel.swift in Sources */,
 				12A18A19EEF8BE2ED712F44D /* QuarantineRecord.swift in Sources */,
 				D43BD385637D22053A3464D6 /* SOSMacApp.swift in Sources */,
+				35F78EF4F974AD83A4552DD8 /* ScanProgressPanel.swift in Sources */,
 				1D06AB7F38F03BC556400EB7 /* ScanProgressTracker.swift in Sources */,
 				302D413F61D134A94F8799EF /* SidebarNavRow.swift in Sources */,
 				0B8EB0370E309D0D95DC67B3 /* SmartCareView.swift in Sources */,
