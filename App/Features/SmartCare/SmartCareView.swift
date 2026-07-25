@@ -9,9 +9,14 @@ struct SmartCareView: View {
             content
 
             if let errorMessage = viewModel.errorMessage {
-                Text(errorMessage).foregroundStyle(.red).padding()
+                Text(errorMessage)
+                    .font(.system(size: Theme.TextSize.sm))
+                    .foregroundStyle(Theme.danger)
+                    .padding(Theme.Spacing.lg)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Theme.background)
         .navigationTitle("Smart Care")
         .onDisappear { viewModel.cancelScan() }
     }
@@ -20,94 +25,168 @@ struct SmartCareView: View {
     private var content: some View {
         switch viewModel.phase {
         case .idle:
-            ContentUnavailableView(
-                "Smart Care",
-                systemImage: "sparkles",
-                description: Text("Runs Junk & Cache and Duplicate Finder together, with a quick health check — nothing is deleted without your review.")
-            )
-            Button("Run Smart Care") { viewModel.startScan() }
-                .padding()
+            idleState
 
         case .scanning:
-            scanningProgress
+            scanningState
 
         case .review, .cleaning:
-            reviewList
-            footer
+            VStack(spacing: 0) {
+                reviewList
+                StickyFooterView(
+                    totalLabel: "Total selected",
+                    totalValue: ByteFormatter.string(fromByteCount: viewModel.totalSelectedBytes)
+                ) {
+                    Button("Clean Selected", role: .destructive) {
+                        Task { await viewModel.clean() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Theme.danger)
+                    .controlSize(.large)
+                    .disabled(viewModel.selectedPaths.isEmpty || viewModel.phase == .cleaning)
+                }
+            }
 
         case .summary(let reclaimedBytes, let itemCount, let failureCount):
-            ContentUnavailableView(
-                "Smart Care Complete",
-                systemImage: "checkmark.circle",
-                description: Text(summaryDescription(reclaimedBytes: reclaimedBytes, itemCount: itemCount, failureCount: failureCount))
-            )
-            Button("New Scan") { viewModel.startNewScan() }
-                .padding()
+            summaryState(reclaimedBytes: reclaimedBytes, itemCount: itemCount, failureCount: failureCount)
         }
     }
 
-    private var scanningProgress: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ForEach([SmartCareViewModel.junkModuleName, SmartCareViewModel.duplicatesModuleName], id: \.self) { name in
-                HStack {
-                    Text(name)
-                    Spacer()
-                    statusView(for: viewModel.moduleStatuses[name] ?? .pending)
+    private var idleState: some View {
+        EmptyStateView(
+            systemImage: "wand.and.stars",
+            title: "Run Smart Care",
+            message: "Smart Care runs Junk & Cache cleanup and Duplicate Finder together, with a quick health check — nothing is deleted without your review.",
+            actionTitle: "Run Smart Care",
+            action: { viewModel.startScan() }
+        )
+    }
+
+    private var scanningState: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+                ForEach([SmartCareViewModel.junkModuleName, SmartCareViewModel.duplicatesModuleName], id: \.self) { name in
+                    stepRow(for: name, status: viewModel.moduleStatuses[name] ?? .pending)
                 }
             }
+            .padding(Theme.Spacing.xxxl)
         }
-        .padding()
     }
 
     @ViewBuilder
-    private func statusView(for status: SmartCareViewModel.ModuleStatus) -> some View {
+    private func stepRow(for name: String, status: SmartCareViewModel.ModuleStatus) -> some View {
         switch status {
         case .pending:
-            Text("Waiting…").foregroundStyle(.secondary)
+            StepRowView(name: name, meta: "Waiting…", state: .pending)
         case .scanning:
-            ProgressView().scaleEffect(0.6)
+            StepRowView(name: name, meta: "Scanning…", state: .active)
         case .done(let count):
-            Text("Found \(count)").foregroundStyle(.secondary)
+            StepRowView(name: name, meta: "Found \(count)", state: .done)
         case .failed:
-            Text("Failed").foregroundStyle(.red)
+            // Don't force a StepRowView.State that doesn't exist for
+            // "failed" — keep the row neutral and surface the failure via
+            // a risk badge alongside it instead.
+            StepRowView(name: name, meta: nil, state: .pending)
+                .overlay(alignment: .trailing) {
+                    BadgeView(text: "Failed", style: .risk)
+                        .padding(.trailing, Theme.Spacing.lg)
+                }
         }
     }
 
     private var reviewList: some View {
-        List {
-            if let snapshot = viewModel.performanceSnapshot {
-                Section("Health Check") {
-                    if let load = snapshot.oneMinuteLoad {
-                        healthRow("Load Average (1m)", value: String(format: "%.2f", load))
-                    }
-                    if let used = snapshot.memoryUsedBytes, let total = snapshot.memoryTotalBytes {
-                        healthRow("Memory", value: "\(ByteFormatter.string(fromByteCount: Int64(used))) / \(ByteFormatter.string(fromByteCount: Int64(total)))")
-                    }
-                    healthRow("Thermal State", value: snapshot.thermalState.rawValue.capitalized)
+        ScrollView {
+            VStack(alignment: .leading, spacing: Theme.Spacing.xl) {
+                if let snapshot = viewModel.performanceSnapshot {
+                    healthCheckCard(snapshot)
+                }
+
+                ForEach(groupedReviewItems, id: \.module) { group in
+                    reviewGroupCard(group)
+                }
+
+                if viewModel.reviewItems.isEmpty {
+                    Text("Nothing found — you're all clean.")
+                        .font(.system(size: Theme.TextSize.sm))
+                        .foregroundStyle(Theme.muted)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(Theme.Spacing.xxxl)
                 }
             }
+            .padding(Theme.Spacing.xxxl)
+        }
+    }
 
-            ForEach(groupedReviewItems, id: \.module) { group in
-                Section("\(group.module) (\(ByteFormatter.string(fromByteCount: group.totalBytes)))") {
-                    ForEach(group.items) { reviewItem in
-                        HStack {
-                            Toggle(isOn: Binding(
-                                get: { viewModel.selectedPaths.contains(reviewItem.item.path) },
-                                set: { _ in viewModel.toggleSelection(for: reviewItem.item.path) }
-                            )) {
-                                Text((reviewItem.item.path as NSString).lastPathComponent)
-                            }
-                            Spacer()
-                            Text(ByteFormatter.string(fromByteCount: reviewItem.item.size))
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+    private func healthCheckCard(_ snapshot: PerformanceSnapshot) -> some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            Text("Health Check")
+                .font(.system(size: Theme.TextSize.base, weight: .semibold))
+                .foregroundStyle(Theme.foreground)
+
+            if let load = snapshot.oneMinuteLoad {
+                healthRow("Load Average (1m)", value: String(format: "%.2f", load))
+            }
+            if let used = snapshot.memoryUsedBytes, let total = snapshot.memoryTotalBytes {
+                healthRow("Memory", value: "\(ByteFormatter.string(fromByteCount: Int64(used))) / \(ByteFormatter.string(fromByteCount: Int64(total)))")
+            }
+            healthRow("Thermal State", value: snapshot.thermalState.rawValue.capitalized)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .careCard()
+    }
+
+    private func healthRow(_ label: String, value: String) -> some View {
+        HStack {
+            Text(label)
+                .font(.system(size: Theme.TextSize.sm))
+                .foregroundStyle(Theme.muted)
+            Spacer()
+            Text(value)
+                .font(.system(size: Theme.TextSize.sm, weight: .medium))
+                .foregroundStyle(Theme.foreground)
+        }
+    }
+
+    private func reviewGroupCard(_ group: ReviewGroup) -> some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            HStack {
+                Text(group.module)
+                    .font(.system(size: Theme.TextSize.base, weight: .semibold))
+                    .foregroundStyle(Theme.foreground)
+                Spacer()
+                Text(ByteFormatter.string(fromByteCount: group.totalBytes))
+                    .font(.system(size: Theme.TextSize.sm))
+                    .foregroundStyle(Theme.muted)
+            }
+
+            VStack(spacing: Theme.Spacing.sm) {
+                ForEach(group.items) { reviewItem in
+                    reviewItemRow(reviewItem)
                 }
             }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .careCard()
+    }
 
-            if viewModel.reviewItems.isEmpty {
-                Text("Nothing found — you're all clean.").foregroundStyle(.secondary)
+    private func reviewItemRow(_ reviewItem: SmartCareReviewItem) -> some View {
+        HStack(spacing: Theme.Spacing.md) {
+            Toggle(isOn: Binding(
+                get: { viewModel.selectedPaths.contains(reviewItem.item.path) },
+                set: { _ in viewModel.toggleSelection(for: reviewItem.item.path) }
+            )) {
+                Text((reviewItem.item.path as NSString).lastPathComponent)
+                    .font(.system(size: Theme.TextSize.sm))
+                    .foregroundStyle(Theme.foreground)
             }
+            .toggleStyle(.checkbox)
+
+            Spacer()
+
+            Text(ByteFormatter.string(fromByteCount: reviewItem.item.size))
+                .font(.system(size: 12.5))
+                .foregroundStyle(Theme.muted)
+                .monospacedDigit()
         }
     }
 
@@ -123,31 +202,24 @@ struct SmartCareView: View {
             .sorted { $0.module < $1.module }
     }
 
-    private func healthRow(_ label: String, value: String) -> some View {
-        HStack {
-            Text(label)
-            Spacer()
-            Text(value).foregroundStyle(.secondary)
-        }
-    }
+    private func summaryState(reclaimedBytes: Int64, itemCount: Int, failureCount: Int) -> some View {
+        VStack(spacing: Theme.Spacing.xl) {
+            SummaryCardView(
+                bigNumber: "\(ByteFormatter.string(fromByteCount: reclaimedBytes)) reclaimed",
+                caption: "Smart Care reclaimed space across \(itemCount) item\(itemCount == 1 ? "" : "s")"
+            )
 
-    private var footer: some View {
-        HStack {
-            Text("Total: \(ByteFormatter.string(fromByteCount: viewModel.totalSelectedBytes))")
-            Spacer()
-            Button("Clean Selected", role: .destructive) {
-                Task { await viewModel.clean() }
+            if failureCount > 0 {
+                BadgeView(text: "\(failureCount) item\(failureCount == 1 ? "" : "s") failed", style: .risk)
             }
-            .disabled(viewModel.selectedPaths.isEmpty || viewModel.phase == .cleaning)
-        }
-        .padding()
-    }
 
-    private func summaryDescription(reclaimedBytes: Int64, itemCount: Int, failureCount: Int) -> String {
-        var text = "Reclaimed \(ByteFormatter.string(fromByteCount: reclaimedBytes)) across \(itemCount) item\(itemCount == 1 ? "" : "s")."
-        if failureCount > 0 {
-            text += " \(failureCount) item\(failureCount == 1 ? "" : "s") couldn't be removed."
+            Button("New Scan") { viewModel.startNewScan() }
+                .buttonStyle(.borderedProminent)
+                .tint(Theme.accent)
+                .controlSize(.large)
         }
-        return text
+        .frame(maxWidth: 560)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(Theme.Spacing.xxxl)
     }
 }

@@ -15,22 +15,31 @@ struct DuplicateFinderView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .padding()
+            .padding(Theme.Spacing.xl)
             .disabled(viewModel.phase == .scanning)
 
             if viewModel.mode == .similarImages, viewModel.phase != .scanning {
-                Text("Similar images are near-matches, not byte-identical copies — review carefully before deleting.")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-                    .padding(.horizontal)
+                HStack(spacing: Theme.Spacing.xs) {
+                    Image(systemName: "exclamationmark.triangle")
+                    Text("Similar images are near-matches, not byte-identical copies — review carefully before deleting.")
+                }
+                .font(.system(size: Theme.TextSize.xs))
+                .foregroundStyle(Theme.warn)
+                .padding(.horizontal, Theme.Spacing.xxxl)
+                .padding(.bottom, Theme.Spacing.sm)
             }
 
             content
 
             if let errorMessage = viewModel.errorMessage {
-                Text(errorMessage).foregroundStyle(.red).padding()
+                Text(errorMessage)
+                    .font(.system(size: Theme.TextSize.sm))
+                    .foregroundStyle(Theme.danger)
+                    .padding(Theme.Spacing.lg)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Theme.background)
         .navigationTitle("Duplicate Finder")
         .onDisappear { viewModel.cancelScan() }
     }
@@ -39,84 +48,216 @@ struct DuplicateFinderView: View {
     private var content: some View {
         switch viewModel.phase {
         case .idle:
-            ContentUnavailableView(
-                "Find Duplicates",
+            EmptyStateView(
                 systemImage: "doc.on.doc",
-                description: Text("Scans for exact duplicate files, or visually similar images.")
+                title: "Find Duplicates",
+                message: "Scans for exact duplicate files, or visually similar images.",
+                actionTitle: "Start Scan",
+                action: { viewModel.startScan() }
             )
-            Button("Start Scan") { viewModel.startScan() }
-                .padding()
 
         case .scanning:
-            ProgressView("Scanning…").padding()
-            Button("Cancel") { viewModel.cancelScan() }
+            scanningView
 
         case .results:
-            resultsList
-            footer
+            resultsView
 
         case .done(let reclaimedBytes):
-            ContentUnavailableView(
-                "Cleaned up",
-                systemImage: "checkmark.circle",
-                description: Text("Reclaimed \(ByteFormatter.string(fromByteCount: reclaimedBytes))")
-            )
-            HStack {
-                Button("Done") { viewModel.backToResults() }
-                Button("New Scan") { viewModel.startNewScan() }
-            }
-            .padding()
+            doneView(reclaimedBytes: reclaimedBytes)
         }
     }
 
-    private var resultsList: some View {
-        List {
-            if viewModel.skippedCount > 0 {
-                Text("\(viewModel.skippedCount) file\(viewModel.skippedCount == 1 ? "" : "s") couldn't be scanned and may be missing from these results.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            if viewModel.groups.isEmpty {
-                Text("No duplicates found.").foregroundStyle(.secondary)
-            }
-            ForEach(viewModel.groups) { group in
-                Section {
-                    ForEach(group.items) { item in
-                        HStack {
-                            Toggle(isOn: Binding(
-                                get: { viewModel.selectedPaths.contains(item.path) },
-                                set: { _ in viewModel.toggleSelection(for: item.path) }
-                            )) {
-                                VStack(alignment: .leading) {
-                                    Text((item.path as NSString).lastPathComponent)
-                                    Text(item.path).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
-                                }
-                            }
-                            Spacer()
-                            if item.path == group.recommendedKeepPath {
-                                Text("Keep").font(.caption).foregroundStyle(.green)
-                            }
-                            Text(ByteFormatter.string(fromByteCount: item.size))
-                                .foregroundStyle(.secondary)
-                        }
+    // MARK: - Scanning
+
+    private var scanningView: some View {
+        VStack(spacing: Theme.Spacing.lg) {
+            StepRowView(
+                name: "Scanning \(viewModel.mode.rawValue.lowercased())…",
+                meta: nil,
+                state: .active
+            )
+            .frame(maxWidth: 420)
+
+            Button("Cancel") { viewModel.cancelScan() }
+                .buttonStyle(.bordered)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(Theme.Spacing.giant)
+    }
+
+    // MARK: - Results
+
+    private var resultsView: some View {
+        VStack(spacing: 0) {
+            resultsHeader
+                .padding(.horizontal, Theme.Spacing.xxxl)
+                .padding(.top, Theme.Spacing.xxxl)
+                .padding(.bottom, Theme.Spacing.lg)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
+                    if viewModel.skippedCount > 0 {
+                        Text("\(viewModel.skippedCount) file\(viewModel.skippedCount == 1 ? "" : "s") couldn't be scanned and may be missing from these results.")
+                            .font(.system(size: Theme.TextSize.xs))
+                            .foregroundStyle(Theme.muted)
                     }
-                } header: {
-                    Text("\(group.items.count) copies · \(ByteFormatter.string(fromByteCount: group.items.first?.size ?? 0)) each")
+                    if viewModel.groups.isEmpty {
+                        Text("No duplicates found.")
+                            .font(.system(size: Theme.TextSize.sm))
+                            .foregroundStyle(Theme.muted)
+                    }
+                    ForEach(viewModel.groups) { group in
+                        groupCard(group)
+                    }
+                }
+                .padding(.horizontal, Theme.Spacing.xxxl)
+                .padding(.bottom, Theme.Spacing.xxxl)
+            }
+
+            StickyFooterView(
+                totalLabel: "Selected for cleanup",
+                totalValue: ByteFormatter.string(fromByteCount: viewModel.totalSelectedBytes)
+            ) {
+                HStack(spacing: Theme.Spacing.md) {
+                    Button("New Scan") { viewModel.startNewScan() }
+                        .buttonStyle(.bordered)
+                    Button("Clean") {
+                        Task { await viewModel.clean() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Theme.danger)
+                    .disabled(viewModel.selectedPaths.isEmpty)
                 }
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    private var footer: some View {
-        HStack {
-            Text("Total: \(ByteFormatter.string(fromByteCount: viewModel.totalSelectedBytes))")
-            Spacer()
-            Button("New Scan") { viewModel.startNewScan() }
-            Button("Clean", role: .destructive) {
-                Task { await viewModel.clean() }
-            }
-            .disabled(viewModel.selectedPaths.isEmpty)
+    private var resultsHeader: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text("Duplicate Finder")
+                .font(.system(size: Theme.TextSize.xl, weight: .semibold))
+                .foregroundStyle(Theme.foreground)
+            Text(resultsSummary)
+                .font(.system(size: Theme.TextSize.sm))
+                .foregroundStyle(Theme.muted)
         }
-        .padding()
+    }
+
+    private var resultsSummary: String {
+        let setCount = viewModel.groups.count
+        return "\(setCount) duplicate set\(setCount == 1 ? "" : "s") found"
+    }
+
+    private func groupCard(_ group: DuplicateGroup) -> some View {
+        VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+            HStack(alignment: .top, spacing: Theme.Spacing.md) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(groupTitle(group))
+                        .font(.system(size: Theme.TextSize.base, weight: .semibold))
+                        .foregroundStyle(Theme.foreground)
+                    Text(groupSubtitle(group))
+                        .font(.system(size: 12.5))
+                        .foregroundStyle(Theme.muted)
+                }
+                Spacer(minLength: 0)
+                BadgeView(text: modeBadgeText, style: modeBadgeStyle)
+            }
+
+            VStack(spacing: 0) {
+                ForEach(Array(group.items.enumerated()), id: \.element.id) { index, item in
+                    if index > 0 {
+                        Rectangle()
+                            .fill(Theme.border)
+                            .frame(height: 1)
+                    }
+                    itemRow(item, group: group)
+                }
+            }
+        }
+        .careCard()
+    }
+
+    private func itemRow(_ item: ScanItem, group: DuplicateGroup) -> some View {
+        // The recommended-keep item is never a deletion candidate — its
+        // toggle stays disabled so a user can't accidentally select the
+        // one copy `DuplicateFinderViewModel` protects by design.
+        let isRecommendedKeep = item.path == group.recommendedKeepPath
+
+        return HStack(spacing: Theme.Spacing.md) {
+            Toggle("", isOn: Binding(
+                get: { viewModel.selectedPaths.contains(item.path) },
+                set: { _ in viewModel.toggleSelection(for: item.path) }
+            ))
+            .toggleStyle(.checkbox)
+            .labelsHidden()
+            .disabled(isRecommendedKeep)
+
+            VStack(alignment: .leading, spacing: 1) {
+                Text((item.path as NSString).lastPathComponent)
+                    .font(.system(size: Theme.TextSize.sm, weight: .medium))
+                    .foregroundStyle(Theme.foreground)
+                Text(item.path)
+                    .font(.system(size: 11.5, design: .monospaced))
+                    .foregroundStyle(Theme.muted)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+
+            Spacer(minLength: Theme.Spacing.md)
+
+            if isRecommendedKeep {
+                BadgeView(text: "Keep", style: .safe)
+            }
+
+            Text(ByteFormatter.string(fromByteCount: item.size))
+                .font(.system(size: 12.5))
+                .foregroundStyle(Theme.muted)
+                .monospacedDigit()
+        }
+        .padding(.vertical, Theme.Spacing.sm)
+    }
+
+    private func groupTitle(_ group: DuplicateGroup) -> String {
+        let path = group.recommendedKeepPath ?? group.items.first?.path
+        guard let path else { return "Duplicate set" }
+        return (path as NSString).lastPathComponent
+    }
+
+    private func groupSubtitle(_ group: DuplicateGroup) -> String {
+        let count = group.items.count
+        let size = ByteFormatter.string(fromByteCount: group.items.first?.size ?? 0)
+        return "\(count) copies · \(size) each"
+    }
+
+    private var modeBadgeText: String {
+        viewModel.mode == .exact ? "Exact match" : "Similar images"
+    }
+
+    private var modeBadgeStyle: BadgeStyle {
+        viewModel.mode == .exact ? .neutral : .attention
+    }
+
+    // MARK: - Done
+
+    private func doneView(reclaimedBytes: Int64) -> some View {
+        VStack(spacing: Theme.Spacing.lg) {
+            SummaryCardView(
+                bigNumber: ByteFormatter.string(fromByteCount: reclaimedBytes),
+                caption: "reclaimed"
+            )
+            .frame(maxWidth: 420)
+
+            HStack(spacing: Theme.Spacing.md) {
+                Button("New Scan") { viewModel.startNewScan() }
+                    .buttonStyle(.borderedProminent)
+                    .tint(Theme.accent)
+                Button("Back to Results") { viewModel.backToResults() }
+                    .buttonStyle(.bordered)
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(Theme.Spacing.giant)
     }
 }

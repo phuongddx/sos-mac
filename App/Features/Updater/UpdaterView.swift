@@ -2,17 +2,24 @@ import SwiftUI
 import AppKit
 import CleanCore
 
+/// Matches `updater.html`: a per-app list with an icon, installed → latest
+/// version, and a status badge. Read-only Sparkle appcast monitoring per
+/// README — there is no "install update"/"Update All" action here, only
+/// detection/display (the "View in App Store" link is a pre-existing
+/// external deep-link, not an install action, so it stays).
 struct UpdaterView: View {
     @State private var viewModel = UpdaterViewModel()
 
     var body: some View {
         Group {
             if viewModel.rows.isEmpty {
-                ProgressView()
+                emptyState
             } else {
-                list
+                content
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Theme.background)
         .navigationTitle("Updater")
         .task {
             viewModel.loadApps()
@@ -20,53 +27,139 @@ struct UpdaterView: View {
         }
     }
 
-    private var list: some View {
-        VStack(spacing: 0) {
-            // The per-app list (including App Store deep-links and "no update
-            // mechanism" rows) must stay visible even when no Sparkle app has
-            // a pending update — hiding it behind a full-screen "up to date"
-            // state would make App Store apps and no-feed apps unreachable.
-            if !viewModel.hasAnyUpdate {
-                Text("No Sparkle-based updates pending")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 8)
-            }
-            List(viewModel.rows) { row in
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text(row.app.name)
-                        if let installed = row.app.version {
-                            Text("Installed: \(installed)").font(.caption).foregroundStyle(.secondary)
-                        }
-                    }
-                    Spacer()
+    // MARK: - Idle / no apps detected
 
-                    if row.isChecking {
-                        ProgressView().scaleEffect(0.6)
-                    } else if viewModel.isUpdateAvailable(row), let latest = row.latestVersion {
-                        Label("→ \(latest)", systemImage: "arrow.up.circle.fill")
-                            .foregroundStyle(.orange)
-                    } else if row.app.isAppStoreDistributed {
-                        Button("View in App Store") {
-                            openAppStoreSearch(for: row.app.name)
-                        }
-                    } else if row.app.sparkleFeedURL == nil {
-                        Text("No update mechanism detected").font(.caption).foregroundStyle(.secondary)
-                    } else {
-                        Text("Up to date").foregroundStyle(.secondary)
-                    }
-                }
-            }
-            refreshButton
+    private var emptyState: some View {
+        EmptyStateView(
+            systemImage: "arrow.triangle.2.circlepath",
+            title: "Looking for installed applications",
+            message: "Scanning your Mac for installed apps and checking their versions. If nothing turns up, try checking again.",
+            actionTitle: "Check Again"
+        ) {
+            viewModel.loadApps()
+            Task { await viewModel.checkAll() }
         }
     }
 
-    private var refreshButton: some View {
-        Button("Check Again") {
-            Task { await viewModel.checkAll() }
+    // MARK: - Populated list
+
+    private var content: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
+                header
+                if isCheckingAny {
+                    StepRowView(name: "Checking for updates…", meta: nil, state: .active)
+                } else if !viewModel.hasAnyUpdate {
+                    Text("No Sparkle-based updates pending")
+                        .font(.system(size: Theme.TextSize.sm))
+                        .foregroundStyle(Theme.muted)
+                }
+                VStack(spacing: Theme.Spacing.sm) {
+                    ForEach(viewModel.rows) { row in
+                        rowView(row)
+                    }
+                }
+            }
+            .padding(Theme.Spacing.xxxl)
         }
-        .padding()
+    }
+
+    private var header: some View {
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Updater")
+                    .font(.system(size: Theme.TextSize.xl, weight: .semibold))
+                    .foregroundStyle(Theme.foreground)
+                Text(headerMeta)
+                    .font(.system(size: Theme.TextSize.sm))
+                    .foregroundStyle(Theme.muted)
+            }
+            Spacer()
+            Button("Check Again") {
+                Task { await viewModel.checkAll() }
+            }
+            .buttonStyle(.bordered)
+            .tint(Theme.accent)
+        }
+    }
+
+    private var headerMeta: String {
+        switch updatesAvailableCount {
+        case 0: return "All applications up to date"
+        case 1: return "1 update available"
+        default: return "\(updatesAvailableCount) updates available"
+        }
+    }
+
+    private var isCheckingAny: Bool {
+        viewModel.rows.contains { $0.isChecking }
+    }
+
+    private var updatesAvailableCount: Int {
+        viewModel.rows.filter(viewModel.isUpdateAvailable).count
+    }
+
+    // MARK: - Row
+
+    @ViewBuilder
+    private func rowView(_ row: UpdaterViewModel.AppUpdateRow) -> some View {
+        HStack(spacing: Theme.Spacing.md) {
+            appIcon(for: row.app)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(row.app.name)
+                    .font(.system(size: Theme.TextSize.sm, weight: .semibold))
+                    .foregroundStyle(Theme.foreground)
+                versionText(for: row)
+            }
+
+            Spacer(minLength: Theme.Spacing.md)
+
+            statusView(for: row)
+        }
+        .careCard()
+    }
+
+    @ViewBuilder
+    private func versionText(for row: UpdaterViewModel.AppUpdateRow) -> some View {
+        if let installed = row.app.version {
+            if viewModel.isUpdateAvailable(row), let latest = row.latestVersion {
+                Text("\(installed) → \(latest)")
+                    .font(.system(size: 12.5, design: .monospaced))
+                    .foregroundStyle(Theme.muted)
+            } else {
+                Text(installed)
+                    .font(.system(size: 12.5, design: .monospaced))
+                    .foregroundStyle(Theme.muted)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func statusView(for row: UpdaterViewModel.AppUpdateRow) -> some View {
+        if row.isChecking {
+            ProgressView().controlSize(.small)
+        } else if viewModel.isUpdateAvailable(row) {
+            BadgeView(text: "Update available", style: .attention)
+        } else if row.app.isAppStoreDistributed {
+            Button("View in App Store") {
+                openAppStoreSearch(for: row.app.name)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .tint(Theme.accent)
+        } else if row.app.sparkleFeedURL == nil {
+            BadgeView(text: "No update mechanism", style: .neutral)
+        } else {
+            BadgeView(text: "Up to date", style: .safe)
+        }
+    }
+
+    private func appIcon(for app: InstalledApp) -> some View {
+        Image(nsImage: NSWorkspace.shared.icon(forFile: app.bundlePath))
+            .resizable()
+            .frame(width: 30, height: 30)
+            .clipShape(RoundedRectangle(cornerRadius: 7))
     }
 
     /// No local App Store product-ID lookup exists without a network call
