@@ -15,6 +15,7 @@
 		119ABFBC2B48E424ABAE34FF /* MenuBarHelper.app in Resources */ = {isa = PBXBuildFile; fileRef = C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		12A18A19EEF8BE2ED712F44D /* QuarantineRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */; };
 		1B4936A4A6291F165CB9595D /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D556598CDC035EE94F81C8 /* DashboardView.swift */; };
+		1D06AB7F38F03BC556400EB7 /* ScanProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC67E979C262C1B384952044 /* ScanProgressTracker.swift */; };
 		1D3798F980BB1E4064A8BD92 /* AuroraCareScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59147E006B726F9138C2B12 /* AuroraCareScreenshotTests.swift */; };
 		2773C6BA3401153349B7A752 /* AuroraBloomModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */; };
 		283D3A9E02E9DFF48AFB6210 /* HealthDialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FCCD11654F615F38FBC7AE /* HealthDialView.swift */; };
@@ -123,6 +124,7 @@
 		B658F774CB266713577506C2 /* SOSMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSMacApp.swift; sourceTree = "<group>"; };
 		B8E6150D819C892387C01600 /* StickyFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyFooterView.swift; sourceTree = "<group>"; };
 		BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraBloomModifier.swift; sourceTree = "<group>"; };
+		BC67E979C262C1B384952044 /* ScanProgressTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanProgressTracker.swift; sourceTree = "<group>"; };
 		C12B3FBB6D8691969DF7F3C4 /* UninstallerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallerViewModel.swift; sourceTree = "<group>"; };
 		C25382720F5D7E946EA383D8 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -300,6 +302,7 @@
 				EB1592F9B76A607BFA0C5D29 /* HeroPanelView.swift */,
 				FEDD20C09B7740A9A836FD75 /* ModuleCardView.swift */,
 				4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */,
+				BC67E979C262C1B384952044 /* ScanProgressTracker.swift */,
 				68651E3F484F9D5B790F279C /* SidebarNavRow.swift */,
 				1C8BE73AC42934229155564A /* StepRowView.swift */,
 				B8E6150D819C892387C01600 /* StickyFooterView.swift */,
@@ -606,6 +609,7 @@
 				77C50036ABEC8F54C3F86362 /* ProtectionViewModel.swift in Sources */,
 				12A18A19EEF8BE2ED712F44D /* QuarantineRecord.swift in Sources */,
 				D43BD385637D22053A3464D6 /* SOSMacApp.swift in Sources */,
+				1D06AB7F38F03BC556400EB7 /* ScanProgressTracker.swift in Sources */,
 				302D413F61D134A94F8799EF /* SidebarNavRow.swift in Sources */,
 				0B8EB0370E309D0D95DC67B3 /* SmartCareView.swift in Sources */,
 				D4761BBD0776A6D89B63A73F /* SmartCareViewModel.swift in Sources */,
