@@ -43,6 +43,7 @@ public struct JunkScanner: Scanner {
                     )
                 }
             }
+            try Task.checkCancellation()
             onProgress?(ScanProgress(itemsProcessed: index + 1, totalItems: rules.count, currentPath: rule.label))
         }
 
