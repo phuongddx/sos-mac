@@ -67,6 +67,9 @@ struct SmartCareView: View {
     private var scanningState: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Theme.Spacing.md) {
+                if let aggregate = viewModel.aggregateProgress {
+                    ScanProgressPanel(progress: aggregate)
+                }
                 ForEach([SmartCareViewModel.junkModuleName, SmartCareViewModel.duplicatesModuleName], id: \.self) { name in
                     stepRow(for: name, status: viewModel.moduleStatuses[name] ?? .pending)
                 }

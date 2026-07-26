@@ -53,6 +53,7 @@ final class SmartCareViewModel {
     let rootPath: String
     private(set) var phase: Phase = .idle
     private(set) var moduleStatuses: [String: ModuleStatus] = [:]
+    private(set) var moduleProgress: [String: ScanProgress] = [:]
     private(set) var reviewItems: [SmartCareReviewItem] = []
     private(set) var performanceSnapshot: PerformanceSnapshot?
     var selectedPaths: Set<String> = []
@@ -79,6 +80,19 @@ final class SmartCareViewModel {
             .reduce(0) { $0 + $1.item.size }
     }
 
+    /// Σ(itemsProcessed)/Σ(totalItems) across whichever modules are
+    /// currently `.scanning` AND have reported a real total — `nil` (no bar,
+    /// step list only) until at least one of them has.
+    var aggregateProgress: ScanProgress? {
+        let inFlightModuleNames = moduleStatuses.filter { $0.value == .scanning }.map(\.key)
+        let reporting = inFlightModuleNames.compactMap { moduleProgress[$0] }.filter { $0.totalItems != nil }
+        guard !reporting.isEmpty else { return nil }
+        return ScanProgress(
+            itemsProcessed: reporting.reduce(0) { $0 + $1.itemsProcessed },
+            totalItems: reporting.reduce(0) { $0 + ($1.totalItems ?? 0) }
+        )
+    }
+
     func startScan() {
         guard phase != .scanning else { return } // re-entrancy guard: ignore a second tap mid-scan
         scanTask?.cancel()
@@ -103,17 +117,23 @@ final class SmartCareViewModel {
         phase = .scanning
         errorMessage = nil
         moduleStatuses = [Self.junkModuleName: .pending, Self.duplicatesModuleName: .pending]
+        moduleProgress = [:]
         performanceSnapshot = PerformanceSnapshot.capture()
 
         async let junkReport = orchestrator.run(
             onModuleStart: { [weak self] name in
                 Task { @MainActor in self?.moduleStatuses[name] = .scanning }
+            },
+            onItemProgress: { [weak self] name, progress in
+                Task { @MainActor in self?.moduleProgress[name] = progress }
             }
         )
 
         moduleStatuses[Self.duplicatesModuleName] = .scanning
         async let duplicateResult: DuplicateScanResult? = try? await DuplicateFinder(rootPath: rootPath)
-            .findExactDuplicateGroups()
+            .findExactDuplicateGroups(onProgress: { [weak self] progress in
+                Task { @MainActor in self?.moduleProgress[Self.duplicatesModuleName] = progress }
+            })
 
         let junkResult = await junkReport
         let duplicates = await duplicateResult
@@ -213,6 +233,7 @@ final class SmartCareViewModel {
     func startNewScan() {
         phase = .idle
         moduleStatuses = [:]
+        moduleProgress = [:]
         reviewItems = []
         selectedPaths = []
         performanceSnapshot = nil
