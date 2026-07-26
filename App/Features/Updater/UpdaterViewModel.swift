@@ -13,6 +13,7 @@ final class UpdaterViewModel {
     }
 
     private(set) var rows: [AppUpdateRow] = []
+    let progressTracker = ScanProgressTracker()
     private let enumerator: InstalledAppsEnumerator
 
     init(enumerator: InstalledAppsEnumerator = InstalledAppsEnumerator()) {
@@ -33,8 +34,10 @@ final class UpdaterViewModel {
     }
 
     func checkAll() async {
+        progressTracker.start()
         for index in rows.indices {
             await checkSingle(at: index)
+            progressTracker.record(ScanProgress(itemsProcessed: index + 1, totalItems: rows.count, currentPath: rows[index].app.name))
         }
     }
 

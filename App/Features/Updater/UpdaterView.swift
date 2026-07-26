@@ -50,7 +50,14 @@ struct UpdaterView: View {
             VStack(alignment: .leading, spacing: Theme.Spacing.lg) {
                 header
                 if isCheckingAny {
-                    StepRowView(name: "Checking for updates…", meta: nil, state: .active)
+                    if let progress = viewModel.progressTracker.progress {
+                        ScanProgressPanel(progress: progress, showCurrentPath: true)
+                    } else {
+                        // Brief window between checkAll() starting and the
+                        // first row finishing, before progressTracker has
+                        // anything to report yet.
+                        StepRowView(name: "Checking for updates…", meta: nil, state: .active)
+                    }
                 } else if !viewModel.hasAnyUpdate {
                     Text("No Sparkle-based updates pending")
                         .font(.system(size: Theme.TextSize.sm))
