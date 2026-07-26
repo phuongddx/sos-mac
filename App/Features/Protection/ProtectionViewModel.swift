@@ -63,6 +63,7 @@ final class ProtectionViewModel {
             selectedPaths = [] // never auto-select a quarantine target — same invariant as Duplicates/SmartCare/CloudCleanup
             phase = .results
         } catch {
+            guard !Task.isCancelled else { return }
             errorMessage = error.localizedDescription
             phase = .idle
         }
