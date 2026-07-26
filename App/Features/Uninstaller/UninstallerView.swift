@@ -61,15 +61,35 @@ struct UninstallerView: View {
     }
 
     private var browsingHeader: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text("Uninstaller")
-                .font(.system(size: Theme.TextSize.xl, weight: .semibold))
-                .foregroundStyle(Theme.foreground)
-            Text("\(viewModel.apps.count) applications installed")
-                .font(.system(size: Theme.TextSize.sm))
-                .foregroundStyle(Theme.muted)
+        VStack(alignment: .leading, spacing: Theme.Spacing.sm) {
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Uninstaller")
+                        .font(.system(size: Theme.TextSize.xl, weight: .semibold))
+                        .foregroundStyle(Theme.foreground)
+                    Text(headerSubtitle)
+                        .font(.system(size: Theme.TextSize.sm))
+                        .foregroundStyle(Theme.muted)
+                }
+                Spacer()
+                if !viewModel.isInspectingAll {
+                    Button("Inspect All") { Task { await viewModel.inspectAll() } }
+                        .buttonStyle(.bordered)
+                        .disabled(viewModel.apps.isEmpty || viewModel.inspectingBundleID != nil)
+                }
+            }
+            if viewModel.isInspectingAll, let progress = viewModel.progressTracker.progress {
+                ScanProgressPanel(progress: progress, showCurrentPath: true)
+            }
         }
         .padding(Theme.Spacing.xxxl)
+    }
+
+    private var headerSubtitle: String {
+        guard viewModel.totalInspectedBytes > 0 else {
+            return "\(viewModel.apps.count) applications installed"
+        }
+        return "\(viewModel.apps.count) applications installed · \(ByteFormatter.string(fromByteCount: viewModel.totalInspectedBytes)) reclaimable if all removed"
     }
 
     private func appRow(_ row: UninstallerViewModel.AppRow) -> some View {
@@ -89,6 +109,13 @@ struct UninstallerView: View {
 
             Spacer(minLength: Theme.Spacing.md)
 
+            if let inspectedSize = row.inspectedSize {
+                Text(ByteFormatter.string(fromByteCount: inspectedSize))
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(Theme.muted)
+                    .monospacedDigit()
+            }
+
             if row.app.isAppStoreDistributed {
                 BadgeView(text: "App Store", style: .accent)
             }
@@ -100,7 +127,7 @@ struct UninstallerView: View {
                     Task { await viewModel.inspect(row) }
                 }
                 .buttonStyle(.bordered)
-                .disabled(viewModel.inspectingBundleID != nil)
+                .disabled(viewModel.inspectingBundleID != nil || viewModel.isInspectingAll)
             }
         }
         .padding(Theme.Spacing.md)

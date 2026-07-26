@@ -7,6 +7,7 @@ import CleanCore
 final class UninstallerViewModel {
     struct AppRow: Identifiable {
         let app: InstalledApp
+        var inspectedSize: Int64?
         var id: String { app.id }
     }
 
@@ -26,6 +27,8 @@ final class UninstallerViewModel {
     /// can't race a first scan and land a stale/mismatched associated-file
     /// list.
     private(set) var inspectingBundleID: String?
+    let progressTracker = ScanProgressTracker()
+    private(set) var isInspectingAll = false
 
     private let enumerator: InstalledAppsEnumerator
 
@@ -36,7 +39,11 @@ final class UninstallerViewModel {
     func loadApps() {
         apps = enumerator.enumerate()
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-            .map(AppRow.init)
+            .map { AppRow(app: $0) }
+    }
+
+    var totalInspectedBytes: Int64 {
+        apps.compactMap(\.inspectedSize).reduce(0, +)
     }
 
     func inspect(_ row: AppRow) async {
@@ -52,6 +59,30 @@ final class UninstallerViewModel {
             phase = .inspecting(bundleID: row.app.bundleIdentifier)
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Proactively runs the same per-app `AppUninstaller.scan()` the
+    /// existing per-row "Inspect" button already uses, for every installed
+    /// app in order, caching each app's total reclaimable size onto its row.
+    /// One app's scan failing (`try?` → `nil`) doesn't abort the rest — same
+    /// partial-failure handling every other batch operation in this codebase
+    /// already uses. Purely additive: doesn't select anything, doesn't
+    /// delete anything, and doesn't touch the existing per-row `inspect(_:)`
+    /// flow used to actually review and confirm an uninstall.
+    func inspectAll() async {
+        guard !isInspectingAll else { return }
+        isInspectingAll = true
+        progressTracker.start()
+        defer { isInspectingAll = false }
+
+        for index in apps.indices {
+            let row = apps[index]
+            let uninstaller = AppUninstaller(appBundlePath: row.app.bundlePath, bundleIdentifier: row.app.bundleIdentifier)
+            if let items = try? await uninstaller.scan() {
+                apps[index].inspectedSize = items.reduce(0) { $0 + $1.size }
+            }
+            progressTracker.record(ScanProgress(itemsProcessed: index + 1, totalItems: apps.count, currentPath: row.app.name))
         }
     }
 
