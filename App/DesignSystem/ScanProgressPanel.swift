@@ -11,10 +11,15 @@ import CleanCore
 ///   percentage (Space Lens, Cloud Cleanup, Duplicate Finder's listing phase).
 struct ScanProgressPanel: View {
     struct StepModel: Identifiable {
-        let id = UUID()
         let name: String
         let meta: String?
         let state: StepRowView.StepState
+        /// Derived from `name`, never a fresh `UUID()`: both consumers rebuild
+        /// their `[StepModel]` in a computed property on every progress tick,
+        /// so a random id would churn `ForEach` identity and tear down/rebuild
+        /// every row instead of updating it in place. Step names are stable
+        /// and unique within one panel's list.
+        var id: String { name }
     }
 
     // Every optional/defaultable property below needs an explicit `= nil`/

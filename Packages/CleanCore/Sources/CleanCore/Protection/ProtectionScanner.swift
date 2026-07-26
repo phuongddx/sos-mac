@@ -1,6 +1,13 @@
 import Foundation
 
 public struct ProtectionScanner: Sendable {
+    /// Report every N files rather than every single one — the App layer hops
+    /// each callback onto the MainActor in its own unstructured `Task`, so a
+    /// per-file callback means 10^4–10^5 Tasks for a real `~/Downloads` scan.
+    /// Matches the throttling `DiskTreeScanner.buildTree` already does, at a
+    /// finer interval because Protection walks far fewer files.
+    private static let progressInterval = 200
+
     private let locations: [ProtectionLocation]
     private let hashScanner: HashScanner
     private let yaraScanner: YaraScanner?
@@ -52,7 +59,11 @@ public struct ProtectionScanner: Sendable {
                 }
 
                 itemsProcessed += 1
-                onProgress?(ScanProgress(itemsProcessed: itemsProcessed, totalItems: totalItems, currentPath: item.path))
+                // The final item always reports even when it doesn't land on
+                // a throttle boundary, so the bar reliably reaches 100%.
+                if itemsProcessed % Self.progressInterval == 0 || itemsProcessed == totalItems {
+                    onProgress?(ScanProgress(itemsProcessed: itemsProcessed, totalItems: totalItems, currentPath: item.path))
+                }
             }
         }
 

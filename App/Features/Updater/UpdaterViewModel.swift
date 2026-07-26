@@ -13,6 +13,7 @@ final class UpdaterViewModel {
     }
 
     private(set) var rows: [AppUpdateRow] = []
+    private(set) var isCheckingAll = false
     let progressTracker = ScanProgressTracker()
     private let enumerator: InstalledAppsEnumerator
 
@@ -33,11 +34,23 @@ final class UpdaterViewModel {
             .map { AppUpdateRow(app: $0) }
     }
 
+    /// Reachable from three places (`.task`, the empty state's action, and
+    /// "Check Again"), so two overlapping runs would otherwise both call
+    /// `progressTracker.start()` and interleave their `record(_:)` calls,
+    /// making the progress bar jump backwards.
     func checkAll() async {
-        progressTracker.start()
+        guard !isCheckingAll else { return }
+        isCheckingAll = true
+        defer { isCheckingAll = false }
+
+        let generation = progressTracker.start()
         for index in rows.indices {
             await checkSingle(at: index)
-            progressTracker.record(ScanProgress(itemsProcessed: index + 1, totalItems: rows.count, currentPath: rows[index].app.name))
+            guard rows.indices.contains(index) else { continue }
+            progressTracker.record(
+                ScanProgress(itemsProcessed: index + 1, totalItems: rows.count, currentPath: rows[index].app.name),
+                generation: generation
+            )
         }
     }
 

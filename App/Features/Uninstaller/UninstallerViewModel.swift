@@ -31,12 +31,20 @@ final class UninstallerViewModel {
     private(set) var isInspectingAll = false
 
     private let enumerator: InstalledAppsEnumerator
+    private var inspectAllTask: Task<Void, Never>?
+    /// Bumped by every start/cancel so a superseded Inspect-All can't clear
+    /// `isInspectingAll` out from under the run that replaced it.
+    private var inspectAllGeneration = 0
 
     init(enumerator: InstalledAppsEnumerator = InstalledAppsEnumerator()) {
         self.enumerator = enumerator
     }
 
     func loadApps() {
+        // `.task` re-fires whenever the view reappears; rebuilding `apps`
+        // mid-Inspect-All would throw away every size already computed and
+        // desync the run from the list it's writing back into.
+        guard !isInspectingAll else { return }
         apps = enumerator.enumerate()
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
             .map { AppRow(app: $0) }
@@ -70,19 +78,56 @@ final class UninstallerViewModel {
     /// already uses. Purely additive: doesn't select anything, doesn't
     /// delete anything, and doesn't touch the existing per-row `inspect(_:)`
     /// flow used to actually review and confirm an uninstall.
-    func inspectAll() async {
-        guard !isInspectingAll else { return }
+    ///
+    /// Cancellation is checked between apps, not inside a single app's bundle
+    /// walk — `AppUninstaller.scan()` is left untouched, so one very large
+    /// app's walk still runs to completion before the loop can bail.
+    func startInspectAll() {
+        inspectAllTask?.cancel()
+        inspectAllGeneration += 1
+        let generation = inspectAllGeneration
         isInspectingAll = true
-        progressTracker.start()
-        defer { isInspectingAll = false }
+        inspectAllTask = Task { [weak self] in
+            await self?.inspectAll(generation: generation)
+        }
+    }
 
-        for index in apps.indices {
-            let row = apps[index]
+    func cancelInspectAll() {
+        inspectAllTask?.cancel()
+        inspectAllTask = nil
+        inspectAllGeneration += 1
+        isInspectingAll = false
+        progressTracker.reset()
+    }
+
+    private func inspectAll(generation: Int) async {
+        let progressGeneration = progressTracker.start()
+        // Only the newest run owns the flag: a superseded run resuming late
+        // must not report "finished" for the one that replaced it.
+        defer { if generation == inspectAllGeneration { isInspectingAll = false } }
+
+        // Snapshot the identifiers up front so the denominator is stable, then
+        // re-resolve each row by bundle identifier before writing back — a
+        // mid-loop mutation of `apps` can't then land a size on the wrong row
+        // or index out of bounds.
+        let bundleIdentifiers = apps.map(\.app.bundleIdentifier)
+
+        for (index, bundleIdentifier) in bundleIdentifiers.enumerated() {
+            guard !Task.isCancelled else { return }
+            guard let currentIndex = apps.firstIndex(where: { $0.app.bundleIdentifier == bundleIdentifier }) else { continue }
+            let row = apps[currentIndex]
+
             let uninstaller = AppUninstaller(appBundlePath: row.app.bundlePath, bundleIdentifier: row.app.bundleIdentifier)
-            if let items = try? await uninstaller.scan() {
-                apps[index].inspectedSize = items.reduce(0) { $0 + $1.size }
+            let items = try? await uninstaller.scan()
+            guard !Task.isCancelled else { return }
+
+            if let items, let writeIndex = apps.firstIndex(where: { $0.app.bundleIdentifier == bundleIdentifier }) {
+                apps[writeIndex].inspectedSize = items.reduce(0) { $0 + $1.size }
             }
-            progressTracker.record(ScanProgress(itemsProcessed: index + 1, totalItems: apps.count, currentPath: row.app.name))
+            progressTracker.record(
+                ScanProgress(itemsProcessed: index + 1, totalItems: bundleIdentifiers.count, currentPath: row.app.name),
+                generation: progressGeneration
+            )
         }
     }
 

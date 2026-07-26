@@ -61,11 +61,11 @@ final class JunkCleanerViewModel {
     private func performScan() async {
         phase = .scanning
         errorMessage = nil
-        progressTracker.start()
+        let generation = progressTracker.start()
         do {
             let ignoredPaths = try fetchIgnoredPaths()
             let scanned = try await scanner.scan(onProgress: { [weak self] progress in
-                Task { @MainActor in self?.progressTracker.record(progress) }
+                Task { @MainActor in self?.progressTracker.record(progress, generation: generation) }
             })
             guard !Task.isCancelled else { return }
             items = scanned.filter { !ignoredPaths.contains($0.path) }

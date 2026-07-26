@@ -80,16 +80,36 @@ final class SmartCareViewModel {
             .reduce(0) { $0 + $1.item.size }
     }
 
-    /// Σ(itemsProcessed)/Σ(totalItems) across whichever modules are
-    /// currently `.scanning` AND have reported a real total — `nil` (no bar,
-    /// step list only) until at least one of them has.
+    /// The unweighted mean of each in-flight module's OWN completion
+    /// fraction, rendered against a synthetic denominator.
+    ///
+    /// Summing raw numerators/denominators across modules would be
+    /// dimensionally meaningless here: Junk reports in RULE units (3 rules,
+    /// done in seconds) while Duplicates reports in FILE units (tens of
+    /// thousands, taking minutes), and both stay `.scanning` until *both*
+    /// legs resolve. Σ/Σ therefore reads ~100% while Duplicates hasn't
+    /// started, then collapses the instant it reports its first huge-
+    /// denominator tick. Averaging fractions keeps the bar monotonic-ish and
+    /// dimensionless.
+    ///
+    /// `nil` (no bar, step list only) until EVERY in-flight module has
+    /// reported at least once — a fraction covering only some of them would
+    /// be built on incomplete information.
     var aggregateProgress: ScanProgress? {
         let inFlightModuleNames = moduleStatuses.filter { $0.value == .scanning }.map(\.key)
-        let reporting = inFlightModuleNames.compactMap { moduleProgress[$0] }.filter { $0.totalItems != nil }
-        guard !reporting.isEmpty else { return nil }
+        guard !inFlightModuleNames.isEmpty else { return nil }
+
+        let fractions = inFlightModuleNames.compactMap { name -> Double? in
+            guard let progress = moduleProgress[name], let total = progress.totalItems, total > 0 else { return nil }
+            return min(Double(progress.itemsProcessed) / Double(total), 1)
+        }
+        guard fractions.count == inFlightModuleNames.count else { return nil }
+
+        let averageFraction = fractions.reduce(0, +) / Double(fractions.count)
+        let scaledTotal = 1000
         return ScanProgress(
-            itemsProcessed: reporting.reduce(0) { $0 + $1.itemsProcessed },
-            totalItems: reporting.reduce(0) { $0 + ($1.totalItems ?? 0) }
+            itemsProcessed: Int((averageFraction * Double(scaledTotal)).rounded()),
+            totalItems: scaledTotal
         )
     }
 

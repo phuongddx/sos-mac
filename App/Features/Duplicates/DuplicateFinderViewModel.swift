@@ -59,7 +59,7 @@ final class DuplicateFinderViewModel {
         phase = .scanning
         errorMessage = nil
         skippedCount = 0
-        progressTracker.start()
+        let generation = progressTracker.start()
 
         let finder = DuplicateFinder(rootPath: rootPath)
         let result: DuplicateScanResult
@@ -67,11 +67,11 @@ final class DuplicateFinderViewModel {
             switch mode {
             case .exact:
                 result = try await finder.findExactDuplicateGroups(onProgress: { [weak self] progress in
-                    Task { @MainActor in self?.progressTracker.record(progress) }
+                    Task { @MainActor in self?.progressTracker.record(progress, generation: generation) }
                 })
             case .similarImages:
                 result = try await finder.findSimilarImageGroups(onProgress: { [weak self] progress in
-                    Task { @MainActor in self?.progressTracker.record(progress) }
+                    Task { @MainActor in self?.progressTracker.record(progress, generation: generation) }
                 })
             }
         } catch {

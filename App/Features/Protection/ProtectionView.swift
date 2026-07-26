@@ -44,15 +44,7 @@ private struct ProtectionContentView: View {
                 quarantineSection
 
             case .scanning:
-                ScanProgressPanel(
-                    progress: viewModel.progressTracker.progress,
-                    ticker: viewModel.progressTracker.progress.map { "\($0.itemsProcessed.formatted()) files scanned" },
-                    etaText: viewModel.progressTracker.estimatedTimeRemainingText,
-                    showCurrentPath: true,
-                    countOnlyLabel: { "Scanned \($0.formatted()) files…" }
-                )
-                .frame(maxWidth: 480)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                scanningContent
 
             case .results, .quarantining:
                 resultsList
@@ -88,6 +80,36 @@ private struct ProtectionContentView: View {
         .background(Theme.background)
         .auroraBloom()
         .onDisappear { viewModel.cancelScan() }
+    }
+
+    /// `ProtectionScanner` pre-counts every file across all six allowlist
+    /// locations before the first `onProgress` fires, so the panel has nothing
+    /// to draw for that whole window — show the same counting fallback Space
+    /// Lens uses rather than an empty screen, and keep Cancel reachable
+    /// throughout (the pre-count honors cancellation too).
+    private var scanningContent: some View {
+        VStack(spacing: Theme.Spacing.lg) {
+            ProgressView()
+                .controlSize(.large)
+                .tint(Theme.accent)
+            if let progress = viewModel.progressTracker.progress {
+                ScanProgressPanel(
+                    progress: progress,
+                    ticker: "\(progress.itemsProcessed.formatted()) files scanned",
+                    etaText: viewModel.progressTracker.estimatedTimeRemainingText,
+                    showCurrentPath: true,
+                    countOnlyLabel: { "Scanned \($0.formatted()) files…" }
+                )
+                .frame(maxWidth: 480)
+            } else {
+                Text("Counting files…")
+                    .font(.system(size: Theme.TextSize.sm))
+                    .foregroundStyle(Theme.muted)
+            }
+            Button("Cancel") { viewModel.cancelScan() }
+                .buttonStyle(.bordered)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var disclaimerBanner: some View {

@@ -38,6 +38,12 @@ public struct DuplicateFinder: Scanner {
         "jpg", "jpeg", "png", "heic", "tiff", "bmp", "gif", "webp"
     ]
 
+    /// Report every N files rather than every single one — the App layer hops
+    /// each callback onto the MainActor in its own unstructured `Task`, and a
+    /// full-home-directory duplicate scan hashes tens of thousands of files.
+    /// Same reasoning as `DiskTreeScanner.buildTree`'s own throttle.
+    private static let progressInterval = 200
+
     public let rootPath: String
 
     public init(rootPath: String) {
@@ -72,7 +78,11 @@ public struct DuplicateFinder: Scanner {
                 }
 
                 itemsProcessed += 1
-                onProgress?(ScanProgress(itemsProcessed: itemsProcessed, totalItems: totalToHash, currentPath: item.path))
+                // The final item always reports even when it doesn't land on
+                // a throttle boundary, so the bar reliably reaches 100%.
+                if itemsProcessed % Self.progressInterval == 0 || itemsProcessed == totalToHash {
+                    onProgress?(ScanProgress(itemsProcessed: itemsProcessed, totalItems: totalToHash, currentPath: item.path))
+                }
             }
         }
 
@@ -101,7 +111,10 @@ public struct DuplicateFinder: Scanner {
             } else {
                 skippedCount += 1
             }
-            onProgress?(ScanProgress(itemsProcessed: index + 1, totalItems: imageItems.count, currentPath: item.path))
+            let itemsProcessed = index + 1
+            if itemsProcessed % Self.progressInterval == 0 || itemsProcessed == imageItems.count {
+                onProgress?(ScanProgress(itemsProcessed: itemsProcessed, totalItems: imageItems.count, currentPath: item.path))
+            }
         }
 
         try Task.checkCancellation()

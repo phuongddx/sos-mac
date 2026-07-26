@@ -287,11 +287,11 @@ final class SpaceLensViewModel {
     private func performScan() async {
         phase = .scanning
         errorMessage = nil
-        progressTracker.start()
+        let generation = progressTracker.start()
 
         let scanner = DiskTreeScanner(rootPath: rootPath)
         let result = await scanner.buildTree(onProgress: { [weak self] progress in
-            Task { @MainActor in self?.progressTracker.record(progress) }
+            Task { @MainActor in self?.progressTracker.record(progress, generation: generation) }
         })
         guard !Task.isCancelled else { return }
         guard !result.tree.nodes.isEmpty else {

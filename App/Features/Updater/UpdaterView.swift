@@ -89,6 +89,7 @@ struct UpdaterView: View {
             }
             .buttonStyle(.bordered)
             .tint(Theme.accent)
+            .disabled(viewModel.isCheckingAll)
         }
     }
 

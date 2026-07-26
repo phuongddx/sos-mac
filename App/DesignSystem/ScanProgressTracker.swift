@@ -4,14 +4,22 @@ import CleanCore
 
 /// Presentation-layer only — CleanCore has no business estimating wall-clock
 /// ETAs. Each feature ViewModel owns one instance: call `start()` when a scan
-/// begins and `record(_:)` from inside the engine's `onProgress` closure,
-/// hopped to `@MainActor` first — the same pattern `SpaceLensViewModel`
-/// already used for its own ad hoc progress callback.
+/// begins and `record(_:generation:)` from inside the engine's `onProgress`
+/// closure, hopped to `@MainActor` first — the same pattern
+/// `SpaceLensViewModel` already used for its own ad hoc progress callback.
 @MainActor
 @Observable
 final class ScanProgressTracker {
     private(set) var progress: ScanProgress?
     private var startedAt: Date?
+    /// Bumped by every `start()`. The MainActor-hop `Task`s that carry engine
+    /// progress into this tracker are unstructured and therefore *not*
+    /// cancelled along with the scan's own `Task` — so after a
+    /// cancel-then-restart, hop-Tasks enqueued by the old scan can still land
+    /// here and clobber the new scan's freshly reset state. Every call site
+    /// captures the generation `start()` returned and passes it back to
+    /// `record(_:generation:)`, which drops anything stale.
+    private var generation = 0
     // Injectable for deterministic testing, matching the same pattern
     // `JunkScanner`'s injectable `now` closure already uses in CleanCore —
     // there's no test target wired to this file today, but this keeps the
@@ -22,12 +30,17 @@ final class ScanProgressTracker {
         self.now = now
     }
 
-    func start() {
+    /// Returns the generation token this scan must tag its progress with.
+    @discardableResult
+    func start() -> Int {
+        generation += 1
         startedAt = now()
         progress = nil
+        return generation
     }
 
-    func record(_ progress: ScanProgress) {
+    func record(_ progress: ScanProgress, generation: Int) {
+        guard generation == self.generation else { return }
         self.progress = progress
     }
 

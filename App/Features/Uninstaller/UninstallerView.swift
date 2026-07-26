@@ -72,8 +72,11 @@ struct UninstallerView: View {
                         .foregroundStyle(Theme.muted)
                 }
                 Spacer()
-                if !viewModel.isInspectingAll {
-                    Button("Inspect All") { Task { await viewModel.inspectAll() } }
+                if viewModel.isInspectingAll {
+                    Button("Cancel") { viewModel.cancelInspectAll() }
+                        .buttonStyle(.bordered)
+                } else {
+                    Button("Inspect All") { viewModel.startInspectAll() }
                         .buttonStyle(.bordered)
                         .disabled(viewModel.apps.isEmpty || viewModel.inspectingBundleID != nil)
                 }
