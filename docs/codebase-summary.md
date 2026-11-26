@@ -334,7 +334,7 @@ public static func layout(
 ## Build Configuration
 
 **project.yml** (XcodeGen source of truth):
-- Targets: SOSMac (main), MenuBarHelper (embedded app)
+- Targets: SOSMac (main), MenuBarHelper (embedded app), SOSMacTests (unit tests), SOSMacUITests (UI smoke tests)
 - Packages: CleanCore, TreemapKit
 - Deployment target: macOS 14.0+
 - Bundle ID prefix: com.nextlabs
@@ -348,6 +348,12 @@ xcodegen generate              # Regenerate from project.yml
 xcodebuild build -scheme SOSMac
 xcodebuild test -scheme CleanCore
 ```
+
+## UI Test Harness (Debug only)
+
+**Hooks and fixtures** (`App/Support/UITestHooks.swift`, `UITestFixtures.swift`, both `#if DEBUG`). `UITestHooks.current` reads `SOSMAC_UITEST_*` launch variables once: `SCREEN` (prototype key such as `junk`), `STATE`, `APPEARANCE` (`light`/`dark`), `FIXTURES` (`1`), `WINDOW_SIZE` (`1200x760`, the outer window size in points, forced on the window rather than via `defaultSize`), `REDUCE_TRANSPARENCY` (`1`, exposed as `EnvironmentValues.uiTestReduceTransparency` because SwiftUI's own value is read-only) and `OUTPUT_DIR`. `RootView` uses them to pick the first screen and apply appearance and size. A launch with no variables behaves as before. `UITestFixtures` holds fictional sample data (4 junk rules, 6 exact and 2 similar duplicate sets, 10 apps, 8 updater rows, a small Space Lens tree, findings and quarantine records, system metrics) under `/Users/sample`; it never reads the real file system. Each screen supports a state by implementing `loadFixture(_ state: LifecycleState)` under `#if DEBUG` on its view model. Unit tests live in `SOSMacTests/` (Swift Testing, hosted by the app); `SOSMacUITests/RedesignSmokeTests.swift` clicks through the sidebar and captures only the window element, and should run only with the owner's go-ahead because XCUITest activates the app.
+
+**Snapshot script** (`Scripts/ui-snapshots.sh`, `Scripts/window-id.swift`). `Scripts/ui-snapshots.sh -p <name> -s <screen>=<state>[,…]` builds Debug into a throwaway derived-data folder, launches the build with `open -n -g --env SOSMAC_UITEST_…` so it stays in the background, finds the window by pid with `window-id.swift` (`CGWindowListCopyWindowInfo`, checked against bundle id `com.nextlabs.sosmac`), captures only that window with `screencapture -l<id> -o -x`, then kills the instance. For each appearance (`-a`, default `dark,light`) it writes `artifacts/ui-snapshots/<name>/<appearance>-<screen>-<state>.png` (display-native pixels, so 2400x1520 for 1200x760 points on a Retina display; `-1` downsizes to points), checks the images are not blank, and builds `contact-sheet.png` with `magick montage`. It stops if the app becomes frontmost. The process that runs it needs Screen Recording permission. `artifacts/` is git-ignored.
 
 ## Lines of Code Summary
 
