@@ -129,7 +129,7 @@ struct ComponentGalleryView: View {
                 .padding(.vertical, Theme.Spacing.s2)
                 .padding(.horizontal, Theme.Spacing.s3)
                 .background(Theme.Derived.rowSelected, in: RoundedRectangle(cornerRadius: Theme.Radius.sm))
-            Text("Caution label: the kind's colour in dark, textPrimary in light (X4).")
+            Text("Caution label: the kind's colour in both appearances (X4 withdrawn).")
                 .font(Theme.Font.subheadline)
                 .foregroundStyle(Theme.Color.textSecondary)
         }
