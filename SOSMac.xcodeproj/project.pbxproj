@@ -36,6 +36,7 @@
 		6ABC1C18339FFC501B35A3AF /* UpdaterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DAA0AD06134B381646E567 /* UpdaterView.swift */; };
 		6C83EF8ADCC68D145197246A /* PrivilegedHelperClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A34B85C63A2C70EA9CC995A /* PrivilegedHelperClient.swift */; };
 		6DE0567BF263811BF9B5FAC0 /* SpaceLensViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FEC6E072C20E77D60A0C25 /* SpaceLensViewModel.swift */; };
+		6F39304CD1EE0F2EEE12E060 /* UITestHooksTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFA193C1EA5BD96B19DE3B6D /* UITestHooksTests.swift */; };
 		728C27220348DC8271916BB8 /* CloudCleanupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3378D6B53CDCB0474385C0B8 /* CloudCleanupView.swift */; };
 		74C7BE36C015752F317B82C5 /* UpdaterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B273DE218A656524EA73BAF /* UpdaterViewModel.swift */; };
 		77854C6493918A65D3F8873A /* CleanCore in Frameworks */ = {isa = PBXBuildFile; productRef = 89061E0DFCA37E66808CEF57 /* CleanCore */; };
@@ -55,6 +56,8 @@
 		BD71724FAF539B30C395699C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25382720F5D7E946EA383D8 /* EmptyStateView.swift */; };
 		BFB9A6BD1B872593B8AE2E6E /* DuplicateFinderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */; };
 		C525BF54959EB6033641B5C1 /* MenuBarMetricsMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E854DD88191E34B25816AF4E /* MenuBarMetricsMonitor.swift */; };
+		C5E85C60ADA4E920FB90650A /* UITestHooks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C400BD0033715B73C6C5FE06 /* UITestHooks.swift */; };
+		D269A378D1225B726E086FE4 /* UITestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE83684E6FDF6AB08F134234 /* UITestFixtures.swift */; };
 		D43BD385637D22053A3464D6 /* SOSMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B658F774CB266713577506C2 /* SOSMacApp.swift */; };
 		D4761BBD0776A6D89B63A73F /* SmartCareViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E244407C254EC7244F5679A6 /* SmartCareViewModel.swift */; };
 		D8C735AEECD1B5CB23CBA24B /* VolumeStorageInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60925814F21D41B971FD4766 /* VolumeStorageInfo.swift */; };
@@ -137,8 +140,11 @@
 		B8E6150D819C892387C01600 /* StickyFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyFooterView.swift; sourceTree = "<group>"; };
 		BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraBloomModifier.swift; sourceTree = "<group>"; };
 		BC67E979C262C1B384952044 /* ScanProgressTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanProgressTracker.swift; sourceTree = "<group>"; };
+		BE83684E6FDF6AB08F134234 /* UITestFixtures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestFixtures.swift; sourceTree = "<group>"; };
+		BFA193C1EA5BD96B19DE3B6D /* UITestHooksTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestHooksTests.swift; sourceTree = "<group>"; };
 		C12B3FBB6D8691969DF7F3C4 /* UninstallerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallerViewModel.swift; sourceTree = "<group>"; };
 		C25382720F5D7E946EA383D8 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
+		C400BD0033715B73C6C5FE06 /* UITestHooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestHooks.swift; sourceTree = "<group>"; };
 		C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C99BA9DCEA375A8537944594 /* UninstallerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallerView.swift; sourceTree = "<group>"; };
 		D60AE4D0BE44E292519DD599 /* PerformanceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceViewModel.swift; sourceTree = "<group>"; };
@@ -259,6 +265,8 @@
 			children = (
 				565503C45E57F760D1ABCE61 /* IgnoredItem.swift */,
 				5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */,
+				BE83684E6FDF6AB08F134234 /* UITestFixtures.swift */,
+				C400BD0033715B73C6C5FE06 /* UITestHooks.swift */,
 				60925814F21D41B971FD4766 /* VolumeStorageInfo.swift */,
 			);
 			path = Support;
@@ -277,6 +285,7 @@
 			isa = PBXGroup;
 			children = (
 				00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */,
+				BFA193C1EA5BD96B19DE3B6D /* UITestHooksTests.swift */,
 			);
 			path = SOSMacTests;
 			sourceTree = "<group>";
@@ -666,6 +675,8 @@
 				A292BD79FDE867EC711A8E5B /* SummaryCardView.swift in Sources */,
 				78879E5A7BE2B8C2721395E8 /* Theme.swift in Sources */,
 				920A4CDCE15A91C7105AF525 /* TreemapCanvasView.swift in Sources */,
+				D269A378D1225B726E086FE4 /* UITestFixtures.swift in Sources */,
+				C5E85C60ADA4E920FB90650A /* UITestHooks.swift in Sources */,
 				0F7066083A4CA069EBEFE499 /* UninstallerView.swift in Sources */,
 				FB8C8083C6100E2742DDB309 /* UninstallerViewModel.swift in Sources */,
 				6ABC1C18339FFC501B35A3AF /* UpdaterView.swift in Sources */,
@@ -679,6 +690,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */,
+				6F39304CD1EE0F2EEE12E060 /* UITestHooksTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
