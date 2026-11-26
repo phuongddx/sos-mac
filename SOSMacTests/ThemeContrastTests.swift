@@ -68,6 +68,8 @@ struct ThemeContrastTests {
         ("bgBase", C.bgBase, "#F4F6FF", "#0A0E1A"),
         ("card", C.card, "#FFFFFF", "#111829"),
         ("textPrimary", C.textPrimary, "#141A33", "#EEF2FF"),
+        ("warning", C.warning, "#A14A06", "#F59E0B"),
+        ("treemapText", C.treemapText, "#141A33", "#F4F2FF"),
     ])
     func adaptiveResolvesPerAppearance(name: String, token: SwiftUI.Color, lightHex: String, darkHex: String) {
         func channels(_ hex: String) -> [Double] {

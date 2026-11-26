@@ -5,9 +5,11 @@ import AppKit
 ///
 /// Source of truth: `docs/superpowers/specs/2026-11-26-ui-migration-palette-c-design.md`
 /// §2.3–2.8 and Appendix C (dark values from `docs/redesign/prototype/tokens.css`
-/// `data-palette="c"`; light values marked `[D]` in the spec are derived and still
-/// await the Designer's confirmation, OD-1). Structure follows the Designer's
-/// `docs/redesign/prototype/tokens/Theme.swift`.
+/// `data-palette="c"`; light values confirmed by the Designer's final Palette C
+/// light block, 2026-11-26 — OD-1 closed: `warning` light `#A14A06`,
+/// `treemapText` light `#141A33`, light elevation ink `#141A33`; every other
+/// light value matched the table). Structure follows the Designer's
+/// `tokens/Theme.swift`.
 ///
 /// Inside this type the names `Color`, `Gradient` and `Font` refer to the nested token
 /// namespaces, so SwiftUI's own types are always written `SwiftUI.Color` etc.
@@ -53,8 +55,8 @@ enum Theme {
         static let textTertiary = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#7C84A3"), dark: SwiftUI.Color(hex: "#6E7799"))
         /// --success · dark #34D399 · light #047857
         static let success = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#047857"), dark: SwiftUI.Color(hex: "#34D399"))
-        /// --warning · dark #F59E0B · light #B45309
-        static let warning = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#B45309"), dark: SwiftUI.Color(hex: "#F59E0B"))
+        /// --warning · dark #F59E0B · light #A14A06 (Designer final light; 5.02–6.00:1 on every surface)
+        static let warning = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#A14A06"), dark: SwiftUI.Color(hex: "#F59E0B"))
         /// --danger · dark #F87171 · light #B91C1C
         static let danger = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#B91C1C"), dark: SwiftUI.Color(hex: "#F87171"))
         /// --danger-fill · dark #B91C1C · light #B91C1C
@@ -75,8 +77,8 @@ enum Theme {
         static let treemap7 = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#E9E5FF"), dark: SwiftUI.Color(hex: "#353A6E"))
         /// --tm-8 · dark #2D2A55 · light #ECE7FA
         static let treemap8 = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#ECE7FA"), dark: SwiftUI.Color(hex: "#2D2A55"))
-        /// --tm-text · dark #F4F2FF · light #1A1333
-        static let treemapText = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#1A1333"), dark: SwiftUI.Color(hex: "#F4F2FF"))
+        /// --tm-text · dark #F4F2FF · light #141A33 (Designer final light)
+        static let treemapText = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#141A33"), dark: SwiftUI.Color(hex: "#F4F2FF"))
     }
 
     // MARK: - Derived tokens (spec §2.4)
@@ -219,7 +221,7 @@ enum Theme {
     }
 
     /// Two-layer soft elevation — apply via the `.elevation(_:)` view modifier, not by
-    /// reading these directly. Dark layers are black-based; light layers are `#1A1333`-based (spec §2.4).
+    /// reading these directly. Dark layers are black-based; light layers are `#141A33`-based (spec §2.4).
     enum Elevation {
         enum Level { case raised, float }
 
@@ -229,7 +231,7 @@ enum Theme {
             let y: CGFloat
         }
 
-        private static let lightInk = SwiftUI.Color(hex: "#1A1333")
+        private static let lightInk = SwiftUI.Color(hex: "#141A33")
 
         static func layers(for level: Level, isDark: Bool) -> (near: Layer, far: Layer) {
             switch (level, isDark) {
