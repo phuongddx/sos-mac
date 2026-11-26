@@ -63,7 +63,7 @@ dependency; at the OD-5 minimum (960×600) it simply scrolls.
 - **Not in the static matrix:** a real helper run (Free up RAM / Flush DNS on a live
   helper), the System Settings panel the approval banner points to, and the real
   MenuBarHelper launch. Those stay on the manual-test list; the state transitions are
-  covered by `SOSMacTests/PerformanceViewModelTests` (19 tests, injected seams only).
+  covered by `SOSMacTests/PerformanceViewModelTests` (20 tests, injected seams only).
 
 ## PR-description skeleton
 
@@ -93,7 +93,7 @@ OD-18 → Login Items deep link via SMAppService · OD-17 → background snapsho
 xcodegen generate ·
 xcodebuild build -scheme SOSMac -configuration Debug (exit 0, 0 errors) ·
 cd Packages/CleanCore && swift test (115 tests / 28 suites) ·
-xcodebuild test -only-testing:SOSMacTests (195 tests / 25 suites, 19 new) ·
+xcodebuild test -only-testing:SOSMacTests (196 tests / 25 suites, 20 new) ·
 Scripts/ui-snapshots.sh -p pr-12 -w 1200x1040 (12 captures at 2400x2080; every committed
 state sheet pairs dark + light into one 4800x2080 image)
 ```
