@@ -285,7 +285,7 @@ private struct DuplicateFinderScreen: View {
         let selected = extras.filter { viewModel.selectedPaths.contains($0.path) }
         return ReviewFrameView.ListHead(
             title: set?.title ?? "Sets",
-            sub: set.map(Self.listSub),
+            sub: set.map { listSub($0) },
             isSelectAllEnabled: selected.count < extras.count,
             isDeselectAllEnabled: !selected.isEmpty,
             selectAll: { viewModel.selectAllInCurrentSet() },
@@ -293,14 +293,13 @@ private struct DuplicateFinderScreen: View {
             banner: isSimilar ? AnyView(similarBanner) : nil)
     }
 
-    private func setSub(_ set: DuplicateFinderViewModel.DuplicateSet) -> String {
-        Self.listSub(set)
-    }
-
     /// "3 copies · 612.3 MB each" — the prototype's set sub. Similar images differ in size, so
     /// no per-copy size is quoted for them.
-    private static func listSub(_ set: DuplicateFinderViewModel.DuplicateSet) -> String {
+    private func listSub(_ set: DuplicateFinderViewModel.DuplicateSet) -> String {
         let count = set.items.count
+        if isSimilar {
+            return "\(count) \(count == 1 ? "image" : "images")"
+        }
         return "\(count) \(count == 1 ? "copy" : "copies") · \(ByteFormatter.string(fromByteCount: set.copySize)) each"
     }
 
@@ -449,7 +448,10 @@ private struct DuplicateFinderScreen: View {
         case .results, .review:
             DuplicateFrame.SelectionSummary(
                 count: viewModel.selectedItems.count,
-                sizeText: ConfirmItemList.sizeText(for: viewModel.totalSelectedBytes))
+                // The shared formatter spells zero as the words "Zero KB"; the dock shows a numeral.
+                sizeText: viewModel.totalSelectedBytes == 0
+                    ? "0 KB"
+                    : ConfirmItemList.sizeText(for: viewModel.totalSelectedBytes))
         case .idle, .scanning, .cleaning, .done, .failed:
             nil
         }
