@@ -216,6 +216,12 @@ final class SpaceLensViewModel {
     }
 
     var selectedItemEligibility: SpaceLensCleanupEligibility? {
+        #if DEBUG
+        // Fixture data never touches the real file system — the policy's writable
+        // check would read it, so fixture selections present as eligible (the
+        // prototype's interactive results state).
+        if showsFixtureVolumesOnly { return .eligible }
+        #endif
         guard let selectedItem, let item = scanItem(for: selectedItem) else { return nil }
         return cleanupPolicy.eligibility(for: item, scanRootPath: rootPath)
     }
@@ -682,7 +688,8 @@ extension SpaceLensViewModel {
             applyFixtureTree()
             // The prototype's results state renders with one selected cell, so the
             // inspector detail and the selection ring are visible in the snapshot.
-            selectFixtureItem(named: "Old Installers")
+            // A root-level cell — "Old Installers" lives one level down.
+            selectFixtureItem(named: "Downloads")
 
         case .empty:
             applyFixtureTree(emptyFolder: true)
@@ -704,8 +711,9 @@ extension SpaceLensViewModel {
 
         case .done:
             applyFixtureTree()
-            let moved = Array(selectedItemsByPath.values)
+            // As if the cart had just been confirmed: real cart figures on the card.
             addFixtureCart()
+            let moved = Array(selectedItemsByPath.values)
             selectedItemsByPath = [:]
             phase = .done(movedBytes: moved.reduce(0) { $0 + $1.size },
                           movedCount: moved.count,
@@ -727,13 +735,21 @@ extension SpaceLensViewModel {
         var tree = ArenaTree()
         var items: [ScanItem] = []
         let rootName = (UITestFixtures.home as NSString).lastPathComponent
-        let rootIndex = tree.addNode(pathComponent: rootName, size: 0, kind: .directory,
+        // The root's total: its children's declared bytes (the fallback inspector and
+        // the breadcrumb bar quote it; the prototype's own "~" total).
+        let rootBytes = UITestFixtures.spaceLensRoot.children.reduce(Int64(0)) { $0 + $1.bytes }
+        let rootIndex = tree.addNode(pathComponent: rootName, size: rootBytes, kind: .directory,
                                      parentIndex: ArenaTree.Node.noIndex)
 
         func add(_ node: UITestFixtures.LensNode, parent: Int32) {
             let kind: ScanItemKind = node.isDirectory ? .directory : .file
+            // The prototype's own numbers, verbatim: directories carry their declared
+            // total (the prototype's LENS sizes do not sum exactly either — it is
+            // fictional snapshot data). No `recomputeDirectorySizes` here: the real
+            // scanner's walk covers that path, and several fixture leaves (Library,
+            // Documents…) have no children to sum.
             let index = tree.addNode(pathComponent: node.name,
-                                     size: node.isDirectory ? 0 : node.bytes,
+                                     size: node.bytes,
                                      kind: kind,
                                      parentIndex: parent)
             items.append(ScanItem(path: node.path, size: node.bytes, kind: kind))
@@ -747,7 +763,6 @@ extension SpaceLensViewModel {
                 add(child, parent: rootIndex)
             }
         }
-        tree.recomputeDirectorySizes()
 
         self.tree = tree
         flatItems = items
