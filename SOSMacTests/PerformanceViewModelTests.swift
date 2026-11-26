@@ -26,7 +26,7 @@ struct PerformanceViewModelTests {
     }
 
     private nonisolated static let segments = Segments(
-        wired: 30, active: 30, compressed: 30, inactive: 5, free: 5, total: 200)
+        wired: 30, active: 30, compressed: 30, inactive: 5, free: 5, total: 200, inUseBytes: 90)
 
     private nonisolated static func sample(cpu: Double? = 23,
                                            memory: Segments? = segments) -> VM.Sample {
@@ -68,6 +68,7 @@ struct PerformanceViewModelTests {
 
     private func makeViewModel(
         sample: @escaping @MainActor () -> VM.Sample = { Self.sample() },
+        resetCPUBaseline: @escaping @MainActor () -> Void = {},
         purgeRAM: @escaping @MainActor () async throws -> Void = {},
         flushDNS: @escaping @MainActor () async throws -> Void = {},
         registerHelper: @escaping @MainActor () throws -> Void = {},
@@ -78,6 +79,7 @@ struct PerformanceViewModelTests {
     ) -> VM {
         VM(seams: VM.Seams(
             sample: sample,
+            resetCPUBaseline: resetCPUBaseline,
             purgeRAM: purgeRAM,
             flushDNS: flushDNS,
             registerHelper: registerHelper,
@@ -133,18 +135,80 @@ struct PerformanceViewModelTests {
         #expect(viewModel.currentSample?.memory != nil)
     }
 
-    // MARK: - Memory definitions (OD-11 / D2, plan risk)
+    @Test("A polling start resets the CPU baseline: the first read carries no percentage")
+    func pollingStartResetsCPUBaseline() async {
+        let probe = Probe()
+        let readings: [VM.Sample] = [Self.sample(cpu: nil), Self.sample(cpu: 42)]
+        var index = 0
+        let viewModel = makeViewModel(sample: {
+            probe.record("sample")
+            defer { index += 1 }
+            return index < readings.count ? readings[index] : readings[readings.count - 1]
+        }, resetCPUBaseline: { probe.record("reset") })
 
-    @Test("in use is wired + active + compressed, not total − free")
-    func inUseFollowsOD11() {
-        // wired 30 + active 30 + compressed 30 = 90; the legacy "total − free" would read 195.
-        #expect(Self.segments.inUseBytes == 90)
+        let task = Task { await viewModel.runPollingLoop() }
+        let sampled = await wait(until: { probe.count("sample") == 1 })
+        // The loop sleeps pollInterval (2 s) between reads, so exactly one read has run;
+        // cancel before the second to keep the observation deterministic.
+        task.cancel()
+        await task.value
+
+        #expect(sampled)
+        #expect(probe.calls.first == "reset")   // the baseline drops before the first read
+        #expect(probe.count("reset") == 1)      // once per polling start, not per read
+        #expect(viewModel.currentSample?.cpuUsagePercent == nil)  // fresh baseline → no diff
+        #expect(viewModel.metrics == .live)
     }
 
-    @Test("in use is capped at total when the segments' accounting overshoots")
-    func inUseCappedAtTotal() {
-        let overshooting = Segments(wired: 30, active: 30, compressed: 30, inactive: 5, free: 5, total: 50)
-        #expect(overshooting.inUseBytes == 50)
+    // MARK: - Unavailable gating (review fixes)
+
+    @Test("A partial sample marks metrics unavailable and dashes the system table")
+    func partialSampleIsUnavailableAndTableDashes() {
+        // The real seams return a non-nil partial sample when the memory read fails:
+        // swap, architecture and boot time present, memory nil, no CPU diff yet. The
+        // table must gate on the same unavailable flag as every other card.
+        let partial = Self.sample(cpu: nil, memory: nil)
+        let viewModel = makeViewModel(sample: { partial })
+        viewModel.sampleOnce()
+        #expect(viewModel.currentSample != nil)
+        #expect(viewModel.metrics == .unavailable)
+        #expect(viewModel.hasSampled)
+
+        let gated = PerformanceMetricGrid.systemTableValues(sample: viewModel.currentSample,
+                                                            showsUnavailable: true)
+        #expect(gated.swapUsed == nil)
+        #expect(gated.architecture == nil)
+        #expect(gated.runningSince == nil)
+
+        // The same sample without the gate shows the reads that did land — the dashes
+        // come from the gating, not from empty data.
+        let ungated = PerformanceMetricGrid.systemTableValues(sample: viewModel.currentSample,
+                                                              showsUnavailable: false)
+        #expect(ungated.swapUsed != nil)
+        #expect(ungated.architecture != nil)
+        #expect(ungated.runningSince != nil)
+    }
+
+    @Test("An unread silicon read dashes Architecture instead of guessing a chip family")
+    func architectureFailsClosedWhenSiliconUnread() {
+        var partial = Self.sample(cpu: nil, memory: nil)
+        partial.isAppleSilicon = nil
+        let values = PerformanceMetricGrid.systemTableValues(sample: partial, showsUnavailable: false)
+        #expect(values.architecture == nil)
+        #expect(values.swapUsed != nil)
+        #expect(values.runningSince != nil)
+    }
+
+    // MARK: - Memory definitions (OD-11 / D2, plan risk)
+
+    @Test("in use is the engine's figure carried verbatim — the app never re-derives it")
+    func inUseIsCarriedNotReDerived() {
+        // CleanCore owns the OD-11 formula (wired + active + compressed, capped at total;
+        // MachHostStatsTests covers it). The app-side segments carry the engine's value:
+        // a re-derived min(total, wired + active + compressed) would read 90, not 42.
+        let carried = Segments(wired: 30, active: 30, compressed: 30, inactive: 5, free: 5,
+                               total: 200, inUseBytes: 42)
+        #expect(carried.inUseBytes == 42)
     }
 
     @Test("Segment fractions normalise against the segments' own sum, not total")
@@ -196,18 +260,20 @@ struct PerformanceViewModelTests {
 
     // MARK: - Maintenance: the approval flow
 
-    @Test("requiresApproval lands in needsApproval and opens Login Items settings")
-    func requiresApprovalOpensSettings() async {
+    @Test("requiresApproval lands in needsApproval without opening System Settings")
+    func requiresApprovalDoesNotOpenSettings() async {
         let probe = Probe()
         let viewModel = makeViewModel(
             purgeRAM: { throw PrivilegedHelperError.requiresApproval },
             openLoginItemsSettings: { probe.record("settings") })
         await viewModel.run(.freeRAM)
         #expect(viewModel.actionState(of: .freeRAM) == .needsApproval)
-        #expect(probe.count("settings") == 1)
+        // Deliberate deviation from the old screen (gallery README): no auto-open — the
+        // banner's explicit button is the one way in.
+        #expect(probe.calls.isEmpty)
     }
 
-    @Test("notRegistered registers the helper first, then asks for approval")
+    @Test("notRegistered registers the helper first, then asks for approval — still no auto-open")
     func notRegisteredRegistersThenAsksForApproval() async {
         let probe = Probe()
         let viewModel = makeViewModel(
@@ -217,6 +283,14 @@ struct PerformanceViewModelTests {
         await viewModel.run(.flushDNS)
         #expect(viewModel.actionState(of: .flushDNS) == .needsApproval)
         #expect(probe.count("register") == 1)
+        #expect(probe.count("settings") == 0)
+    }
+
+    @Test("The banner's Open System Settings button is the one way in")
+    func openSettingsButtonOpensSettings() {
+        let probe = Probe()
+        let viewModel = makeViewModel(openLoginItemsSettings: { probe.record("settings") })
+        viewModel.openLoginItemsSettings()
         #expect(probe.count("settings") == 1)
     }
 
@@ -299,8 +373,44 @@ struct PerformanceViewModelTests {
 
         let unavailable = VM()
         unavailable.loadFixture(state: "unavailable")
-        #expect(unavailable.currentSample == nil)
+        // The fixture now carries the real shape: a non-nil partial sample (memory nil,
+        // the rest present) that the screen's own gating dashes (review fix — a nil
+        // sample here masked the gating bug).
+        #expect(unavailable.currentSample != nil)
+        #expect(unavailable.currentSample?.memory == nil)
         #expect(unavailable.metrics == .unavailable)
         #expect(unavailable.hasSampled)
+    }
+
+    @Test("Fixture launch hooks with no state still install the fixture seams")
+    func launchHookWithoutStateInstallsFixtureSeams() {
+        let hooks = UITestHooks(environment: [
+            "SOSMAC_UITEST_FIXTURES": "1",
+            "SOSMAC_UITEST_SCREEN": "performance",
+        ])
+        let viewModel = makeViewModel(openMenuBarWidget: {
+            throw TestFailure(message: "real seams reached")
+        })
+        viewModel.loadFixtureFromLaunchHooks(hooks)
+        viewModel.openMenuBarWidget()  // the fixture seams' no-op: nothing throws
+        #expect(viewModel.widgetError == nil)
+        #expect(viewModel.hasSampled == false)  // no state → nothing applied, seams swapped only
+    }
+
+    @Test("Launch hooks that don't match the performance screen leave the seams alone")
+    func launchHookMismatchKeepsInjectedSeams() {
+        let environments: [[String: String]] = [
+            ["SOSMAC_UITEST_SCREEN": "performance"],                            // fixtures off
+            ["SOSMAC_UITEST_FIXTURES": "1", "SOSMAC_UITEST_SCREEN": "updater"], // another screen
+        ]
+        for environment in environments {
+            let hooks = UITestHooks(environment: environment)
+            let viewModel = makeViewModel(openMenuBarWidget: {
+                throw TestFailure(message: "injected seams still in place")
+            })
+            viewModel.loadFixtureFromLaunchHooks(hooks)
+            viewModel.openMenuBarWidget()
+            #expect(viewModel.widgetError == "injected seams still in place")
+        }
     }
 }

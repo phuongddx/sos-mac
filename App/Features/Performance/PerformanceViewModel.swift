@@ -64,12 +64,15 @@ final class PerformanceViewModel {
         var thermal: ThermalState = .nominal
         var load: LoadAverages?
         var bootTime: Date?
-        var isAppleSilicon = false
+        /// `nil` until the silicon read has landed — fail closed: the table dashes
+        /// Architecture instead of guessing a chip family.
+        var isAppleSilicon: Bool?
     }
 
-    /// The five memory segments (spec §5.9). `in use` follows OD-11 / D2: wired + active +
-    /// compressed — the legacy `total − free` definition reads ~99 % on an idle Mac and is
-    /// never shown here.
+    /// The five memory segments (spec §5.9). `in use` follows OD-11 / D2 and is carried
+    /// from CleanCore's `MemoryInfo.inUseBytes` (wired + active + compressed, capped at
+    /// total) — the legacy `total − free` definition reads ~99 % on an idle Mac and is
+    /// never shown here, and the app-side type re-derives nothing.
     struct MemorySegments: Equatable {
         let wired: UInt64
         let active: UInt64
@@ -77,20 +80,21 @@ final class PerformanceViewModel {
         let inactive: UInt64
         let free: UInt64
         let total: UInt64
+        /// The OD-11 "in use" figure **as CleanCore computed it** (`MemoryInfo.inUseBytes`:
+        /// wired + active + compressed, capped at `total`), carried verbatim from the read.
+        /// CleanCore is the single source of truth for the definition — the app never
+        /// re-derives it (review fix: the old computed property duplicated the formula).
+        let inUseBytes: UInt64
 
-        init(wired: UInt64, active: UInt64, compressed: UInt64, inactive: UInt64, free: UInt64, total: UInt64) {
+        init(wired: UInt64, active: UInt64, compressed: UInt64, inactive: UInt64, free: UInt64, total: UInt64,
+             inUseBytes: UInt64) {
             self.wired = wired
             self.active = active
             self.compressed = compressed
             self.inactive = inactive
             self.free = free
             self.total = total
-        }
-
-        /// OD-11: wired + active + compressed, capped at `total` (the segments' accounting
-        /// can overshoot by a few pages' worth of kernel reservations).
-        var inUseBytes: UInt64 {
-            min(total, wired + active + compressed)
+            self.inUseBytes = inUseBytes
         }
 
         var values: [UInt64] { [wired, active, compressed, inactive, free] }
@@ -129,6 +133,10 @@ final class PerformanceViewModel {
         private static let sharedHelperClient = PrivilegedHelperClient()
 
         var sample: @MainActor () -> Sample
+        /// Called once per polling start: production drops the CPU tick baseline so the
+        /// first read after (re)entering the screen diffs over the next ~2 s interval,
+        /// not over the whole away period. Tests observe the call through this seam.
+        var resetCPUBaseline: @MainActor () -> Void
         var purgeRAM: @MainActor () async throws -> Void
         var flushDNS: @MainActor () async throws -> Void
         var registerHelper: @MainActor () throws -> Void
@@ -143,24 +151,37 @@ final class PerformanceViewModel {
         /// value. `sharedHelperClient` is built lazily on the first real maintenance run —
         /// merely opening the screen never constructs an XPC-ready client.
         static func live() -> Seams {
-            var previousTicks: CPUTicks?
+            // A `@MainActor` box for the CPU tick baseline — both closures share it without
+            // sharing a mutable local (a Swift 6 data-race risk the compiler refuses; same
+            // pattern as `FixtureLoginState`).
+            let baseline = BaselineBox()
+            // Architecture and boot time cannot change while the app runs; the old screen
+            // read them once per polling start, so the first successful read is cached for
+            // the VM's lifetime (review fix: they were re-read on every 2 s poll). Fail
+            // closed: until a read lands the value stays `nil` and renders "—" — never a
+            // guess — and a failed read is simply retried on the next poll.
+            var cachedBootTime: Date?
+            var cachedIsAppleSilicon: Bool?
             return Seams(
                 sample: {
                     var sample = Sample()
                     if let current = MachHostStats.cpuTicks() {
-                        if let previous = previousTicks {
+                        if let previous = baseline.previousTicks {
                             sample.cpuUsagePercent = MachHostStats.cpuUsagePercent(from: previous, to: current)
                         }
-                        previousTicks = current
+                        baseline.previousTicks = current
                     }
                     sample.memory = MachHostStats.memoryInfo().map(MemorySegments.init)
                     sample.swap = SysctlReader.swapUsage().map(SwapUsagePair.init)
                     sample.thermal = IOKitSensors.thermalState()
                     sample.load = SysctlReader.loadAverages().map(LoadAverages.init)
-                    sample.bootTime = SysctlReader.bootTime()
-                    sample.isAppleSilicon = IOKitSensors.isAppleSilicon()
+                    if cachedBootTime == nil { cachedBootTime = SysctlReader.bootTime() }
+                    sample.bootTime = cachedBootTime
+                    if cachedIsAppleSilicon == nil { cachedIsAppleSilicon = IOKitSensors.isAppleSilicon() }
+                    sample.isAppleSilicon = cachedIsAppleSilicon
                     return sample
                 },
+                resetCPUBaseline: { baseline.previousTicks = nil },
                 purgeRAM: { try await sharedHelperClient.purgeMemory() },
                 flushDNS: { try await sharedHelperClient.flushDNSCache() },
                 registerHelper: { try sharedHelperClient.register() },
@@ -194,6 +215,7 @@ final class PerformanceViewModel {
             let login = FixtureLoginState()
             return Seams(
                 sample: { UITestFixtures.performanceSample() },
+                resetCPUBaseline: {},
                 purgeRAM: {},
                 flushDNS: {},
                 registerHelper: {},
@@ -210,6 +232,14 @@ final class PerformanceViewModel {
         private final class FixtureLoginState {
             var enabled = true
             var status: SMAppService.Status { enabled ? .enabled : .notRegistered }
+        }
+
+        /// The live seams' CPU tick baseline — same `@MainActor`-box pattern as
+        /// `FixtureLoginState`: the sample and reset closures share the box, not a
+        /// mutable local.
+        @MainActor
+        private final class BaselineBox {
+            var previousTicks: CPUTicks?
         }
 #endif
     }
@@ -248,6 +278,10 @@ final class PerformanceViewModel {
 
     /// Polls every two seconds while the screen's `.task` is alive (structural cancellation).
     func runPollingLoop() async {
+        // Review fix: the CPU tick baseline belonged to the VM (it lives in ModuleStore),
+        // so the first reading after returning to the screen averaged over the whole away
+        // period. Each polling start drops the baseline — the next interval reads fresh.
+        seams.resetCPUBaseline()
         refreshLoginItems()
         while !Task.isCancelled {
             sampleOnce()
@@ -320,13 +354,18 @@ final class PerformanceViewModel {
         }
     }
 
+    /// Deliberate deviation from the old screen (gallery README): the state alone flips to
+    /// `.needsApproval` — System Settings is **not** auto-opened. A system pane opening by
+    /// itself is a surprise system-UI action; the banner's explicit "Open System Settings"
+    /// button is the one way in.
     private func enterApproval(_ action: MaintenanceAction) {
         setActionState(action, .needsApproval)
-        seams.openLoginItemsSettings()
     }
 
-    /// The approval banner's "Open System Settings" — Login Items has a documented deep
-    /// link (OD-18: Full Disk Access and iCloud stay text; this one is a real API).
+    /// The approval banner's "Open System Settings" — user-initiated, and Login Items has
+    /// a documented deep link (OD-18: Full Disk Access and iCloud stay text; this one is a
+    /// real API). The old screen also fired this the moment a run needed approval; that
+    /// auto-open is removed.
     func openLoginItemsSettings() {
         seams.openLoginItemsSettings()
     }
@@ -359,15 +398,16 @@ final class PerformanceViewModel {
 // MARK: - Production adapters for CleanCore's types
 
 extension PerformanceViewModel.MemorySegments {
-    /// Reads CleanCore's `MemoryInfo` — its memberwise values, no arithmetic of our own
-    /// beyond what the struct itself documents.
+    /// Reads CleanCore's `MemoryInfo` — its memberwise values plus the engine's own
+    /// `inUseBytes`; no arithmetic of our own anywhere.
     init(from info: MemoryInfo) {
         self.init(wired: info.wiredBytes,
                   active: info.activeBytes,
                   compressed: info.compressedBytes,
                   inactive: info.inactiveBytes,
                   free: info.freeBytes,
-                  total: info.totalBytes)
+                  total: info.totalBytes,
+                  inUseBytes: info.inUseBytes)
     }
 }
 
@@ -392,9 +432,15 @@ extension PerformanceViewModel {
     /// The launch-hook half of the fixture convention (`SOSMAC_UITEST_FIXTURES=1`,
     /// `SOSMAC_UITEST_SCREEN=performance`, `SOSMAC_UITEST_STATE=…`). Never starts the
     /// polling loop: the caller (the screen's `.task`) returns before `runPollingLoop`.
-    func loadFixtureFromLaunchHooks() {
-        let hooks = UITestHooks.current
-        guard hooks.fixtures, hooks.destination == .performance, let state = hooks.state else { return }
+    func loadFixtureFromLaunchHooks(_ hooks: UITestHooks = UITestHooks.current) {
+        guard hooks.fixtures, hooks.destination == .performance else { return }
+        guard let state = hooks.state else {
+            // Review fix: the fixture seams install whenever the performance key matches —
+            // even with no state — so a DEBUG launch hook can never leave the real
+            // (privileged) seams in place.
+            seams = Seams.fixture()
+            return
+        }
         loadFixture(state: state.lowercased())
     }
 
@@ -419,9 +465,10 @@ extension PerformanceViewModel {
             applyFixtureSample()
             flushDNSState = .failed(message: "The helper didn't respond.")
         case "unavailable":
-            currentSample = nil
-            metrics = .unavailable
-            hasSampled = true
+            // The real seams return a non-nil partial sample when the memory read fails
+            // (`apply` gates on `memory == nil`), so the fixture models exactly that —
+            // a nil sample here would mask the screen's own gating (review fix).
+            apply(UITestFixtures.performanceUnavailableSample())
             loginItemEntries = UITestFixtures.performanceLoginItems()
             launchAtLoginStatus = .enabled
         default:

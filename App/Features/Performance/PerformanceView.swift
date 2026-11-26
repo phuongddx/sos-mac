@@ -14,6 +14,8 @@ import CleanCore
 /// - The approval banner's "Open System Settings" opens Login Items through the documented
 ///   `SMAppService.openSystemSettingsLoginItems()` — OD-18 keeps undocumented deep links
 ///   out; this one is the API the app already uses.
+/// - **No auto-open:** unlike the old screen, a run that needs approval only flips the
+///   state — System Settings opens through the banner's explicit button, never by itself.
 struct PerformanceView: View {
     @Environment(ModuleStore.self) private var store
     private var viewModel: PerformanceViewModel { store.performance }
