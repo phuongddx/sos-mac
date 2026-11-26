@@ -16,7 +16,6 @@
 		12A18A19EEF8BE2ED712F44D /* QuarantineRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */; };
 		1B4936A4A6291F165CB9595D /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D556598CDC035EE94F81C8 /* DashboardView.swift */; };
 		1D06AB7F38F03BC556400EB7 /* ScanProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC67E979C262C1B384952044 /* ScanProgressTracker.swift */; };
-		1D3798F980BB1E4064A8BD92 /* AuroraCareScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59147E006B726F9138C2B12 /* AuroraCareScreenshotTests.swift */; };
 		2773C6BA3401153349B7A752 /* AuroraBloomModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */; };
 		27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */; };
 		283D3A9E02E9DFF48AFB6210 /* HealthDialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FCCD11654F615F38FBC7AE /* HealthDialView.swift */; };
@@ -63,6 +62,7 @@
 		D8C735AEECD1B5CB23CBA24B /* VolumeStorageInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60925814F21D41B971FD4766 /* VolumeStorageInfo.swift */; };
 		DDABCDA3D5687DA3D9226741 /* ProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */; };
 		E1CFC6345E8746F24381C098 /* CloudCleanupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E613731BF2E7935588A184F1 /* CloudCleanupViewModel.swift */; };
+		E5A667E7EF1EE19E7E587638 /* RedesignSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1E85D262BB7F5B40BE39E7F /* RedesignSmokeTests.swift */; };
 		EFDE7593D4F73BCC2E1BEAF7 /* MenuBarHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */; };
 		F2F2D9337CA182C9FD55FD7D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB67B89413B962973465246B /* main.swift */; };
 		FB8C8083C6100E2742DDB309 /* UninstallerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12B3FBB6D8691969DF7F3C4 /* UninstallerViewModel.swift */; };
@@ -135,7 +135,7 @@
 		A75763649B41522A9F8B4952 /* CleanCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CleanCore; path = Packages/CleanCore; sourceTree = SOURCE_ROOT; };
 		AD009D570D83BC9D450F00E2 /* HelperOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperOperations.swift; sourceTree = "<group>"; };
 		AEE74DC5C8E5A6D70E4BDB9E /* ASWebAuthSessionPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASWebAuthSessionPresenter.swift; sourceTree = "<group>"; };
-		B59147E006B726F9138C2B12 /* AuroraCareScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraCareScreenshotTests.swift; sourceTree = "<group>"; };
+		B1E85D262BB7F5B40BE39E7F /* RedesignSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedesignSmokeTests.swift; sourceTree = "<group>"; };
 		B658F774CB266713577506C2 /* SOSMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSMacApp.swift; sourceTree = "<group>"; };
 		B8E6150D819C892387C01600 /* StickyFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickyFooterView.swift; sourceTree = "<group>"; };
 		BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraBloomModifier.swift; sourceTree = "<group>"; };
@@ -374,7 +374,7 @@
 		BDC8CFB2E7DB46D06FD11255 /* SOSMacUITests */ = {
 			isa = PBXGroup;
 			children = (
-				B59147E006B726F9138C2B12 /* AuroraCareScreenshotTests.swift */,
+				B1E85D262BB7F5B40BE39E7F /* RedesignSmokeTests.swift */,
 			);
 			path = SOSMacUITests;
 			sourceTree = "<group>";
@@ -717,7 +717,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1D3798F980BB1E4064A8BD92 /* AuroraCareScreenshotTests.swift in Sources */,
+				E5A667E7EF1EE19E7E587638 /* RedesignSmokeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
