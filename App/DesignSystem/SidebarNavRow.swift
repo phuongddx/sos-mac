@@ -68,6 +68,8 @@ struct SidebarNavRow: View {
     let hue: Color
     let ink: Color
     let isActive: Bool
+    /// PR 3 (OD-3): a cyan dot while the module is scanning in the background.
+    var isScanning: Bool = false
 
     @State private var isHovering = false
 
@@ -85,11 +87,20 @@ struct SidebarNavRow: View {
                 .foregroundStyle(Theme.Color.textPrimary)
                 .lineLimit(1)
             Spacer(minLength: 0)
+            if isScanning {
+                Circle()
+                    .fill(Theme.Color.neonCyan)
+                    .frame(width: 6, height: 6)
+                    .accessibilityHidden(true)
+            }
         }
         .padding(.horizontal, Theme.Spacing.s2)
         .frame(height: 32)
         .background(rowFill, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        // Spec §8: colour is never the only signal — the row says "scanning"
+        // for VoiceOver when the busy dot is showing.
+        .accessibilityLabel(isScanning ? "\(title), scanning" : title)
         .onHover { isHovering = $0 }
         .animation(Theme.Motion.quick, value: isHovering)
     }

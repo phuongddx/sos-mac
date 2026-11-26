@@ -130,11 +130,16 @@ final class SpaceLensViewModel {
         selectLocation(at: url.path)
     }
 
-    func startScan() {
+    /// `false` when a scan or clean is already running (PR 3 re-entrancy guard).
+    @discardableResult
+    func startScan() -> Bool {
+        // PR 3: re-entrancy guard — a second tap mid-scan must not restart the scan.
+        guard phase != .scanning, phase != .cleaning else { return false }
         scanTask?.cancel()
         scanTask = Task { [weak self] in
             await self?.performScan()
         }
+        return true
     }
 
     func cancelScan() {

@@ -2,7 +2,8 @@ import SwiftUI
 import CleanCore
 
 struct CloudCleanupView: View {
-    @State private var viewModel = CloudCleanupViewModel()
+    @Environment(ModuleStore.self) private var store
+    private var viewModel: CloudCleanupViewModel { store.cloudCleanup }
     @State private var selectedTab: Tab = .googleDrive
 
     private enum Tab: String, CaseIterable, Identifiable {
