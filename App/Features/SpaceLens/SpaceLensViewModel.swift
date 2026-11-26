@@ -648,12 +648,16 @@ final class SpaceLensViewModel {
 #if DEBUG
 extension SpaceLensViewModel {
     /// Launch-hook half of the fixture convention: applies the state named by
-    /// `SOSMAC_UITEST_SCREEN`/`SOSMAC_UITEST_STATE` when fixtures are on.
+    /// `SOSMAC_UITEST_SCREEN`/`SOSMAC_UITEST_STATE` when fixtures are on, and the
+    /// snapshot script's `SOSMAC_UITEST_VIEW=type` switches the map to By Type.
     func loadFixtureFromLaunchHooks() {
         let hooks = UITestHooks.current
         guard hooks.fixtures, hooks.destination == .spaceLens,
               let raw = hooks.state, let state = LifecycleState(rawValue: raw) else { return }
         loadFixture(state)
+        if ProcessInfo.processInfo.environment["SOSMAC_UITEST_VIEW"] == "type" {
+            viewMode = .category
+        }
     }
 
     /// Loads one of the eight lifecycle states from the fictional sample tree
