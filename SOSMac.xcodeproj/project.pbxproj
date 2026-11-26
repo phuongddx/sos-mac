@@ -11,6 +11,7 @@
 		08900F6991F02A43C569DDF4 /* CleanCore in Frameworks */ = {isa = PBXBuildFile; productRef = B0AE3ED04E1697D2D60C38DF /* CleanCore */; };
 		0980BEA718F6AC9A78614779 /* CareCardModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99909B8A48785AADED1E723A /* CareCardModifier.swift */; };
 		0B8EB0370E309D0D95DC67B3 /* SmartCareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19C39CA1766D163871E0E7CE /* SmartCareView.swift */; };
+		0DFF6FB8B20304F3183766D6 /* ResultTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81CEFBC9F798A11B713EDB0E /* ResultTileView.swift */; };
 		0F7066083A4CA069EBEFE499 /* UninstallerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99BA9DCEA375A8537944594 /* UninstallerView.swift */; };
 		119ABFBC2B48E424ABAE34FF /* MenuBarHelper.app in Resources */ = {isa = PBXBuildFile; fileRef = C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		12A18A19EEF8BE2ED712F44D /* QuarantineRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */; };
@@ -20,6 +21,7 @@
 		27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */; };
 		283D3A9E02E9DFF48AFB6210 /* HealthDialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FCCD11654F615F38FBC7AE /* HealthDialView.swift */; };
 		29AC5FD388B0CFD5BBEE361C /* TreemapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 35EB24D1CC05056D12B5D6DD /* TreemapKit */; };
+		2C3D89DD7ECDDBAD46C15E2F /* ComponentGalleryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8FAD68028AABF9C5B31041F /* ComponentGalleryTests.swift */; };
 		302D413F61D134A94F8799EF /* SidebarNavRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68651E3F484F9D5B790F279C /* SidebarNavRow.swift */; };
 		35F78EF4F974AD83A4552DD8 /* ScanProgressPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5B55EEB5382ACCBAD08487 /* ScanProgressPanel.swift */; };
 		38E490DE64DB1DC787E4D64D /* ElevationModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */; };
@@ -31,7 +33,9 @@
 		4E688FAFBD4C19198A4B7168 /* PerformanceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60AE4D0BE44E292519DD599 /* PerformanceViewModel.swift */; };
 		505D9B11A9E68A53E981C804 /* StickyFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E6150D819C892387C01600 /* StickyFooterView.swift */; };
 		524602F1BD6F72FD380E92A0 /* SpaceLensView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556CD64042D3F9B34D459D96 /* SpaceLensView.swift */; };
+		58C8A75DDFB23DEDE787D858 /* KeepBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 919E782D860AE64EAB29DC53 /* KeepBadge.swift */; };
 		5C3F87EDDE3FBF336E4F7040 /* ModuleCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEDD20C09B7740A9A836FD75 /* ModuleCardView.swift */; };
+		66484C003D1B5413F0E1FA0F /* ComponentGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46536D27681C822DDF6B6BA3 /* ComponentGalleryView.swift */; };
 		6ABC1C18339FFC501B35A3AF /* UpdaterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10DAA0AD06134B381646E567 /* UpdaterView.swift */; };
 		6C83EF8ADCC68D145197246A /* PrivilegedHelperClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A34B85C63A2C70EA9CC995A /* PrivilegedHelperClient.swift */; };
 		6DE0567BF263811BF9B5FAC0 /* SpaceLensViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16FEC6E072C20E77D60A0C25 /* SpaceLensViewModel.swift */; };
@@ -46,16 +50,21 @@
 		89A677FD9979FA784AE0C17A /* ASWebAuthSessionPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE74DC5C8E5A6D70E4BDB9E /* ASWebAuthSessionPresenter.swift */; };
 		8A7D4331AFFDCB5D68F6FE3C /* JunkCleanerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09BAF8424C039491F5324208 /* JunkCleanerViewModel.swift */; };
 		8CB197C5A6E43082A88B95AE /* HelperOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD009D570D83BC9D450F00E2 /* HelperOperations.swift */; };
+		9048E53AD6C3B192A1A0A66D /* ModuleTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98E5B704E377BCA702F23AB /* ModuleTileView.swift */; };
 		920A4CDCE15A91C7105AF525 /* TreemapCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169861D77A35617E7FED9E0A /* TreemapCanvasView.swift */; };
 		96A2FFBEDA9B53B465AEB41A /* JunkCleanerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575242D8CA34B18FD76DD4FE /* JunkCleanerView.swift */; };
 		9C256ECFD03A15A92272C000 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2212133287D5A40215D51B3F /* Assets.xcassets */; };
+		9F677E2B9ABC28418466526F /* BannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9BD42E1F51C8416E7A7986 /* BannerView.swift */; };
 		A292BD79FDE867EC711A8E5B /* SummaryCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0AC3C62BF924A8FD115848 /* SummaryCardView.swift */; };
 		B013D80A5181BB873E15F75A /* HeroPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB1592F9B76A607BFA0C5D29 /* HeroPanelView.swift */; };
+		B291176399D37249D9059EE4 /* SOSButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EC34D67EBF39DAB19C31B7 /* SOSButtonStyle.swift */; };
 		B3BA61A0E30BB10F63410FE9 /* BadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E0B72A04198D2C4C56BD2A9 /* BadgeView.swift */; };
 		B8C5878B6778CB1B3A13E84F /* ProtectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A434E7961B33074CE62CB1F /* ProtectionView.swift */; };
+		BBF734014F4FBA38476B323D /* SOSCheckboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */; };
 		BD71724FAF539B30C395699C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25382720F5D7E946EA383D8 /* EmptyStateView.swift */; };
 		BFB9A6BD1B872593B8AE2E6E /* DuplicateFinderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */; };
 		C1D306350EF9CCE179379F36 /* ModuleToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5673E5EFA5B1CE9CA9DE9E43 /* ModuleToolbar.swift */; };
+		C4ED66EFBFB0B5605E5E8EC9 /* AuroraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410827EB99A79421DCD4BE06 /* AuroraBackground.swift */; };
 		C525BF54959EB6033641B5C1 /* MenuBarMetricsMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E854DD88191E34B25816AF4E /* MenuBarMetricsMonitor.swift */; };
 		C5E85C60ADA4E920FB90650A /* UITestHooks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C400BD0033715B73C6C5FE06 /* UITestHooks.swift */; };
 		D269A378D1225B726E086FE4 /* UITestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE83684E6FDF6AB08F134234 /* UITestFixtures.swift */; };
@@ -65,6 +74,7 @@
 		DDABCDA3D5687DA3D9226741 /* ProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */; };
 		E1CFC6345E8746F24381C098 /* CloudCleanupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E613731BF2E7935588A184F1 /* CloudCleanupViewModel.swift */; };
 		E5A667E7EF1EE19E7E587638 /* RedesignSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1E85D262BB7F5B40BE39E7F /* RedesignSmokeTests.swift */; };
+		EEA176C3563B7855B2925B07 /* SOSCheckbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81C7D66DD1EE9A33BC0AC613 /* SOSCheckbox.swift */; };
 		EFDE7593D4F73BCC2E1BEAF7 /* MenuBarHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */; };
 		F2F2D9337CA182C9FD55FD7D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB67B89413B962973465246B /* main.swift */; };
 		F5E4459F950F16A16B19197B /* Theme+SidebarDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1DCFFB032E4C169A525F5E /* Theme+SidebarDestination.swift */; };
@@ -109,6 +119,7 @@
 		09BAF8424C039491F5324208 /* JunkCleanerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JunkCleanerViewModel.swift; sourceTree = "<group>"; };
 		0A2A54290A0C90569DA0BE23 /* SOSMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SOSMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A434E7961B33074CE62CB1F /* ProtectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtectionView.swift; sourceTree = "<group>"; };
+		0F9BD42E1F51C8416E7A7986 /* BannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerView.swift; sourceTree = "<group>"; };
 		10DAA0AD06134B381646E567 /* UpdaterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterView.swift; sourceTree = "<group>"; };
 		1528BAB4676A01E77E6B9BB1 /* ShellTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellTests.swift; sourceTree = "<group>"; };
 		166E1A0591F7BDC42C0E7853 /* PrivilegedHelper */ = {isa = PBXFileReference; includeInIndex = 0; path = PrivilegedHelper; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -118,11 +129,14 @@
 		1C8BE73AC42934229155564A /* StepRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepRowView.swift; sourceTree = "<group>"; };
 		1D1DCFFB032E4C169A525F5E /* Theme+SidebarDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme+SidebarDestination.swift"; sourceTree = "<group>"; };
 		2212133287D5A40215D51B3F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		22EC34D67EBF39DAB19C31B7 /* SOSButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSButtonStyle.swift; sourceTree = "<group>"; };
 		25FCCD11654F615F38FBC7AE /* HealthDialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDialView.swift; sourceTree = "<group>"; };
 		3378D6B53CDCB0474385C0B8 /* CloudCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCleanupView.swift; sourceTree = "<group>"; };
 		34D556598CDC035EE94F81C8 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderViewModel.swift; sourceTree = "<group>"; };
+		410827EB99A79421DCD4BE06 /* AuroraBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraBackground.swift; sourceTree = "<group>"; };
 		4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBarView.swift; sourceTree = "<group>"; };
+		46536D27681C822DDF6B6BA3 /* ComponentGalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGalleryView.swift; sourceTree = "<group>"; };
 		4F5B55EEB5382ACCBAD08487 /* ScanProgressPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanProgressPanel.swift; sourceTree = "<group>"; };
 		5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuarantineRecord.swift; sourceTree = "<group>"; };
 		556CD64042D3F9B34D459D96 /* SpaceLensView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceLensView.swift; sourceTree = "<group>"; };
@@ -137,12 +151,17 @@
 		73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevationModifier.swift; sourceTree = "<group>"; };
 		763ECBD32513F45F9539E313 /* DuplicateFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderView.swift; sourceTree = "<group>"; };
 		7B273DE218A656524EA73BAF /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
+		7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSCheckboxTests.swift; sourceTree = "<group>"; };
+		81C7D66DD1EE9A33BC0AC613 /* SOSCheckbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSCheckbox.swift; sourceTree = "<group>"; };
+		81CEFBC9F798A11B713EDB0E /* ResultTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultTileView.swift; sourceTree = "<group>"; };
 		8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraSurface.swift; sourceTree = "<group>"; };
 		8F0AC3C62BF924A8FD115848 /* SummaryCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryCardView.swift; sourceTree = "<group>"; };
+		919E782D860AE64EAB29DC53 /* KeepBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepBadge.swift; sourceTree = "<group>"; };
 		971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeContrastTests.swift; sourceTree = "<group>"; };
 		99909B8A48785AADED1E723A /* CareCardModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareCardModifier.swift; sourceTree = "<group>"; };
 		9A34B85C63A2C70EA9CC995A /* PrivilegedHelperClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedHelperClient.swift; sourceTree = "<group>"; };
 		A75763649B41522A9F8B4952 /* CleanCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CleanCore; path = Packages/CleanCore; sourceTree = SOURCE_ROOT; };
+		A98E5B704E377BCA702F23AB /* ModuleTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleTileView.swift; sourceTree = "<group>"; };
 		AD009D570D83BC9D450F00E2 /* HelperOperations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperOperations.swift; sourceTree = "<group>"; };
 		AEE74DC5C8E5A6D70E4BDB9E /* ASWebAuthSessionPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ASWebAuthSessionPresenter.swift; sourceTree = "<group>"; };
 		B1E85D262BB7F5B40BE39E7F /* RedesignSmokeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RedesignSmokeTests.swift; sourceTree = "<group>"; };
@@ -156,6 +175,7 @@
 		C25382720F5D7E946EA383D8 /* EmptyStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyStateView.swift; sourceTree = "<group>"; };
 		C400BD0033715B73C6C5FE06 /* UITestHooks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestHooks.swift; sourceTree = "<group>"; };
 		C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MenuBarHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		C8FAD68028AABF9C5B31041F /* ComponentGalleryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGalleryTests.swift; sourceTree = "<group>"; };
 		C99BA9DCEA375A8537944594 /* UninstallerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallerView.swift; sourceTree = "<group>"; };
 		D60AE4D0BE44E292519DD599 /* PerformanceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceViewModel.swift; sourceTree = "<group>"; };
 		D78116D60A7591C3E1D1E111 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
@@ -273,6 +293,7 @@
 		537233CFE1D2F0659C0A5F75 /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				46536D27681C822DDF6B6BA3 /* ComponentGalleryView.swift */,
 				565503C45E57F760D1ABCE61 /* IgnoredItem.swift */,
 				5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */,
 				BE83684E6FDF6AB08F134234 /* UITestFixtures.swift */,
@@ -296,6 +317,7 @@
 			children = (
 				1528BAB4676A01E77E6B9BB1 /* ShellTests.swift */,
 				00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */,
+				7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */,
 				971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */,
 				BFA193C1EA5BD96B19DE3B6D /* UITestHooksTests.swift */,
 			);
@@ -336,20 +358,27 @@
 		7BFDB829AB2B5D575B0FDD4E /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
+				410827EB99A79421DCD4BE06 /* AuroraBackground.swift */,
 				BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */,
 				8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */,
 				6E0B72A04198D2C4C56BD2A9 /* BadgeView.swift */,
+				0F9BD42E1F51C8416E7A7986 /* BannerView.swift */,
 				99909B8A48785AADED1E723A /* CareCardModifier.swift */,
 				73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */,
 				C25382720F5D7E946EA383D8 /* EmptyStateView.swift */,
 				25FCCD11654F615F38FBC7AE /* HealthDialView.swift */,
 				EB1592F9B76A607BFA0C5D29 /* HeroPanelView.swift */,
+				919E782D860AE64EAB29DC53 /* KeepBadge.swift */,
 				FEDD20C09B7740A9A836FD75 /* ModuleCardView.swift */,
+				A98E5B704E377BCA702F23AB /* ModuleTileView.swift */,
 				5673E5EFA5B1CE9CA9DE9E43 /* ModuleToolbar.swift */,
 				4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */,
+				81CEFBC9F798A11B713EDB0E /* ResultTileView.swift */,
 				4F5B55EEB5382ACCBAD08487 /* ScanProgressPanel.swift */,
 				BC67E979C262C1B384952044 /* ScanProgressTracker.swift */,
 				68651E3F484F9D5B790F279C /* SidebarNavRow.swift */,
+				22EC34D67EBF39DAB19C31B7 /* SOSButtonStyle.swift */,
+				81C7D66DD1EE9A33BC0AC613 /* SOSCheckbox.swift */,
 				1C8BE73AC42934229155564A /* StepRowView.swift */,
 				B8E6150D819C892387C01600 /* StickyFooterView.swift */,
 				8F0AC3C62BF924A8FD115848 /* SummaryCardView.swift */,
@@ -389,6 +418,7 @@
 		BDC8CFB2E7DB46D06FD11255 /* SOSMacUITests */ = {
 			isa = PBXGroup;
 			children = (
+				C8FAD68028AABF9C5B31041F /* ComponentGalleryTests.swift */,
 				B1E85D262BB7F5B40BE39E7F /* RedesignSmokeTests.swift */,
 			);
 			path = SOSMacUITests;
@@ -654,12 +684,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				89A677FD9979FA784AE0C17A /* ASWebAuthSessionPresenter.swift in Sources */,
+				C4ED66EFBFB0B5605E5E8EC9 /* AuroraBackground.swift in Sources */,
 				2773C6BA3401153349B7A752 /* AuroraBloomModifier.swift in Sources */,
 				7D9BBB20AB26D0CFE845E76D /* AuroraSurface.swift in Sources */,
 				B3BA61A0E30BB10F63410FE9 /* BadgeView.swift in Sources */,
+				9F677E2B9ABC28418466526F /* BannerView.swift in Sources */,
 				0980BEA718F6AC9A78614779 /* CareCardModifier.swift in Sources */,
 				728C27220348DC8271916BB8 /* CloudCleanupView.swift in Sources */,
 				E1CFC6345E8746F24381C098 /* CloudCleanupViewModel.swift in Sources */,
+				66484C003D1B5413F0E1FA0F /* ComponentGalleryView.swift in Sources */,
 				1B4936A4A6291F165CB9595D /* DashboardView.swift in Sources */,
 				3EF1CD052576C9A843228DF1 /* DuplicateFinderView.swift in Sources */,
 				BFB9A6BD1B872593B8AE2E6E /* DuplicateFinderViewModel.swift in Sources */,
@@ -670,7 +703,9 @@
 				47A95B1665E814CEB837631D /* IgnoredItem.swift in Sources */,
 				96A2FFBEDA9B53B465AEB41A /* JunkCleanerView.swift in Sources */,
 				8A7D4331AFFDCB5D68F6FE3C /* JunkCleanerViewModel.swift in Sources */,
+				58C8A75DDFB23DEDE787D858 /* KeepBadge.swift in Sources */,
 				5C3F87EDDE3FBF336E4F7040 /* ModuleCardView.swift in Sources */,
+				9048E53AD6C3B192A1A0A66D /* ModuleTileView.swift in Sources */,
 				C1D306350EF9CCE179379F36 /* ModuleToolbar.swift in Sources */,
 				3E38F672530103701AC5A976 /* PerformanceView.swift in Sources */,
 				4E688FAFBD4C19198A4B7168 /* PerformanceViewModel.swift in Sources */,
@@ -679,6 +714,9 @@
 				B8C5878B6778CB1B3A13E84F /* ProtectionView.swift in Sources */,
 				77C50036ABEC8F54C3F86362 /* ProtectionViewModel.swift in Sources */,
 				12A18A19EEF8BE2ED712F44D /* QuarantineRecord.swift in Sources */,
+				0DFF6FB8B20304F3183766D6 /* ResultTileView.swift in Sources */,
+				B291176399D37249D9059EE4 /* SOSButtonStyle.swift in Sources */,
+				EEA176C3563B7855B2925B07 /* SOSCheckbox.swift in Sources */,
 				D43BD385637D22053A3464D6 /* SOSMacApp.swift in Sources */,
 				35F78EF4F974AD83A4552DD8 /* ScanProgressPanel.swift in Sources */,
 				1D06AB7F38F03BC556400EB7 /* ScanProgressTracker.swift in Sources */,
@@ -707,6 +745,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BBF734014F4FBA38476B323D /* SOSCheckboxTests.swift in Sources */,
 				FB08A993FC8FD667E6F92356 /* ShellTests.swift in Sources */,
 				27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */,
 				FA25CBA768BC9879F743EFDB /* ThemeContrastTests.swift in Sources */,
@@ -737,6 +776,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2C3D89DD7ECDDBAD46C15E2F /* ComponentGalleryTests.swift in Sources */,
 				E5A667E7EF1EE19E7E587638 /* RedesignSmokeTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

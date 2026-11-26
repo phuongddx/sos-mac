@@ -11,7 +11,7 @@ import SwiftUI
 ///
 /// | Variable | Meaning |
 /// |---|---|
-/// | `SOSMAC_UITEST_SCREEN` | Prototype screen key: `dashboard`, `smartcare`, `junk`, `duplicates`, `spacelens`, `cloud`, `uninstaller`, `updater`, `performance`, `protection` |
+/// | `SOSMAC_UITEST_SCREEN` | Prototype screen key: `dashboard`, `smartcare`, `junk`, `duplicates`, `spacelens`, `cloud`, `uninstaller`, `updater`, `performance`, `protection`; `gallery` opens the component gallery |
 /// | `SOSMAC_UITEST_STATE` | Lifecycle state for that screen (`start`, `scanning`, `results`, `review`, `cleaning`, `done`, `empty`, `error`, …) |
 /// | `SOSMAC_UITEST_APPEARANCE` | `light` or `dark` |
 /// | `SOSMAC_UITEST_FIXTURES` | `1` to feed screens made-up data from `UITestFixtures` |
@@ -37,6 +37,9 @@ struct UITestHooks: Sendable, Equatable {
 
     /// Parsed once at first access.
     static let current = UITestHooks(environment: ProcessInfo.processInfo.environment)
+
+    /// Screen key of the Debug-only component gallery (`ComponentGalleryView`), in any letter case.
+    static let galleryKey = "gallery"
 
     init(environment: [String: String]) {
         func value(_ key: String) -> String? {
@@ -81,6 +84,12 @@ struct UITestHooks: Sendable, Equatable {
     /// The sidebar destination named by `screen`, or `nil` when unset or unknown.
     var destination: SidebarDestination? {
         screen.flatMap(SidebarDestination.init(uiTestKey:))
+    }
+
+    /// `SOSMAC_UITEST_SCREEN=gallery`: the component gallery replaces the whole app for this launch.
+    /// It is not a sidebar destination, so nothing real (no volume name or size) is on screen.
+    var showsGallery: Bool {
+        screen?.lowercased() == Self.galleryKey
     }
 }
 
