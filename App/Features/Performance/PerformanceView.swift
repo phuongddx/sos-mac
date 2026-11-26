@@ -270,7 +270,7 @@ struct PerformanceView: View {
                     .fill(Theme.accent.opacity(0.12))
                     .frame(width: 36, height: 36)
                 Image(systemName: icon)
-                    .foregroundStyle(Theme.accent)
+                    .foregroundStyle(Theme.Color.primary)
             }
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)

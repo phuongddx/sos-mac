@@ -6,7 +6,7 @@ struct EmptyStateView: View {
     let systemImage: String
     let title: String
     let message: String
-    var hue: Color = Theme.accent
+    var hue: Color = Theme.Color.primary
     var actionTitle: String?
     var action: (() -> Void)?
 
