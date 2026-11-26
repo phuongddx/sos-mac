@@ -8,7 +8,8 @@
 #
 # Options:
 #   -p NAME   Output folder name under artifacts/ui-snapshots/ (required)
-#   -s LIST   Comma-separated screen=state pairs, e.g. dashboard=default,junk=results (required)
+#   -s LIST   Comma-separated screen=state pairs, e.g. dashboard=default,junk=results
+#             (default: the eight Junk & Cache reference states — the first migrated screen)
 #   -a LIST   Appearances, default "dark,light"
 #   -w WxH    Window size in points, default 1200x760
 #   -1        Downscale PNGs to 1x (points) instead of the display's native pixels
@@ -45,7 +46,12 @@ while getopts "p:s:a:w:1d:nh" opt; do
     *) usage >&2; exit 2 ;;
   esac
 done
-[[ -n "$NAME" && -n "$SPECS" ]] || { usage >&2; exit 2; }
+[[ -n "$NAME" ]] || { usage >&2; exit 2; }
+if [[ -z "$SPECS" ]]; then
+  # PR 5's default matrix: the eight Junk & Cache lifecycle states (start/scanning/
+  # results/review/cleaning/done/empty/error), the reference screen every later PR copies.
+  SPECS="junk=start,junk=scanning,junk=results,junk=review,junk=cleaning,junk=done,junk=empty,junk=error"
+fi
 [[ "$NAME" =~ ^[A-Za-z0-9._-]+$ ]] || die "-p must be letters, digits, . _ -"
 [[ "$SIZE" =~ ^[0-9]+x[0-9]+$ ]] || die "-w must look like 1200x760"
 for spec in ${SPECS//,/ }; do
