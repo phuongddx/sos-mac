@@ -10,14 +10,33 @@ final class MenuBarMetricsMonitor {
     private static let pollInterval: Duration = .seconds(2)
 
     private(set) var cpuPercent: Double?
-    private(set) var memoryUsedBytes: UInt64?
+    /// Memory genuinely in use (`inUseBytes`: wired + active + compressed), not the legacy
+    /// `usedBytes` percentage, which reads ~99% on an idle Mac (spec OD-11, plan E1).
+    private(set) var memoryInUseBytes: UInt64?
     private(set) var memoryTotalBytes: UInt64?
 
     private var previousTicks: CPUTicks?
     private var pollingTask: Task<Void, Never>?
 
+    /// Sample text; the label view holds a fixed frame (hidden "CPU 100%") so the menu
+    /// bar item does not reflow between samples. Padding keeps the numeral field
+    /// visually aligned until the first sample replaces "SOS Mac".
     var labelText: String {
-        cpuPercent.map { String(format: "CPU %.0f%%", $0) } ?? "SOS Mac"
+        cpuPercent.map { String(format: "CPU %3.0f%%", $0) } ?? "SOS Mac"
+    }
+
+    var memoryFraction: Double? {
+        guard let used = memoryInUseBytes, let total = memoryTotalBytes, total > 0 else { return nil }
+        return Double(used) / Double(total)
+    }
+
+    var memoryPercentText: String? {
+        memoryFraction.map { String(format: "%.0f%%", $0 * 100) }
+    }
+
+    var memoryDetailText: String? {
+        guard let used = memoryInUseBytes, let total = memoryTotalBytes else { return nil }
+        return "\(ByteFormatter.string(fromByteCount: Int64(used))) of \(ByteFormatter.string(fromByteCount: Int64(total)))"
     }
 
     init() {
@@ -38,7 +57,7 @@ final class MenuBarMetricsMonitor {
         }
 
         if let memory = MachHostStats.memoryInfo() {
-            memoryUsedBytes = memory.usedBytes
+            memoryInUseBytes = memory.inUseBytes
             memoryTotalBytes = memory.totalBytes
         }
     }
