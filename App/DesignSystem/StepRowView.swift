@@ -20,7 +20,7 @@ struct StepRowView: View {
         HStack(spacing: Theme.Spacing.md) {
             ZStack {
                 Circle()
-                    .strokeBorder(state == .active ? Theme.accent : Theme.border, lineWidth: 1.5)
+                    .strokeBorder(state == .active ? Theme.Color.primary : Theme.border, lineWidth: 1.5)
                     .background(
                         Circle().fill(
                             state == .done

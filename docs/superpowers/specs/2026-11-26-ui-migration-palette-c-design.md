@@ -8,7 +8,7 @@ Companion implementation plan: [`docs/superpowers/plans/2026-11-26-ui-migration-
 
 > **Tóm tắt (VN)**
 > - Spec này chuyển SOS Mac sang UI mới của Designer, dùng **Palette C "Midnight Glass"** (dark + light) thay cho Palette A. Giữ nguyên tên token `Theme.Color.*`, chỉ đổi giá trị.
-> - Palette C **light chưa đầy đủ** ở nguồn: report chỉ cho 12/28 token và prototype chưa từng render C light (chỉ có C dark). Các giá trị còn lại được suy ra theo quy tắc, gắn nhãn `[D]` và cần Designer/Phương chốt (§2.2, §10 OD-1).
+> - Palette C **light chưa đầy đủ** ở nguồn: report chỉ cho 12/28 token và prototype chưa từng render C light (chỉ có C dark). Các giá trị còn lại được suy ra theo quy tắc, gắn nhãn `[D]`; Designer đã chốt block light cuối cùng ngày 2026-11-26 (§2.2, §10 OD-1 đã đóng).
 > - Phạm vi: shell mới, component dùng chung, 10 màn + menu bar, và 4 nhóm sửa an toàn/dữ liệu (hộp xác nhận, khoá bản Keep ở Smart Care, ghi "Folder"/"At least…" ở Uninstaller, giữ kết quả khi rời màn). Không gồm việc engine trong `needs-engine-work.html`.
 > - Có **20 open decisions** cần Phương chốt (§10), mỗi mục kèm đề xuất. Hai mục Phương hỏi trực tiếp: OD-a (Similar Images) và OD-b (tổng size từng bộ duplicate).
 > - Đã verify: tương phản (tính lại bằng script, khớp report), API Apple (SDK macOS 27.0 trong Xcode 27.1 + docs Apple), `Theme.swift` của Designer typecheck cho macOS 14.
@@ -97,7 +97,7 @@ From `AGENTS.md`, `CLAUDE.md`, inventory §4.2:
 | `textSecondary` | `--text-2` | `#A5ADC8` | `#4A5273` | `[R][T]` | `[R]` | **8.63:1** · **7.09:1** |
 | `textTertiary` | `--text-3` | `#6E7799` | `#7C84A3` | `[R][T]` | `[R]` | **4.37:1** · **3.42:1** — see rule T3 |
 | `success` | `--success` | `#34D399` | `#047857` | `[R][T]` | `[R]` | 10.02:1 · 5.09:1 |
-| `warning` | `--warning` | `#F59E0B` | `#B45309` | `[R][T]` | `[R]` | 8.97:1 · 4.66:1 |
+| `warning` | `--warning` | `#F59E0B` | `#A14A06` | `[R][T]` | `[R]` (Designer final light, 2026-11-26) | 8.97:1 · **5.57:1** (≥ 5.02:1 on every surface, incl. `rowSelected`) |
 | `danger` | `--danger` | `#F87171` | `#B91C1C` | `[R][T]` | `[R]` | 6.96:1 · 6.00:1 |
 | `dangerFill` | `--danger-fill` | `#B91C1C` | `#B91C1C` | `[A]` | `[A]` (equals C light `danger`) | irreversible action fill; `onPrimary` on it **6.47:1** |
 | `treemap1` | `--tm-1` | `#4A3A9E` | `#DDD6FE` | `[A]` | `[A]` | labels `treemapText` |
@@ -108,7 +108,7 @@ From `AGENTS.md`, `CLAUDE.md`, inventory §4.2:
 | `treemap6` | `--tm-6` | `#3A4780` | `#D9E2FF` | `[A]` | `[A]` | |
 | `treemap7` | `--tm-7` | `#353A6E` | `#E9E5FF` | `[A]` | `[A]` | |
 | `treemap8` | `--tm-8` | `#2D2A55` | `#ECE7FA` | `[A]` | `[A]` | also the "smaller items" bucket |
-| `treemapText` | `--tm-text` | `#F4F2FF` | `#1A1333` | `[A]` | `[A]` | 6.3–12.1:1 on the dark ramp · 12.8–15.5:1 on the light ramp |
+| `treemapText` | `--tm-text` | `#F4F2FF` | `#141A33` | `[A]` | `[A]` (Designer final light, 2026-11-26) | 6.31–12.07:1 on the dark ramp · 12.3–14.9:1 on the light ramp |
 
 Treemap note: the dark labels measure 6.31:1 (`treemap4`) and 6.85:1 (`treemap3`), not "≥ 7:1" as the `tokens.css` comment says. They pass WCAG AA (4.5:1); the comment is corrected when the tokens are ported.
 
@@ -125,7 +125,7 @@ These are used throughout `styles.css`; without them the SwiftUI port would need
 | `Theme.Gradient.aurora` | `--gradient-aurora` | `#A5B4FC → #818CF8 → #6366F1` (120°) | `#6366F1 → #4F46E5 → #155E75` | `[T]` / `[D]` | Light by A's transformation (indigo → primary-deep → neon-cyan, light values) |
 | `Theme.Gradient.soft` | `--gradient-soft` | `#A78BFA → #8B5CF6 → #6366F1` (135°) | `#8B5CF6 → #7C3AED → #6366F1` | `[A]` | Not overridden for C (violet stops; OD-1d) |
 | `Theme.Color.treemapMix` | `--tm-mix`, `--tm-mix-pct` | `card` @ 42 % | `card` @ 24 % | `[D]` | Token reference instead of A's literal card colour |
-| `Theme.Elevation.raised`, `.float` | `--shadow-raised`, `--shadow-float` | A's black-based layers | A's `#1A1333`-based layers | `[A]` | Keep the existing two-layer `Elevation` shape |
+| `Theme.Elevation.raised`, `.float` | `--shadow-raised`, `--shadow-float` | A's black-based layers | `#141A33`-based layers (Designer final light, 2026-11-26) | `[A]` | Keep the existing two-layer `Elevation` shape |
 | `Theme.Glow.idleAlpha` | `--glow-alpha` | `0.32` | `0` | `[A]` | No glow in light |
 | `Theme.Glow.auroraAlpha` | `--aurora-alpha` | `0.16` | `0.07` | `[A]` | |
 
@@ -153,7 +153,7 @@ Same in both appearances. `ink` is the glyph colour on the tile.
 - **T1 — Neon is a verb, not a surface** (report §4). `neonCyan` = scanning / cleaning in progress; `neonLime` = done / selected-and-ready check; `neonMagenta` (violet in C) = Space Lens signature and selection ring. Never neon body text, never neon as a background fill. Neon is for status dots, icons, progress rings, numerals ≥ 18 pt and labels of ≤ 3 words at ≥ 13 pt semibold (report §4.3).
 - **T2 — `primaryDeep` is a fill, never text or an icon on a card** (3.06:1 on base, 2.81:1 on card in dark). Text and links use `primaryBright`.
 - **T3 — `textTertiary` is for large or bold text only.** It reaches **4.37:1 on `bgBase` in dark and 3.42:1 in light**, below the 4.5:1 body-text minimum, and it drops further on other surfaces (dark: 4.01 card, 3.92 elevated, 3.61 glass; light: 3.69 card, 3.30 sidebar). Allowed: text ≥ 18 pt, bold text, disabled text, placeholders, decorative marks. Never for body copy, captions, sizes or paths, and never on a selected row (2.95:1 dark, 3.08:1 light).
-- **T4 — The 11 px badge label is small text**, so its colour must reach 4.5:1 on its own tinted background. All badge colours do except `warning` in light (4.32:1) — see §2.7.
+- **T4 — The 11 px badge label is small text**, so its colour must reach 4.5:1 on its own tinted background. All badge colours do; `warning` light `#A14A06` reaches 5.11:1 on its 11 % tint (X4 withdrawn).
 - **T5 — Module hues are tile fills, not marks, in light mode.** As bare marks on the light base most fail 3:1 (Updater 1.55:1, Protection 1.68:1, Performance 1.73:1, Cloud 1.99:1, Uninstaller 2.10:1, Space Lens 2.28:1). State that must be seen (active step, busy dot, selected ring) uses a neon or status token, which darkens in light.
 - **T6 — Glow budget** (report §4): idle glow blur ≤ 12–16 pt at ≤ 35 % opacity (`Glow.idleAlpha` 0.32); full bloom only while an action runs; none in light; none under Reduce Motion.
 - **T7 — Byte and count formatting** uses the existing `ByteCountFormatter(.file)` (`CleanCore.ByteFormatter`) and plain integer counts. No new formatters.
@@ -167,7 +167,7 @@ Found while computing §2.3–2.6. Each is a one-line change in the SwiftUI port
 | X1 | Checked checkbox is filled `primary` in dark with a white check | white on `#818CF8` = **2.98:1** (under A it was 4.23:1) | Checked fill is `primaryDeep` in both appearances (white check 6.29:1) |
 | X2 | Checkbox outline is `textTertiary` | 3.08:1 on a selected row in light | Outline uses `textSecondary` (7.65:1 light, 7.93:1 dark on card; ≥ 5.8:1 on selected rows) |
 | X3 | "Known threats" tile is rose with a white glyph | 2.56:1 at the light end of the tile gradient | Rose tile uses ink `#140F26` (4.27:1) |
-| X4 | `warning` badge: `#B45309` label on an 11 % warning tint (light) | **4.32:1**, below 4.5:1 for 11 px text | In light the warning badge label uses `textPrimary`; icon/dot stay `warning`. (Inherited from A, not caused by C.) |
+| X4 | ~~`warning` badge: `#B45309` label on an 11 % warning tint (light)~~ | 4.32:1 with the old value | **Withdrawn** (Designer final light, 2026-11-26): `warning` light is now `#A14A06` — 5.11:1 on the tint, 5.02:1 worst case on a selected row — so the light warning badge keeps the `warning` label. |
 | X5 | "Memory in use" = wired + active + compressed (sample data) | The engine reports used = total − free, which reads ~99 % on an idle Mac (inventory D2) | The "in use" definition is fixed in the engine, or the copy changes — OD-11 |
 
 ### 2.8 Geometry, type, motion — as in the Designer's `Theme.swift`
@@ -303,7 +303,7 @@ States: default · selected (check) · skipped (failed) · `full`.
 
 Prefer stock macOS button styles (`bordered`, `borderedProminent`, `borderless`) tinted with tokens; a custom `ButtonStyle` is written only where stock cannot match (dock CTA, large CTA). The implementer records the choice in PR 4a.
 
-Badge: 20 tall, radius 5, 7 side padding, 11 pt semibold, optional 11 pt symbol. Background = colour at 16 % over `card` (light: 11 %); label in the colour (rule T4 / X4). Kinds: `safe` (success) · `caution` (warning) · `risky`, `threat` (danger) · `keep` (success, `lock` symbol) · `neutral` (`textSecondary`) · `accent` (`primaryBright`). The prototype's CSS also defines a `cyan` kind (`neonCyan` label) but no screen uses it; it is **not ported in v1**, because an 11 pt label is below T1's 13 pt floor for neon text — a cyan status is a cyan dot with a `textSecondary` label.
+Badge: 20 tall, radius 5, 7 side padding, 11 pt semibold, optional 11 pt symbol. Background = colour at 16 % over `card` (light: 11 %); label in the colour (rule T4; X4 withdrawn — the light warning badge keeps the `warning` label). Kinds: `safe` (success) · `caution` (warning) · `risky`, `threat` (danger) · `keep` (success, `lock` symbol) · `neutral` (`textSecondary`) · `accent` (`primaryBright`). The prototype's CSS also defines a `cyan` kind (`neonCyan` label) but no screen uses it; it is **not ported in v1**, because an 11 pt label is below T1's 13 pt floor for neon text — a cyan status is a cyan dot with a `textSecondary` label.
 
 ### 4.5 Review frame
 
@@ -770,7 +770,7 @@ Also out: localisation; menu-bar auto-launch; a per-module status or badge in th
 
 > **Status: Decided.** Phương reviewed this spec on 2026-11-26 and accepted every recommendation below (OD-1 → OD-18, OD-a, OD-b). The accepted option is now the decision, not a default. The original options and rationale are kept below for the record.
 >
-> **OD-1 note:** PR 1 implements with the derived `[D]` light values exactly as tabulated in §2.3–2.4. The Designer's final Palette C light values replace them before PR 1 merges into the integration branch (coordination via Zed).
+> **OD-1 note (closed 2026-11-26):** The Designer's final Palette C light block landed via Zed **before PR 1 merged**: `warning` light `#A14A06`, `treemapText` light `#141A33`, light elevation ink `#141A33`; every other light value matched §2.3–2.4 as tabulated. Those sections, §2.6–2.7 and Appendix C are updated accordingly, and X4 is withdrawn.
 
 | Item | Decision (Phương, 2026-11-26) |
 |---|---|
@@ -801,7 +801,7 @@ Each item: the question, the options, my recommendation, and the default I will 
 
 **OD-1 — Palette C light: approve the derived values.** The report gives 12 of 28 tokens for C light and the prototype has never rendered C light (§2.2).
 Options: (1) report's C light + the `[D]` values of §2.3–2.4 — an indigo light theme; (2) what the prototype shows for C + light today, which is Palette A light (lavender-white).
-Recommendation: **(1)**, and ask the Designer to add a `data-palette="c"][data-theme="light"]` block to `tokens.css` and render the three light screens before PR 1 merges. Sub-points: **1a** sidebar `#EEF2FF`; **1b** hairline recipe (text token + A's alpha); **1c** row tints and aurora gradient in light; **1d** `gradientSoft` keeps A's violet stops in both appearances (re-tune or keep); **1e** the four contrast corrections X1–X4 (§2.7); **1f** type deltas 26 / 10 / 10 pt (§2.8, informational).
+Recommendation: **(1)**, and ask the Designer to add a `data-palette="c"][data-theme="light"]` block to `tokens.css` and render the three light screens before PR 1 merges. Sub-points: **1a** sidebar `#EEF2FF`; **1b** hairline recipe (text token + A's alpha); **1c** row tints and aurora gradient in light; **1d** `gradientSoft` keeps A's violet stops in both appearances (re-tune or keep); **1e** the contrast corrections X1–X4 (§2.7; X4 later withdrawn by the Designer's final light values); **1f** type deltas 26 / 10 / 10 pt (§2.8, informational).
 Default: (1) exactly as tabulated. Blocks: PR 1.
 
 **OD-2 — Toolbar: system toolbar or the prototype's in-content header?**
@@ -984,8 +984,8 @@ Generated from one table of hex values so the token block and §2.3 cannot drift
         static let textTertiary = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#7C84A3"), dark: SwiftUI.Color(hex: "#6E7799"))
         /// --success · dark #34D399 · light #047857
         static let success = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#047857"), dark: SwiftUI.Color(hex: "#34D399"))
-        /// --warning · dark #F59E0B · light #B45309
-        static let warning = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#B45309"), dark: SwiftUI.Color(hex: "#F59E0B"))
+        /// --warning · dark #F59E0B · light #A14A06
+        static let warning = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#A14A06"), dark: SwiftUI.Color(hex: "#F59E0B"))
         /// --danger · dark #F87171 · light #B91C1C
         static let danger = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#B91C1C"), dark: SwiftUI.Color(hex: "#F87171"))
         /// --danger-fill · dark #B91C1C · light #B91C1C
@@ -1006,8 +1006,8 @@ Generated from one table of hex values so the token block and §2.3 cannot drift
         static let treemap7 = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#E9E5FF"), dark: SwiftUI.Color(hex: "#353A6E"))
         /// --tm-8 · dark #2D2A55 · light #ECE7FA
         static let treemap8 = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#ECE7FA"), dark: SwiftUI.Color(hex: "#2D2A55"))
-        /// --tm-text · dark #F4F2FF · light #1A1333
-        static let treemapText = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#1A1333"), dark: SwiftUI.Color(hex: "#F4F2FF"))```
+        /// --tm-text · dark #F4F2FF · light #141A33
+        static let treemapText = SwiftUI.Color.adaptive(light: SwiftUI.Color(hex: "#141A33"), dark: SwiftUI.Color(hex: "#F4F2FF"))```
 
 **C.2 Proposed additions (§2.4)**
 

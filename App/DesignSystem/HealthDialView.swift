@@ -11,7 +11,7 @@ struct HealthDialView: View {
     var body: some View {
         ZStack {
             Circle()
-                .stroke(Theme.border, lineWidth: 12)
+                .stroke(Theme.Derived.hairlineStrong, lineWidth: 12)
             Circle()
                 .trim(from: 0, to: progress)
                 .stroke(
