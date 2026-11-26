@@ -54,6 +54,10 @@ Every state also exists in light (`light-spacelens-<state>.png`).
 - **Fixture `.dat` files all land in "Other"** and `.xip` falls there too (the
   engine's extension map has no `xip` entry) — the By Type map and legend show those
   real aggregates rather than invented per-type figures.
+- **§5.5's "scanned total" for the smaller-items threshold reads as the displayed
+  level's total**, matching the prototype's `sum(nodes)`: the 0.4 % merge stays
+  correct when drilling down, where a whole-scan total would misclassify the
+  level's own cells (the same behavior the smaller-items tests pin).
 
 ## Fixture notes
 

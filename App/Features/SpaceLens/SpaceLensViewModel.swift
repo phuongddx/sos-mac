@@ -378,7 +378,7 @@ final class SpaceLensViewModel {
             confirm: { [weak self] selection in
                 self?.beginClean(checkedIDs: selection.itemIDs)
             },
-            cancel: { })
+            cancel: { [weak self] in self?.cancelCleanupReview() })
     }
 
     private func beginClean(checkedIDs: Set<String>) {
@@ -453,7 +453,10 @@ final class SpaceLensViewModel {
 
     /// Pure merge (pattern step 3's testable core): everything below 0.4 % of the
     /// level total becomes one "N smaller items" cell carrying the real count and
-    /// size (§5.5). The result stays size-descending.
+    /// size (§5.5). Spec §5.5 words the threshold against the "scanned total"; that
+    /// is read here as the total of the level on display, matching the prototype's
+    /// `sum(nodes)` — the right reading when drilling down, where a whole-scan total
+    /// would misclassify the level's own cells. The result stays size-descending.
     static func mergingSmallerItems(_ entries: [DisplayItem]) -> [DisplayItem] {
         let total = entries.reduce(Int64(0)) { $0 + $1.size }
         guard total > 0 else { return entries }
