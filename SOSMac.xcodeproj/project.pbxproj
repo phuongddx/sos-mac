@@ -67,6 +67,7 @@
 		E5A667E7EF1EE19E7E587638 /* RedesignSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1E85D262BB7F5B40BE39E7F /* RedesignSmokeTests.swift */; };
 		EFDE7593D4F73BCC2E1BEAF7 /* MenuBarHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */; };
 		F2F2D9337CA182C9FD55FD7D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB67B89413B962973465246B /* main.swift */; };
+		F5E4459F950F16A16B19197B /* Theme+SidebarDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D1DCFFB032E4C169A525F5E /* Theme+SidebarDestination.swift */; };
 		FA25CBA768BC9879F743EFDB /* ThemeContrastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */; };
 		FB08A993FC8FD667E6F92356 /* ShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1528BAB4676A01E77E6B9BB1 /* ShellTests.swift */; };
 		FB8C8083C6100E2742DDB309 /* UninstallerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12B3FBB6D8691969DF7F3C4 /* UninstallerViewModel.swift */; };
@@ -115,6 +116,7 @@
 		16FEC6E072C20E77D60A0C25 /* SpaceLensViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceLensViewModel.swift; sourceTree = "<group>"; };
 		19C39CA1766D163871E0E7CE /* SmartCareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCareView.swift; sourceTree = "<group>"; };
 		1C8BE73AC42934229155564A /* StepRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepRowView.swift; sourceTree = "<group>"; };
+		1D1DCFFB032E4C169A525F5E /* Theme+SidebarDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Theme+SidebarDestination.swift"; sourceTree = "<group>"; };
 		2212133287D5A40215D51B3F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		25FCCD11654F615F38FBC7AE /* HealthDialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDialView.swift; sourceTree = "<group>"; };
 		3378D6B53CDCB0474385C0B8 /* CloudCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCleanupView.swift; sourceTree = "<group>"; };
@@ -352,6 +354,7 @@
 				B8E6150D819C892387C01600 /* StickyFooterView.swift */,
 				8F0AC3C62BF924A8FD115848 /* SummaryCardView.swift */,
 				D78116D60A7591C3E1D1E111 /* Theme.swift */,
+				1D1DCFFB032E4C169A525F5E /* Theme+SidebarDestination.swift */,
 			);
 			path = DesignSystem;
 			sourceTree = "<group>";
@@ -687,6 +690,7 @@
 				03D89916AF1CF0691BB0B6FB /* StepRowView.swift in Sources */,
 				505D9B11A9E68A53E981C804 /* StickyFooterView.swift in Sources */,
 				A292BD79FDE867EC711A8E5B /* SummaryCardView.swift in Sources */,
+				F5E4459F950F16A16B19197B /* Theme+SidebarDestination.swift in Sources */,
 				78879E5A7BE2B8C2721395E8 /* Theme.swift in Sources */,
 				920A4CDCE15A91C7105AF525 /* TreemapCanvasView.swift in Sources */,
 				D269A378D1225B726E086FE4 /* UITestFixtures.swift in Sources */,
