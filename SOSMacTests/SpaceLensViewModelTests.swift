@@ -6,7 +6,8 @@ import CleanCore
 /// Space Lens view-model tests (plan PR 8). Cover the plan's list — nothing
 /// pre-selected, the cart keeps only top-most items, the smaller-items merge (count
 /// and size), selection never includes an ineligible path, the phase mapping — plus
-/// the confirmation's CF-3 numbers, the real hermetic clean (the one trash-routed
+/// the confirmation's CF-3 numbers, the review-cancel path (§5.5: dismissing the
+/// review sheet exits review), the real hermetic clean (the one trash-routed
 /// path), failure accounting on Done, and the re-entrancy guards. Real scans run over
 /// unique temp trees; nothing outside those trees is ever touched.
 @Suite("SpaceLensViewModel")
@@ -317,6 +318,42 @@ struct SpaceLensViewModelTests {
         let state = ConfirmSheetState(model: model)
         #expect(state.checkedItemIDs == Set(cart.map(\.path)))
         #expect(state.isConfirmEnabled)
+    }
+
+    // MARK: - Review cancel (§5.5: dismissing the review sheet exits review)
+
+    @Test("cancelCleanupReview resets .review to .results and is a no-op outside review")
+    func cancelCleanupReviewResetsAndIsNoOpOutsideReview() async throws {
+        let (viewModel, root) = try await scanTree()
+        defer { try? fileManager.removeItem(at: root) }
+
+        // Outside .review (still .results): a no-op.
+        viewModel.cancelCleanupReview()
+        #expect(viewModel.phase == .results)
+
+        select(viewModel, named: "big.dat")
+        viewModel.beginCleanupReview()
+        #expect(viewModel.phase == .review)
+
+        viewModel.cancelCleanupReview()
+        #expect(viewModel.phase == .results)
+        // The map's review CTA works again (beginCleanupReview guards .results).
+        viewModel.beginCleanupReview()
+        #expect(viewModel.phase == .review)
+    }
+
+    @Test("the confirmation model's cancel closure exits review (Cancel and Escape)")
+    func confirmationCancelClosureExitsReview() async throws {
+        let (viewModel, root) = try await scanTree()
+        defer { try? fileManager.removeItem(at: root) }
+
+        select(viewModel, named: "big.dat")
+        viewModel.beginCleanupReview()
+        #expect(viewModel.phase == .review)
+
+        // The sheet's Cancel button and Escape both land on this closure (CF-1).
+        viewModel.cleanupConfirmation().cancel()
+        #expect(viewModel.phase == .results)
     }
 
     // MARK: - Clean (the real, trash-routed path)
