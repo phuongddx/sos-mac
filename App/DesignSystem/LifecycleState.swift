@@ -25,6 +25,31 @@ enum LifecycleState: String, CaseIterable, Sendable, Identifiable {
     }
 }
 
+/// The dock labels a module overrides (spec Appendix A, "One verb per idea"). The defaults are
+/// the cleaner modules' wording — Smart Care, Junk & Cache, Duplicate Finder, iCloud Drive —
+/// so a module that does not override a label keeps the frame's original text.
+struct DockCopy: Hashable, Sendable {
+    /// `results` — the round CTA. "Clean" for modules that clean; Protection and Uninstaller
+    /// open a review instead ("Review"), Space Lens "Review…", Updater "Check Again".
+    var resultsAction = "Clean"
+    /// `results` — the leading "open review" button. `nil` leaves the slot to the meta text
+    /// (the review is the CTA, or the module has nothing to review).
+    var openReview: String? = "Review Items…"
+    /// `results` — the leading meta text while the selection is empty.
+    var nothingSelectedMeta = "Nothing selected"
+    /// `results` — a fixed hint that replaces the selection meta altogether (Protection §5.10,
+    /// Uninstaller §5.7), for modules whose selection is not made on this screen.
+    var resultsHint: String?
+    /// `results` — the trailing plain button. `nil` hides it.
+    var resultsFinish: String? = "Scan Again"
+    /// `done` — the CTA.
+    var doneAction = "Scan Again"
+    /// `done` — the trailing secondary. `nil` hides it (Cloud's server-side delete has no Trash).
+    var doneSecondary: String? = "Open Trash"
+    /// `empty` — the CTA.
+    var emptyAction = "Scan Again"
+}
+
 /// A module's identity in the shared frame: the name the toolbar and eyebrows show, the hue
 /// the canvas glows with, and the glyph the orb carries.
 struct ModuleIdentity: Hashable, Sendable {
@@ -41,17 +66,21 @@ struct ModuleIdentity: Hashable, Sendable {
     /// The review bar CTA renders in the danger style only for the
     /// server-side cloud delete (spec §4.4) — Cloud Cleanup's API providers.
     let isReviewCTADanger: Bool
+    /// The per-module dock wording for `results`, `done` and `empty` (Appendix A).
+    let dock: DockCopy
 
     init(name: String, hue: Color, symbol: String,
          startActionTitle: String = "Scan",
          reviewActionTitle: String = "Move to Trash…",
-         isReviewCTADanger: Bool = false) {
+         isReviewCTADanger: Bool = false,
+         dock: DockCopy = DockCopy()) {
         self.name = name
         self.hue = hue
         self.symbol = symbol
         self.startActionTitle = startActionTitle
         self.reviewActionTitle = reviewActionTitle
         self.isReviewCTADanger = isReviewCTADanger
+        self.dock = dock
     }
 
     init(module: SidebarDestination) {
@@ -60,8 +89,48 @@ struct ModuleIdentity: Hashable, Sendable {
             hue: module.tileHue,
             symbol: module.systemImage,
             startActionTitle: module == .updater ? "Check" : (module == .uninstaller ? "Measure All" : "Scan"),
-            reviewActionTitle: module == .protection ? "Quarantine…" : "Move to Trash…"
+            reviewActionTitle: module == .protection ? "Quarantine…" : "Move to Trash…",
+            dock: Self.dockCopy(for: module)
         )
+    }
+
+    /// Appendix A, module by module. Anything not listed keeps the `DockCopy` defaults.
+    static func dockCopy(for module: SidebarDestination) -> DockCopy {
+        var copy = DockCopy()
+        switch module {
+        case .spaceLens:
+            // §5.5: the cleanup list opens from "Review…" (one button, not two).
+            copy.resultsAction = "Review…"
+            copy.openReview = nil
+            // §5.5 done: Back to Map leads; §5.5 empty: Choose Folder….
+            copy.doneAction = "Back to Map"
+            copy.emptyAction = "Choose Folder…"
+        case .uninstaller:
+            // §5.7: results "Review" + "Measure Again"; done "Back to Apps"; empty "Check Again".
+            copy.resultsAction = "Review"
+            copy.openReview = nil
+            copy.resultsHint = "Choose an app to review what it left behind"
+            copy.resultsFinish = "Measure Again"
+            copy.doneAction = "Back to Apps"
+            copy.emptyAction = "Check Again"
+        case .updater:
+            // §5.8: read-only — nothing to review or clean; the CTA re-checks.
+            copy.resultsAction = "Check Again"
+            copy.openReview = nil
+            copy.resultsFinish = nil
+            copy.doneSecondary = nil
+            copy.emptyAction = "Check Again"
+        case .protection:
+            // §5.10: results "Review" with the hint, "Scan Again"; the quarantine never trashes.
+            copy.resultsAction = "Review"
+            copy.openReview = nil
+            copy.resultsHint = "Review the finding, then quarantine it"
+            copy.doneSecondary = nil
+        case .smartCare, .junkCleaner, .duplicateFinder, .cloudCleanup,
+             .dashboard, .performance:
+            break
+        }
+        return copy
     }
 }
 
