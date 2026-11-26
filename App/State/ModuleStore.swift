@@ -103,7 +103,9 @@ final class ModuleStore {
         case .smartCare:
             return _smartCare?.phase == .scanning || _smartCare?.phase == .cleaning
         case .junkCleaner:
-            return _junkCleaner?.phase == .scanning || _junkCleaner?.phase == .cleaning
+            guard let junk = _junkCleaner else { return false }
+            // PR 5: `.cleaning` carries its selection count, so it needs a pattern match.
+            return junk.phase == .scanning || junk.isCleaning
         case .duplicateFinder:
             return _duplicates?.phase == .scanning
         case .spaceLens:
