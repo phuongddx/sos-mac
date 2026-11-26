@@ -23,8 +23,26 @@ public struct MemoryInfo: Sendable {
     public let compressedBytes: UInt64
     public let totalBytes: UInt64
 
+    /// Legacy "used" figure: everything that is not free. Kept as-is for the
+    /// existing call sites (Smart Care, Performance, menu bar helper); unlike
+    /// `inUseBytes` it counts reclaimable inactive pages as used.
     public var usedBytes: UInt64 {
         totalBytes > freeBytes ? totalBytes - freeBytes : 0
+    }
+
+    /// Memory genuinely in use: wired + active + compressed. Inactive pages
+    /// are reclaimable and free pages are unused, so neither counts here.
+    /// The five `vm_statistics64` segments do not sum exactly to `totalBytes`
+    /// (`compressor_page_count` vs. compressed pages, kernel reservations
+    /// absent from every bucket), so the sum is capped at `totalBytes`.
+    public var inUseBytes: UInt64 {
+        min(totalBytes, wiredBytes + activeBytes + compressedBytes)
+    }
+
+    /// Memory available without paging pressure: free + inactive, capped at
+    /// `totalBytes` for the same accounting reason as `inUseBytes`.
+    public var availableBytes: UInt64 {
+        min(totalBytes, freeBytes + inactiveBytes)
     }
 }
 
