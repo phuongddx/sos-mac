@@ -16,6 +16,26 @@ struct CloudCleanupView: View {
     @Environment(ModuleStore.self) private var store
     private var viewModel: CloudCleanupViewModel { store.cloudCleanup }
 
+    /// The frame toolbar's identity per provider (spec §5.6 + Appendix A): an
+    /// API provider's review CTA ("Delete from Google Drive…") renders the
+    /// **danger** style — the delete happens on the provider's servers and
+    /// cannot be undone — while iCloud Drive's local "Move to Trash…" keeps
+    /// the standard prominent style. Internal static so the unit tests pin
+    /// the rule (the screen's `frameModule` below reads it).
+    static func frameIdentity(for provider: CloudCleanupViewModel.Provider) -> ModuleIdentity {
+        switch provider {
+        case .iCloudDrive:
+            return ModuleIdentity(module: .cloudCleanup)
+        default:
+            return ModuleIdentity(name: "Cloud Cleanup",
+                                  hue: Theme.Hue.cloud,
+                                  symbol: "icloud",
+                                  startActionTitle: "Scan",
+                                  reviewActionTitle: "Delete from \(provider.rawValue)…",
+                                  isReviewCTADanger: true)
+        }
+    }
+
     var body: some View {
         CloudCleanupScreen(viewModel: viewModel)
     }
@@ -41,16 +61,7 @@ private struct CloudCleanupScreen: View {
     /// CTA ("Delete from Google Drive…"), iCloud Drive the standard
     /// "Move to Trash…".
     private var frameModule: ModuleIdentity {
-        switch viewModel.selectedProvider {
-        case .iCloudDrive:
-            return ModuleIdentity(module: .cloudCleanup)
-        default:
-            return ModuleIdentity(name: "Cloud Cleanup",
-                                  hue: Theme.Hue.cloud,
-                                  symbol: "icloud",
-                                  startActionTitle: "Scan",
-                                  reviewActionTitle: "Delete from \(viewModel.selectedProvider.rawValue)…")
-        }
+        CloudCleanupView.frameIdentity(for: viewModel.selectedProvider)
     }
 
     /// The eyebrow/orb identity of the state views: the provider's own name
@@ -420,9 +431,14 @@ private struct CloudCleanupScreen: View {
     private func apiInlineHead(_ provider: CloudCleanupViewModel.Provider) -> InlineListHead {
         let extras = viewModel.apiSets.flatMap(\.extraItems)
         let selected = extras.filter { (viewModel.selectedPaths[provider] ?? []).contains($0.id) }
+        // Honest state line: the head names the real selection, not a
+        // permanent "nothing is selected" (the list is the select surface).
+        let selectionLine = selected.isEmpty
+            ? "Nothing is selected"
+            : "\(selected.count.formatted()) \(selected.count == 1 ? "copy" : "copies") selected"
         return InlineListHead(
             title: "\(provider.rawValue) · \(viewModel.apiSets.count.formatted()) \(viewModel.apiSets.count == 1 ? "set" : "sets")",
-            sub: "\(viewModel.listedFileCount.formatted()) files listed. Nothing is selected: deleting happens on \(provider.rawValue)’s servers.",
+            sub: "\(viewModel.listedFileCount.formatted()) files listed. \(selectionLine): deleting happens on \(provider.rawValue)’s servers.",
             isSelectAllEnabled: selected.count < extras.count,
             isDeselectAllEnabled: !selected.isEmpty)
     }
@@ -493,7 +509,7 @@ private struct CloudCleanupScreen: View {
             ? (progress.map { "Moving \($0.attemptedCount) of \($0.totalCount) \($0.totalCount == 1 ? "copy" : "copies") to the Trash…" }
                ?? "Moving copies to the Trash…")
             : (progress.map { "Deleting \($0.attemptedCount) of \($0.totalCount) \($0.totalCount == 1 ? "file" : "files") from \(provider.rawValue)…" }
-               ?? "Deleting files…")
+               ?? "Deleting from \(provider.rawValue)…")
         return ScanningView(
             module: displayModule,
             title: title,
@@ -702,10 +718,15 @@ private struct CloudCleanupScreen: View {
         case .review:
             return nil
         case .cleaning:
-            guard let progress = viewModel.cleaningProgress else { return nil }
-            return provider == .iCloudDrive
-                ? "Moving \(progress.attemptedCount) of \(progress.totalCount)…"
-                : "Deleting \(progress.attemptedCount) of \(progress.totalCount)…"
+            if provider == .iCloudDrive {
+                guard let progress = viewModel.cleaningProgress else { return nil }
+                return "Moving \(progress.attemptedCount) of \(progress.totalCount)…"
+            }
+            // A server-side delete is one call — no per-file count exists, so
+            // the toolbar names the operation instead of falling back to the
+            // shared "Moving to Trash…" default (fail closed, no invented
+            // numbers).
+            return "Deleting from \(provider.rawValue)…"
         case .empty:
             return nil
         }
@@ -760,4 +781,3 @@ private struct CloudCleanupScreen: View {
         let rows: [ReviewItemRow.Model]
     }
 }
-

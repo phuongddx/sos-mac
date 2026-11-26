@@ -740,7 +740,6 @@ final class CloudCleanupViewModel {
         guard !toDelete.isEmpty, let apiProvider = apiProviders[provider] else { return false }
 
         setPhase(.cleaning(selectedCount: toDelete.count), for: provider)
-        let deletedBytes = toDelete.reduce(0) { $0 + $1.size }
         let ids = toDelete.map(\.id)
 
         let result: CloudDeleteResult
@@ -765,6 +764,9 @@ final class CloudCleanupViewModel {
         selection.formIntersection(Set(remainingFiles.map(\.id)))
         selectedPaths[provider] = selection
         apiDeleteFailures[provider] = result.failed
+        // F4/S6: Done counts only what the provider **confirmed** — a
+        // partial failure must not store the attempted bytes as deleted.
+        let deletedBytes = toDelete.filter { succeeded.contains($0.id) }.reduce(0) { $0 + $1.size }
         setPhase(.done(movedBytes: deletedBytes,
                        movedCount: result.succeededIDs.count,
                        failedCount: result.failed.count),
