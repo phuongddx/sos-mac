@@ -30,6 +30,7 @@
 		2C3D89DD7ECDDBAD46C15E2F /* ComponentGalleryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8FAD68028AABF9C5B31041F /* ComponentGalleryTests.swift */; };
 		302D413F61D134A94F8799EF /* SidebarNavRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68651E3F484F9D5B790F279C /* SidebarNavRow.swift */; };
 		35F78EF4F974AD83A4552DD8 /* ScanProgressPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5B55EEB5382ACCBAD08487 /* ScanProgressPanel.swift */; };
+		37B31F579E768BEA62703695 /* SpaceLensViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5AD78B6155CB9FB7317633 /* SpaceLensViewModelTests.swift */; };
 		38E490DE64DB1DC787E4D64D /* ElevationModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */; };
 		3E38F672530103701AC5A976 /* PerformanceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFABD43DC705D2ADFED69B24 /* PerformanceView.swift */; };
 		3E60D9BD9B7CB5E0B6D9A6F9 /* PrivilegedHelper in Resources */ = {isa = PBXBuildFile; fileRef = 166E1A0591F7BDC42C0E7853 /* PrivilegedHelper */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -56,6 +57,7 @@
 		77C50036ABEC8F54C3F86362 /* ProtectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80C73390FD3C0119541F076 /* ProtectionViewModel.swift */; };
 		7812BF7A3831BCCE1307EA7E /* HelperXPCListenerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7ECA1B33611E22001EF44C /* HelperXPCListenerDelegate.swift */; };
 		78879E5A7BE2B8C2721395E8 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78116D60A7591C3E1D1E111 /* Theme.swift */; };
+		7B0BF2F1DCF7F9088E30463D /* SpaceLensInspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 775F90E696DA1D6BFAE1FB54 /* SpaceLensInspector.swift */; };
 		7D6DCFA67BEF550AED2CFB2D /* ResultsHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F9222D01A9BB3EFA06D707 /* ResultsHeaderView.swift */; };
 		7D9BBB20AB26D0CFE845E76D /* AuroraSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */; };
 		84205A2671998584B0641409 /* ReviewFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D8888421C6C248085AA4EB /* ReviewFrameView.swift */; };
@@ -200,6 +202,7 @@
 		73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevationModifier.swift; sourceTree = "<group>"; };
 		74AECFD5CAB894ECF247EFEB /* ModuleScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleScreen.swift; sourceTree = "<group>"; };
 		763ECBD32513F45F9539E313 /* DuplicateFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderView.swift; sourceTree = "<group>"; };
+		775F90E696DA1D6BFAE1FB54 /* SpaceLensInspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceLensInspector.swift; sourceTree = "<group>"; };
 		7826241023B15C0AF05CAC88 /* DuplicateSetDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSetDetail.swift; sourceTree = "<group>"; };
 		7945E248A4E3A0459F1AE7D7 /* SmartCareReviewBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCareReviewBuilder.swift; sourceTree = "<group>"; };
 		7B273DE218A656524EA73BAF /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
@@ -216,6 +219,7 @@
 		971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeContrastTests.swift; sourceTree = "<group>"; };
 		99909B8A48785AADED1E723A /* CareCardModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareCardModifier.swift; sourceTree = "<group>"; };
 		9A34B85C63A2C70EA9CC995A /* PrivilegedHelperClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedHelperClient.swift; sourceTree = "<group>"; };
+		9B5AD78B6155CB9FB7317633 /* SpaceLensViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceLensViewModelTests.swift; sourceTree = "<group>"; };
 		A0EF1DBAA9A5560ACF98A63C /* ProgressiveCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressiveCleaner.swift; sourceTree = "<group>"; };
 		A75763649B41522A9F8B4952 /* CleanCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CleanCore; path = Packages/CleanCore; sourceTree = SOURCE_ROOT; };
 		A98E5B704E377BCA702F23AB /* ModuleTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleTileView.swift; sourceTree = "<group>"; };
@@ -395,6 +399,7 @@
 				00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */,
 				2B37C16388088187F3EF7131 /* SmartCareViewModelTests.swift */,
 				7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */,
+				9B5AD78B6155CB9FB7317633 /* SpaceLensViewModelTests.swift */,
 				971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */,
 				BFA193C1EA5BD96B19DE3B6D /* UITestHooksTests.swift */,
 				1941F6225699920CDBD6068F /* UninstallerViewModelTests.swift */,
@@ -525,6 +530,7 @@
 		E2993D55C7DD4927D96A0D94 /* SpaceLens */ = {
 			isa = PBXGroup;
 			children = (
+				775F90E696DA1D6BFAE1FB54 /* SpaceLensInspector.swift */,
 				556CD64042D3F9B34D459D96 /* SpaceLensView.swift */,
 				16FEC6E072C20E77D60A0C25 /* SpaceLensViewModel.swift */,
 				169861D77A35617E7FED9E0A /* TreemapCanvasView.swift */,
@@ -848,6 +854,7 @@
 				843A670F6C23BFB0C66E4056 /* SmartCareReviewBuilder.swift in Sources */,
 				0B8EB0370E309D0D95DC67B3 /* SmartCareView.swift in Sources */,
 				D4761BBD0776A6D89B63A73F /* SmartCareViewModel.swift in Sources */,
+				7B0BF2F1DCF7F9088E30463D /* SpaceLensInspector.swift in Sources */,
 				524602F1BD6F72FD380E92A0 /* SpaceLensView.swift in Sources */,
 				6DE0567BF263811BF9B5FAC0 /* SpaceLensViewModel.swift in Sources */,
 				EF316611FC48AC42963F7DC0 /* StartView.swift in Sources */,
@@ -884,6 +891,7 @@
 				FB08A993FC8FD667E6F92356 /* ShellTests.swift in Sources */,
 				27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */,
 				970D8CDCD51CB84BCB45908B /* SmartCareViewModelTests.swift in Sources */,
+				37B31F579E768BEA62703695 /* SpaceLensViewModelTests.swift in Sources */,
 				FA25CBA768BC9879F743EFDB /* ThemeContrastTests.swift in Sources */,
 				6F39304CD1EE0F2EEE12E060 /* UITestHooksTests.swift in Sources */,
 				1F57FAFAFF372F7BFFDF26AC /* UninstallerViewModelTests.swift in Sources */,
