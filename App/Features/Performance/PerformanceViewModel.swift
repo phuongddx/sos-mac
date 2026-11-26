@@ -159,7 +159,9 @@ final class PerformanceViewModel {
             // read them once per polling start, so the first successful read is cached for
             // the VM's lifetime (review fix: they were re-read on every 2 s poll). Fail
             // closed: until a read lands the value stays `nil` and renders "—" — never a
-            // guess — and a failed read is simply retried on the next poll.
+            // guess. Note: the engine's `isAppleSilicon()` is non-optional today, so a
+            // failed read collapses to `false` at the CleanCore boundary; making that API
+            // optional is a follow-up for the engine, not this screen.
             var cachedBootTime: Date?
             var cachedIsAppleSilicon: Bool?
             return Seams(

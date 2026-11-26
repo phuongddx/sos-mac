@@ -38,7 +38,7 @@ sheets are the same picture.
   lists files, so step 1 has no "files counted" meta; the bar, "k of N files" and the
   percentage appear only once hashing starts (before that: "Counting files in your Home
   folder…"). The path line is the engine's current path.
-- **Done's "Kept" is the number of sets that lost a copy** (each still has its kept copy);
+- **Done's "Sets kept" is the number of sets that lost a copy** (each still has its kept copy);
   a failed copy gets its own "Couldn't move" stat and an error banner instead of being
   folded into the moved figures (S5).
 - **Empty copy never overclaims.** When files were skipped it appends "N files were

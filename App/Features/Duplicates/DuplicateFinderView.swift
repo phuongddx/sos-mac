@@ -349,7 +349,7 @@ private struct DuplicateFinderScreen: View {
         var stats: [DoneView.Stat] = [
             .init(label: "Moved to Trash", value: ByteFormatter.string(fromByteCount: movedBytes), isBytes: true),
             .init(label: "Copies", value: "\(movedCount)"),
-            .init(label: "Kept", value: "\(viewModel.lastKeptCount)"),
+            .init(label: "Sets kept", value: "\(viewModel.lastKeptCount)"),
         ]
         // S5: a failure is never folded into the moved figures — it gets its own stat.
         if failedCount > 0 {
