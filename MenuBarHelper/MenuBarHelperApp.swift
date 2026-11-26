@@ -15,9 +15,15 @@ struct MenuBarHelperApp: App {
             MenuBarPopover(monitor: monitor)
         } label: {
             // View-based label (rather than the plain-string initializer) so the
-            // numeral field can carry `.monospacedDigit()` and stay fixed-width.
+            // numeral field can carry `.monospacedDigit()`. The hidden "CPU 100%"
+            // (the widest possible sample) holds the frame, so the status item never
+            // reflows between 1-, 2- and 3-digit CPU values (space padding alone is
+            // not enough: spaces are ~3.8 pt wide vs ~8.7 pt per digit).
             Label {
-                Text(monitor.labelText).monospacedDigit()
+                ZStack(alignment: .leading) {
+                    Text("CPU 100%").monospacedDigit().hidden().accessibilityHidden(true)
+                    Text(monitor.labelText).monospacedDigit()
+                }
             } icon: {
                 Image(systemName: "gauge.with.dots.needle.50percent")
             }
