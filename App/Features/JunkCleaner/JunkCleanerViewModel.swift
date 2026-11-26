@@ -70,6 +70,18 @@ final class JunkCleanerViewModel {
         let items: [ScanItem]
     }
 
+    /// One start-screen bullet (spec §5.3 `start` row): the rule's short name, its
+    /// root path, and whether it needs the privileged helper (which drives the
+    /// bullet's symbol). Derived from the injected `rules`, so the start screen
+    /// always describes the exact set a scan will walk — including a test scanner
+    /// built from custom rules.
+    struct RuleSummary: Identifiable, Hashable, Sendable {
+        let id: String
+        let title: String
+        let root: String
+        let requiresPrivilegedHelper: Bool
+    }
+
     private(set) var phase: Phase = .idle
     private(set) var items: [ScanItem] = []
     private(set) var selectedPaths: Set<String> = []
@@ -157,6 +169,16 @@ final class JunkCleanerViewModel {
 
     /// The rule names shown as scanning steps, in scan order.
     var ruleLabels: [String] { rules.map(\.shortLabel) }
+
+    /// The start screen's bullets, one per rule, in scan order.
+    var ruleSummaries: [RuleSummary] {
+        rules.map { rule in
+            RuleSummary(id: rule.id,
+                        title: rule.shortLabel,
+                        root: rule.displayRoot,
+                        requiresPrivilegedHelper: rule.requiresPrivilegedHelper)
+        }
+    }
 
     /// The location count the copy uses ("k of 4 locations", "all 4 locations").
     var locationCount: Int { rules.count }
@@ -526,7 +548,13 @@ final class JunkCleanerViewModel {
     }
 
     private func applyFixtureResults() {
-        items = UITestFixtures.junkRules.flatMap(\.items)
+        applyResults(UITestFixtures.junkRules.flatMap(\.items))
+    }
+
+    /// The completed-scan state over a result set: the real pre-selection rule,
+    /// applied exactly as `performScan` applies it.
+    private func applyResults(_ scanned: [ScanItem]) {
+        items = scanned
         selectedPaths = Set(items.filter(Self.isPreSelectable).map(\.path))
         currentGroupID = nil
         focusedItemPath = nil
@@ -535,6 +563,14 @@ final class JunkCleanerViewModel {
         cleaningProgress = nil
         rebuildReviewLocations()
         phase = .results
+    }
+
+    /// Test-only: the completed-scan state over arbitrary items. The paths need not
+    /// exist — tests use unique temp paths that are never created, so a clean over
+    /// them exercises the real `Cleaner` failure path without depending on anything
+    /// in the user's home directory.
+    func loadFixtureResults(_ items: [ScanItem]) {
+        applyResults(items)
     }
 #endif
 
