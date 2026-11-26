@@ -60,6 +60,35 @@ struct ThemeContrastTests {
         ("bgBase", C.bgBase), ("bgElevated", C.bgElevated), ("card", C.card), ("glass", C.glass), ("sidebar", C.sidebar),
     ]
 
+    // MARK: - Appearance resolution
+
+    /// Locks the adaptive resolution itself: if `Color.adaptive` ever returned the dark
+    /// value in both appearances, every threshold above would still pass (review PR #3).
+    @Test("adaptive tokens resolve per appearance", arguments: [
+        ("bgBase", C.bgBase, "#F4F6FF", "#0A0E1A"),
+        ("card", C.card, "#FFFFFF", "#111829"),
+        ("textPrimary", C.textPrimary, "#141A33", "#EEF2FF"),
+    ])
+    func adaptiveResolvesPerAppearance(name: String, token: SwiftUI.Color, lightHex: String, darkHex: String) {
+        func channels(_ hex: String) -> [Double] {
+            var v = hex.hasPrefix("#") ? String(hex.dropFirst()) : hex
+            var out: [Double] = []
+            while v.count >= 2 {
+                out.append(Double(Int(v.prefix(2), radix: 16)!) / 255)
+                v = String(v.dropFirst(2))
+            }
+            return out
+        }
+        for mode in Mode.allCases {
+            let rgba = Self.resolve(token, mode)
+            let expected = channels(mode == .light ? lightHex : darkHex)
+            #expect(abs(rgba.r - expected[0]) <= 1.5 / 255, "\(name) red in \(mode.rawValue)")
+            #expect(abs(rgba.g - expected[1]) <= 1.5 / 255, "\(name) green in \(mode.rawValue)")
+            #expect(abs(rgba.b - expected[2]) <= 1.5 / 255, "\(name) blue in \(mode.rawValue)")
+            #expect(abs(rgba.a - 1) <= 0.001, "\(name) alpha in \(mode.rawValue)")
+        }
+    }
+
     // MARK: - Text
 
     @Test("textPrimary is at least 7:1 on every surface", arguments: Mode.allCases)
