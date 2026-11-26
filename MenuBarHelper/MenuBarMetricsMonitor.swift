@@ -18,9 +18,9 @@ final class MenuBarMetricsMonitor {
     private var previousTicks: CPUTicks?
     private var pollingTask: Task<Void, Never>?
 
-    /// Fixed-width so the menu bar item does not reflow between samples: a 3-character
-    /// numeral field, monospaced digits (applied by the label view), before "SOS Mac" is
-    /// shown until the first sample arrives.
+    /// Sample text; the label view holds a fixed frame (hidden "CPU 100%") so the menu
+    /// bar item does not reflow between samples. Padding keeps the numeral field
+    /// visually aligned until the first sample replaces "SOS Mac".
     var labelText: String {
         cpuPercent.map { String(format: "CPU %3.0f%%", $0) } ?? "SOS Mac"
     }

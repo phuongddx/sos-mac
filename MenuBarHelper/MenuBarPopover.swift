@@ -33,7 +33,7 @@ struct MenuBarPopover: View {
         }
         .padding(Theme.Spacing.s4)
         .frame(width: 260)
-        .background(Theme.Color.bgElevated)
+        .auroraSurface(cornerRadius: Theme.Radius.lg)
     }
 
     private var header: some View {
@@ -44,7 +44,7 @@ struct MenuBarPopover: View {
                 .overlay {
                     Image(systemName: "gauge.with.dots.needle.50percent")
                         .foregroundStyle(Theme.Hue.Ink.performance)
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(Theme.Font.headline)
                 }
 
             VStack(alignment: .leading, spacing: 1) {
@@ -125,6 +125,10 @@ private struct MenuBarMetricCard: View {
         }
         .padding(Theme.Spacing.s3)
         .frame(maxWidth: .infinity)
-        .auroraSurface(cornerRadius: Theme.Radius.md)
+        .background(Theme.Color.card, in: RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous)
+                .strokeBorder(Theme.Derived.hairline)
+        )
     }
 }
