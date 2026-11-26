@@ -76,6 +76,26 @@ struct JunkCleanerViewModelTests {
         await wait(until: JunkCleanerViewModel.Phase.results) { viewModel.phase }
     }
 
+    /// ScanItems pointing at unique temp paths that are **never created**. A clean
+    /// over them exercises the real `Cleaner` failure path (per-item `trashItem`
+    /// errors) without depending on anything in the user's home directory — the
+    /// `/Users/sample` fixture paths must never reach the cleaner, because on a
+    /// machine that really has such a user they would move real files.
+    private static func missingItems(_ count: Int, helper: Bool = false) -> [ScanItem] {
+        (0..<count).map { index in
+            let path = FileManager.default.temporaryDirectory
+                .appendingPathComponent("junk-missing-\(UUID().uuidString)-\(index).db")
+                .path
+            return ScanItem(
+                path: path,
+                size: Int64(100 + index),
+                kind: .file,
+                severity: helper ? .caution : .safe,
+                sourceLabel: helper ? "System Caches (requires additional permission)" : "User App Caches",
+                requiresPrivilegedHelper: helper)
+        }
+    }
+
     // MARK: - Pre-selection
 
     @Test("pre-selection selects safe items only — never caution, never helper items")
@@ -171,13 +191,14 @@ struct JunkCleanerViewModelTests {
 
     @Test("failures are counted, surfaced and never turned into a success")
     func failuresAreCountedAndSurfaced() async throws {
-        // The fixture paths live under the fictional /Users/sample home, so every
-        // trash attempt fails through the real Cleaner error path — no files are
-        // created and no Trash debris is left behind.
+        // Unique temp paths that are never created: every trash attempt fails
+        // through the real Cleaner error path, and no machine state can make a
+        // real file move.
+        let missing = Self.missingItems(3)
         let viewModel = try Self.makeViewModel()
-        viewModel.loadFixture(.results)
+        viewModel.loadFixtureResults(missing)
         let selected = viewModel.selectedItems
-        #expect(!selected.isEmpty)
+        #expect(selected.count == missing.count)
 
         let accepted = await viewModel.clean()
 
@@ -191,22 +212,23 @@ struct JunkCleanerViewModelTests {
         #expect(failedCount == selected.count)
         #expect(viewModel.lastFailedItems.count == selected.count)
         #expect(viewModel.lastFailedItems.allSatisfy { !$0.reason.isEmpty })
-        // Nothing succeeded, so the results list is unchanged.
-        #expect(viewModel.items.count == fixtureItems().count)
+        // Nothing succeeded, so the results list is unchanged — and nothing landed
+        // anywhere, so there is no debris to clean up.
+        #expect(viewModel.items.count == missing.count)
     }
 
     @Test("helper items are routed to the privileged helper, not Cleaner.clean")
     func helperItemsRouteThroughThePrivilegedHelper() async throws {
+        // Two user items at paths that never exist (they will fail to trash) and
+        // one helper item — the helper item is the only one that can "move", and
+        // only through the spy.
+        let userItems = Self.missingItems(2)
+        let helperItem = Self.missingItems(1, helper: true)[0]
         let helper = HelperSpy()
         let viewModel = try Self.makeViewModel(privilegedHelper: helper)
-        viewModel.loadFixture(.results)
-        viewModel.selectGroup("system-caches")
-        guard let helperItem = viewModel.currentLocation?.items.first else {
-            Issue.record("the System Caches group must have items")
-            return
-        }
+        viewModel.loadFixtureResults(userItems + [helperItem])
         viewModel.toggleSelection(path: helperItem.path)
-        let selectedBefore = viewModel.selectedItems.count
+        #expect(viewModel.selectedItems.count == 3)
 
         await viewModel.clean()
 
@@ -215,10 +237,11 @@ struct JunkCleanerViewModelTests {
             Issue.record("phase should be .done")
             return
         }
-        // The helper item moved through the spy; every fixture user item failed to trash.
+        // The helper item moved through the spy; the user items failed to trash.
         #expect(movedCount == 1)
-        #expect(failedCount == selectedBefore - movedCount)
+        #expect(failedCount == userItems.count)
         #expect(!viewModel.items.contains { $0.path == helperItem.path })
+        #expect(viewModel.items.count == userItems.count)
     }
 
     @Test("a successful clean moves the selected files and reports real figures")
@@ -230,10 +253,21 @@ struct JunkCleanerViewModelTests {
             .appendingPathComponent("junk-clean-\(UUID().uuidString)", isDirectory: true)
         try fileManager.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try? fileManager.removeItem(at: root) }
-        let names = (0..<3).map { "junk-clean-\($0).db" }
+        // UUID-embedded names make the Trash landing path deterministic even against
+        // leftovers from earlier runs (CleanerTrashTests' collision note): a fixed
+        // name would make `trashItem` land as "<name> 2.db" and the cleanup below
+        // could then remove an unrelated pre-existing file. The Trash cleanup is a
+        // `defer`, so a failed expectation still leaves no debris behind.
+        let names = (0..<3).map { "junk-clean-\(UUID().uuidString)-\($0).db" }
         let payload = Data("sos-mac junk clean test".utf8)
         for name in names {
             try payload.write(to: root.appendingPathComponent(name))
+        }
+        let trash = try fileManager.url(for: .trashDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        defer {
+            for name in names {
+                try? fileManager.removeItem(at: trash.appendingPathComponent(name))
+            }
         }
         let rule = JunkRule(id: "test-caches",
                             label: "Test Caches",
@@ -261,11 +295,6 @@ struct JunkCleanerViewModelTests {
         #expect(viewModel.selectedPaths.isEmpty)
         for item in scanned {
             #expect(!fileManager.fileExists(atPath: item.path))
-        }
-        // Don't leave test debris in the real Trash.
-        let trash = try fileManager.url(for: .trashDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-        for name in names {
-            try? fileManager.removeItem(at: trash.appendingPathComponent(name))
         }
     }
 
