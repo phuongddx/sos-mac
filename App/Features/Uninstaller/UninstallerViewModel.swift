@@ -29,6 +29,9 @@ final class UninstallerViewModel {
     private(set) var inspectingBundleID: String?
     let progressTracker = ScanProgressTracker()
     private(set) var isInspectingAll = false
+    /// PR 3 (spec §6.6): the store keeps the rows; `loadApps` is first-visit-only
+    /// so re-opening the screen never throws away inspected sizes or selection.
+    private(set) var hasLoadedApps = false
 
     private let enumerator: InstalledAppsEnumerator
     private var inspectAllTask: Task<Void, Never>?
@@ -45,6 +48,8 @@ final class UninstallerViewModel {
         // mid-Inspect-All would throw away every size already computed and
         // desync the run from the list it's writing back into.
         guard !isInspectingAll else { return }
+        guard !hasLoadedApps else { return }
+        hasLoadedApps = true
         apps = enumerator.enumerate()
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
             .map { AppRow(app: $0) }

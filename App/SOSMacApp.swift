@@ -96,6 +96,8 @@ struct SidebarGroup: Identifiable {
 
 struct RootView: View {
     @State private var selection: SidebarDestination? = RootView.initialSelection
+    @Environment(\.modelContext) private var modelContext
+    @State private var store: ModuleStore?
 
     private static var initialSelection: SidebarDestination {
         #if DEBUG
@@ -120,19 +122,32 @@ struct RootView: View {
             #endif
         }
         .uiTestHooks()
+        .task {
+            // PR 3 (spec §6.6): one store owns every view model for the session,
+            // injected through the environment so screens survive navigation.
+            if store == nil {
+                store = ModuleStore(modelContext: modelContext)
+            }
+        }
     }
 
     /// The sidebar and the selected screen.
+    @ViewBuilder
     private var appShell: some View {
-        NavigationSplitView {
-            SidebarView(selection: $selection)
-                .navigationSplitViewColumnWidth(min: 200, ideal: 240)
-        } detail: {
-            detail
-                .moduleToolbar(.shell(for: selection ?? .dashboard))
+        if let store {
+            NavigationSplitView {
+                SidebarView(selection: $selection)
+                    .navigationSplitViewColumnWidth(min: 200, ideal: 240)
+            } detail: {
+                detail
+                    .moduleToolbar(.shell(for: selection ?? .dashboard))
+            }
+            .environment(store)
+            .frame(minWidth: 960, minHeight: 600)  // OD-5
+            .uiTestHooks()
+        } else {
+            ProgressView()
         }
-        .frame(minWidth: 960, minHeight: 600)  // OD-5
-        .uiTestHooks()
     }
 
     @ViewBuilder
@@ -187,6 +202,7 @@ private extension View {
 /// Reduce Transparency. Settings is deliberately absent (no screen yet).
 private struct SidebarView: View {
     @Binding var selection: SidebarDestination?
+    @Environment(ModuleStore.self) private var store
 
     var body: some View {
         ScrollView {
@@ -219,7 +235,8 @@ private struct SidebarView: View {
                 systemImage: destination.systemImage,
                 hue: destination.tileHue,
                 ink: destination.tileInk,
-                isActive: selection == destination
+                isActive: selection == destination,
+                isScanning: store.isScanning(destination)
             )
         }
         .buttonStyle(.plain)

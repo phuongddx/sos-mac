@@ -2,14 +2,16 @@ import SwiftUI
 import CleanCore
 
 struct DuplicateFinderView: View {
-    @State private var viewModel = DuplicateFinderViewModel()
+    @Environment(ModuleStore.self) private var store
+    private var viewModel: DuplicateFinderViewModel { store.duplicates }
 
     var body: some View {
         VStack(spacing: 0) {
             // Visible in every phase (not just idle/scanning) — otherwise
             // there's no way to change mode or start over once a scan
             // reaches results/done short of navigating away from the screen.
-            Picker("Mode", selection: $viewModel.mode) {
+            // `viewModel` is store-owned (PR 3), so the binding is explicit.
+            Picker("Mode", selection: Binding(get: { viewModel.mode }, set: { viewModel.mode = $0 })) {
                 ForEach(DuplicateFinderViewModel.Mode.allCases, id: \.self) { mode in
                     Text(mode.rawValue).tag(mode)
                 }
@@ -42,7 +44,6 @@ struct DuplicateFinderView: View {
         .background(Theme.background)
         .auroraBloom()
         .navigationTitle("Duplicate Finder")
-        .onDisappear { viewModel.cancelScan() }
     }
 
     @ViewBuilder

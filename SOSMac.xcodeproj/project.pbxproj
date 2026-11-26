@@ -17,6 +17,7 @@
 		12A18A19EEF8BE2ED712F44D /* QuarantineRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */; };
 		1B4936A4A6291F165CB9595D /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D556598CDC035EE94F81C8 /* DashboardView.swift */; };
 		1D06AB7F38F03BC556400EB7 /* ScanProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC67E979C262C1B384952044 /* ScanProgressTracker.swift */; };
+		1F40A560B91FC884CF786AB5 /* ModuleStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1B843A3B926BEFB774274F /* ModuleStoreTests.swift */; };
 		2773C6BA3401153349B7A752 /* AuroraBloomModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */; };
 		27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */; };
 		283D3A9E02E9DFF48AFB6210 /* HealthDialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FCCD11654F615F38FBC7AE /* HealthDialView.swift */; };
@@ -69,6 +70,7 @@
 		C4ED66EFBFB0B5605E5E8EC9 /* AuroraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410827EB99A79421DCD4BE06 /* AuroraBackground.swift */; };
 		C525BF54959EB6033641B5C1 /* MenuBarMetricsMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E854DD88191E34B25816AF4E /* MenuBarMetricsMonitor.swift */; };
 		C5E85C60ADA4E920FB90650A /* UITestHooks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C400BD0033715B73C6C5FE06 /* UITestHooks.swift */; };
+		CB9E65B31707640AFEA30196 /* ModuleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA6515595D8B3DA061B0B454 /* ModuleStore.swift */; };
 		D269A378D1225B726E086FE4 /* UITestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE83684E6FDF6AB08F134234 /* UITestFixtures.swift */; };
 		D43BD385637D22053A3464D6 /* SOSMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B658F774CB266713577506C2 /* SOSMacApp.swift */; };
 		D4761BBD0776A6D89B63A73F /* SmartCareViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E244407C254EC7244F5679A6 /* SmartCareViewModel.swift */; };
@@ -134,6 +136,7 @@
 		2212133287D5A40215D51B3F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		22EC34D67EBF39DAB19C31B7 /* SOSButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSButtonStyle.swift; sourceTree = "<group>"; };
 		25FCCD11654F615F38FBC7AE /* HealthDialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDialView.swift; sourceTree = "<group>"; };
+		2D1B843A3B926BEFB774274F /* ModuleStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleStoreTests.swift; sourceTree = "<group>"; };
 		313B297F15BD7FB50466F914 /* MenuBarPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopover.swift; sourceTree = "<group>"; };
 		3378D6B53CDCB0474385C0B8 /* CloudCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCleanupView.swift; sourceTree = "<group>"; };
 		34D556598CDC035EE94F81C8 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
@@ -191,6 +194,7 @@
 		EB1592F9B76A607BFA0C5D29 /* HeroPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeroPanelView.swift; sourceTree = "<group>"; };
 		EB67B89413B962973465246B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		F8220BACD07F979662C76390 /* TreemapKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = TreemapKit; path = Packages/TreemapKit; sourceTree = SOURCE_ROOT; };
+		FA6515595D8B3DA061B0B454 /* ModuleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleStore.swift; sourceTree = "<group>"; };
 		FD7ECA1B33611E22001EF44C /* HelperXPCListenerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperXPCListenerDelegate.swift; sourceTree = "<group>"; };
 		FEDD20C09B7740A9A836FD75 /* ModuleCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleCardView.swift; sourceTree = "<group>"; };
 		FFABD43DC705D2ADFED69B24 /* PerformanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceView.swift; sourceTree = "<group>"; };
@@ -320,6 +324,7 @@
 		5FD202B260011B119848872E /* SOSMacTests */ = {
 			isa = PBXGroup;
 			children = (
+				2D1B843A3B926BEFB774274F /* ModuleStoreTests.swift */,
 				1528BAB4676A01E77E6B9BB1 /* ShellTests.swift */,
 				00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */,
 				7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */,
@@ -337,6 +342,7 @@
 				7BFDB829AB2B5D575B0FDD4E /* DesignSystem */,
 				E8CAA9B4E0A7D6FB1248D169 /* Features */,
 				3ED69B2A9BC865B40322DB40 /* Services */,
+				EF3A8800D3B1D9AC8B910AEB /* State */,
 				537233CFE1D2F0659C0A5F75 /* Support */,
 			);
 			path = App;
@@ -464,6 +470,14 @@
 				F85E9F32DD7D83C5989962AB /* Updater */,
 			);
 			path = Features;
+			sourceTree = "<group>";
+		};
+		EF3A8800D3B1D9AC8B910AEB /* State */ = {
+			isa = PBXGroup;
+			children = (
+				FA6515595D8B3DA061B0B454 /* ModuleStore.swift */,
+			);
+			path = State;
 			sourceTree = "<group>";
 		};
 		F85E9F32DD7D83C5989962AB /* Updater */ = {
@@ -710,6 +724,7 @@
 				8A7D4331AFFDCB5D68F6FE3C /* JunkCleanerViewModel.swift in Sources */,
 				58C8A75DDFB23DEDE787D858 /* KeepBadge.swift in Sources */,
 				5C3F87EDDE3FBF336E4F7040 /* ModuleCardView.swift in Sources */,
+				CB9E65B31707640AFEA30196 /* ModuleStore.swift in Sources */,
 				9048E53AD6C3B192A1A0A66D /* ModuleTileView.swift in Sources */,
 				C1D306350EF9CCE179379F36 /* ModuleToolbar.swift in Sources */,
 				3E38F672530103701AC5A976 /* PerformanceView.swift in Sources */,
@@ -750,6 +765,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1F40A560B91FC884CF786AB5 /* ModuleStoreTests.swift in Sources */,
 				BBF734014F4FBA38476B323D /* SOSCheckboxTests.swift in Sources */,
 				FB08A993FC8FD667E6F92356 /* ShellTests.swift in Sources */,
 				27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */,

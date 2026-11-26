@@ -3,22 +3,11 @@ import SwiftData
 import CleanCore
 
 struct ProtectionView: View {
-    @Environment(\.modelContext) private var modelContext
-    @State private var viewModel: ProtectionViewModel?
+    @Environment(ModuleStore.self) private var store
+    private var viewModel: ProtectionViewModel { store.protection }
 
     var body: some View {
-        Group {
-            if let viewModel {
-                ProtectionContentView(viewModel: viewModel)
-            } else {
-                ProgressView()
-            }
-        }
-        .task {
-            if viewModel == nil {
-                viewModel = ProtectionViewModel(modelContext: modelContext)
-            }
-        }
+        ProtectionContentView(viewModel: viewModel)
         .navigationTitle("Protection")
     }
 }
@@ -79,7 +68,6 @@ private struct ProtectionContentView: View {
         }
         .background(Theme.background)
         .auroraBloom()
-        .onDisappear { viewModel.cancelScan() }
     }
 
     /// `ProtectionScanner` pre-counts every file across all six allowlist

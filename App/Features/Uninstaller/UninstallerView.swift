@@ -7,7 +7,8 @@ import CleanCore
 /// "last used" date, so those mockup columns are omitted rather than
 /// fabricated. See plans/0725-1315-apply-open-design-system/phase-04-retrofit.md.
 struct UninstallerView: View {
-    @State private var viewModel = UninstallerViewModel()
+    @Environment(ModuleStore.self) private var store
+    private var viewModel: UninstallerViewModel { store.uninstaller }
 
     var body: some View {
         content
