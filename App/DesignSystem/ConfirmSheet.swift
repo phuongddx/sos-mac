@@ -46,12 +46,20 @@ struct ConfirmSheet: View {
         let items: [ConfirmItem]
         /// The module hue behind the icon tile.
         let hue: Color
+        /// Cloud variant: the provider the copy names ("Google Drive" when
+        /// nil — §4.8's canonical variant). One component, five variants;
+        /// the provider is data, not a restyle.
+        let providerName: String?
         let confirm: @MainActor (_ confirmed: ConfirmSelection) -> Void
         /// Cancel — never triggers the removal.
         let cancel: @MainActor () -> Void
         var reviewItems: (@MainActor () -> Void)?
 
         var id: String { "confirm-\(variant.rawValue)" }
+
+        /// The provider the cloud copy names (§4.8 pins "Google Drive" as
+        /// the canonical spelling when none is given).
+        var cloudProvider: String { providerName ?? "Google Drive" }
 
         init(variant: Variant,
              count: Int,
@@ -62,6 +70,7 @@ struct ConfirmSheet: View {
              appStoreNote: Bool = false,
              items: [ConfirmItem] = [],
              hue: Color = Theme.Color.primary,
+             providerName: String? = nil,
              confirm: @escaping @MainActor (_ confirmed: ConfirmSelection) -> Void,
              cancel: @escaping @MainActor () -> Void,
              reviewItems: (@MainActor () -> Void)? = nil) {
@@ -74,6 +83,7 @@ struct ConfirmSheet: View {
             self.appStoreNote = appStoreNote
             self.items = items
             self.hue = hue
+            self.providerName = providerName
             self.confirm = confirm
             self.cancel = cancel
             self.reviewItems = reviewItems
@@ -183,7 +193,7 @@ struct ConfirmSheet: View {
             }
             return text + Text(" to the Trash?")
         case .cloud:
-            return Text("Delete ") + count + Text(" file\(model.count == 1 ? "" : "s") from Google Drive?")
+            return Text("Delete ") + count + Text(" file\(model.count == 1 ? "" : "s") from \(model.cloudProvider)?")
         case .uninstall:
             if let appName = model.appName {
                 return Text("Move ") + Text(appName).fontWeight(.semibold) + Text(" and ") + count
@@ -207,7 +217,7 @@ struct ConfirmSheet: View {
                     paragraph("System Caches are included: macOS will ask for your password once.")
                 }
             case .cloud:
-                paragraph("These files are deleted on Google Drive's servers, not moved to the Trash on this Mac. You can restore them only from Google Drive's own trash, and SOS Mac can't undo this.")
+                paragraph("These files are deleted on \(model.cloudProvider)'s servers, not moved to the Trash on this Mac. You can restore them only from \(model.cloudProvider)'s own trash, and SOS Mac can't undo this.")
             case .uninstall:
                 if let appName = model.appName {
                     paragraph("Quit \(appName) first if it's open. You can put everything back from the Trash in Finder.")
@@ -236,10 +246,10 @@ struct ConfirmSheet: View {
     /// The cloud acknowledgement: the Delete button stays disabled until it is on.
     private var acknowledgement: some View {
         HStack(alignment: .top, spacing: Theme.Spacing.s2) {
-            SOSCheckbox(isSelected: state.acknowledged, label: "I understand these files are deleted on Google Drive.") {
+            SOSCheckbox(isSelected: state.acknowledged, label: "I understand these files are deleted on \(model.cloudProvider).") {
                 state.toggleAcknowledgement()
             }
-            Text("I understand these files are deleted on Google Drive.")
+            Text("I understand these files are deleted on \(model.cloudProvider).")
                 .font(Theme.Font.callout)
                 .foregroundStyle(Theme.Color.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
@@ -266,10 +276,10 @@ struct ConfirmSheet: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
             } else {
-                // Cloud: "Delete from Google Drive (danger, disabled until the checkbox is
-                // ticked) · Cancel (prominent)".
+                // Cloud: "Delete from «Provider» (danger, disabled until the
+                // checkbox is ticked) · Cancel (prominent)".
                 HStack(spacing: Theme.Spacing.s2) {
-                    Button("Delete from Google Drive") { confirmAndDismiss() }
+                    Button("Delete from \(model.cloudProvider)") { confirmAndDismiss() }
                         .sosButton(.danger)
                         .disabled(!state.isConfirmEnabled)
                     cancelButton

@@ -144,6 +144,7 @@ struct ModuleScreen<Content: View>: View {
             selectedSizeText: selection?.sizeText,
             ctaLabel: module.reviewActionTitle,
             isCTAEnabled: (selection?.count ?? 0) > 0 && actions.primary != nil,
+            isCTADanger: module.isReviewCTADanger,
             ctaAction: actions.primary
         )
     }
