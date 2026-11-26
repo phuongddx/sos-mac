@@ -10,14 +10,6 @@ enum BadgeStyle: CaseIterable, Sendable {
     case neutral
     case accent
 
-    /// Legacy name still used by the pre-redesign screens; removed in PR 16.
-    @available(*, deprecated, message: "Use .caution")
-    static var attention: BadgeStyle { .caution }
-
-    /// Legacy name still used by the pre-redesign screens; removed in PR 16.
-    @available(*, deprecated, message: "Use .risky")
-    static var risk: BadgeStyle { .risky }
-
     /// The kind's colour: its tint, its symbol, and its label (rule T4).
     var color: Color {
         switch self {

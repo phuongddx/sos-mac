@@ -15,9 +15,6 @@ import AppKit
 ///
 /// Inside this type the names `Color`, `Gradient` and `Font` refer to the nested token
 /// namespaces, so SwiftUI's own types are always written `SwiftUI.Color` etc.
-///
-/// The pre-redesign token names (`background`, `surface`, `accent`, …) survive as
-/// deprecated shims at the bottom of the file; they are removed in PR 16.
 enum Theme {
     // MARK: - Colour tokens (28)
 
@@ -156,27 +153,6 @@ enum Theme {
         static let s6: CGFloat = 24
         static let s8: CGFloat = 32
         static let s12: CGFloat = 48
-
-        // Legacy names → nearest Palette C step (deprecated; removed in PR 16).
-        @available(*, deprecated, message: "Use the Palette C token Theme.Spacing.s1")
-        static let xs: CGFloat = s1
-        @available(*, deprecated, message: "Use the Palette C token Theme.Spacing.s2")
-        static let sm: CGFloat = s2
-        @available(*, deprecated, message: "Use the Palette C token Theme.Spacing.s3")
-        static let md: CGFloat = s3
-        @available(*, deprecated, message: "Use the Palette C token Theme.Spacing.s4")
-        static let lg: CGFloat = s4
-        @available(*, deprecated, message: "Use the Palette C token Theme.Spacing.s5")
-        static let xl: CGFloat = s5
-        @available(*, deprecated, message: "Use the Palette C token Theme.Spacing.s6")
-        static let xxl: CGFloat = s6
-        @available(*, deprecated, message: "Use the Palette C token Theme.Spacing.s8")
-        static let xxxl: CGFloat = s8
-        @available(*, deprecated, message: "Use the Palette C token Theme.Spacing.s12")
-        static let huge: CGFloat = s12
-        /// No Palette C step reaches 80 pt; the old value is kept so the old layout does not move.
-        @available(*, deprecated, message: "Use the Palette C token Theme.Spacing.s12 or a layout container")
-        static let giant: CGFloat = 80
     }
 
     enum Radius {
@@ -211,17 +187,6 @@ enum Theme {
         static let mono = SwiftUI.Font.system(.caption, design: .monospaced)
     }
 
-    /// Pre-redesign point sizes, still used by the old layout. Unchanged.
-    enum TextSize {
-        static let xs: CGFloat = 12
-        static let sm: CGFloat = 14
-        static let base: CGFloat = 16
-        static let lg: CGFloat = 20
-        static let xl: CGFloat = 24
-        static let xxl: CGFloat = 32
-        static let xxxl: CGFloat = 48
-    }
-
     /// Two-layer soft elevation — apply via the `.elevation(_:)` view modifier, not by
     /// reading these directly. Dark layers are black-based; light layers are `#141A33`-based (spec §2.4).
     enum Elevation {
@@ -252,64 +217,6 @@ enum Theme {
             }
         }
     }
-}
-
-// MARK: - Legacy shims (deprecated — removed in PR 16)
-
-extension Theme {
-    @available(*, deprecated, message: "Use the Palette C token Theme.Color.bgBase")
-    static let background = Color.bgBase
-    @available(*, deprecated, message: "Use the Palette C token Theme.Color.card")
-    static let surface = Color.card
-    @available(*, deprecated, message: "Use the Palette C token Theme.Color.textPrimary")
-    static let foreground = Color.textPrimary
-    @available(*, deprecated, message: "Use the Palette C token Theme.Color.textSecondary")
-    static let muted = Color.textSecondary
-    @available(*, deprecated, message: "Use the Palette C token Theme.Derived.hairline")
-    static let border = Derived.hairline
-
-    /// Fill and `.tint` only. As an icon or text colour use `Theme.Color.primary` (spec T2).
-    @available(*, deprecated, message: "Use the Palette C token Theme.Color.primaryDeep (fills) or Theme.Color.primary (icons, text)")
-    static let accent = Color.primaryDeep
-    @available(*, deprecated, message: "Use the Palette C token Theme.Color.neonCyan")
-    static let accent2 = Color.neonCyan
-    @available(*, deprecated, message: "Use the Palette C token Theme.Gradient.soft")
-    static let accentGradient = Gradient.soft
-    @available(*, deprecated, message: "Use the Palette C token Theme.Color.success")
-    static let success = Color.success
-    @available(*, deprecated, message: "Use the Palette C token Theme.Color.warning")
-    static let warn = Color.warning
-    @available(*, deprecated, message: "Use the Palette C token Theme.Color.danger")
-    static let danger = Color.danger
-
-    /// Old module identity colours, now pointing at `Theme.Hue`.
-    enum ModuleHue {
-        /// The dashboard has no hue of its own in Palette C; it uses Smart Care's.
-        @available(*, deprecated, message: "Use the Palette C token Theme.Hue.smartcare")
-        static let dashboard = Hue.smartcare
-        @available(*, deprecated, message: "Use the Palette C token Theme.Hue.smartcare")
-        static let smartCare = Hue.smartcare
-        @available(*, deprecated, message: "Use the Palette C token Theme.Hue.junk")
-        static let junkCleaner = Hue.junk
-        @available(*, deprecated, message: "Use the Palette C token Theme.Hue.uninstaller")
-        static let uninstaller = Hue.uninstaller
-        @available(*, deprecated, message: "Use the Palette C token Theme.Hue.updater")
-        static let updater = Hue.updater
-        @available(*, deprecated, message: "Use the Palette C token Theme.Hue.spacelens")
-        static let spaceLens = Hue.spacelens
-        @available(*, deprecated, message: "Use the Palette C token Theme.Hue.duplicates")
-        static let duplicateFinder = Hue.duplicates
-        @available(*, deprecated, message: "Use the Palette C token Theme.Hue.performance")
-        static let performance = Hue.performance
-        @available(*, deprecated, message: "Use the Palette C token Theme.Hue.cloud")
-        static let cloudCleanup = Hue.cloud
-        @available(*, deprecated, message: "Use the Palette C token Theme.Hue.protection")
-        static let protection = Hue.protection
-        /// Palette C has no Settings hue and no Settings screen exists yet; neutral text colour stands in.
-        @available(*, deprecated, message: "Palette C has no Settings hue; use Theme.Color.textSecondary")
-        static let settings = Color.textSecondary
-    }
-
 }
 
 // MARK: - Helpers

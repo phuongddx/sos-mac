@@ -111,7 +111,7 @@ struct DoneView: View {
                     if let hint {
                         HStack(alignment: .top, spacing: Theme.Spacing.s2) {
                             Image(systemName: "info.circle")
-                                .font(.system(size: Theme.TextSize.sm))
+                                .font(.system(size: 14))
                                 .foregroundStyle(Theme.Color.textSecondary)
                                 .padding(.top, 1)
                             Text(hint)
