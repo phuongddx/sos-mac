@@ -17,6 +17,9 @@ struct ReviewBarView: View {
     var noun: String = "item"
     var ctaLabel: String = "Move to Trash…"
     var isCTAEnabled: Bool = true
+    /// Danger style — reserved for the server-side cloud delete (§4.4);
+    /// every other review bar keeps the prominent style.
+    var isCTADanger: Bool = false
     var ctaAction: (@MainActor () -> Void)?
 
     var body: some View {
@@ -33,7 +36,7 @@ struct ReviewBarView: View {
             } label: {
                 Text(ctaLabel)
             }
-            .sosButton(.prominent)
+            .sosButton(isCTADanger ? .danger : .prominent)
             .disabled(!isCTAEnabled || ctaAction == nil)
         }
         .padding(.horizontal, Self.horizontalPadding)
