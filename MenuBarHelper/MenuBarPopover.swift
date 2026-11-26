@@ -23,8 +23,7 @@ struct MenuBarPopover: View {
             MenuBarMetricCard(
                 title: "Memory",
                 valueText: monitor.memoryPercentText ?? "—",
-                detailText: monitor.memoryDetailText,
-                progress: monitor.memoryFraction
+                detailText: monitor.memoryDetailText
             )
 
             Divider().overlay(Theme.Derived.hairline)
@@ -98,7 +97,7 @@ private struct MenuBarMetricCard: View {
     let title: String
     let valueText: String
     let detailText: String?
-    let progress: Double?
+    var progress: Double? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s1) {
@@ -119,8 +118,7 @@ private struct MenuBarMetricCard: View {
             }
 
             if let progress {
-                ProgressView(value: min(max(progress, 0), 1))
-                    .tint(Theme.Hue.performance)
+                MenuBarMeter(fraction: progress)
             }
         }
         .padding(Theme.Spacing.s3)
@@ -130,5 +128,24 @@ private struct MenuBarMetricCard: View {
             RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous)
                 .strokeBorder(Theme.Derived.hairline)
         )
+    }
+}
+
+/// The prototype's `.meter.sm` (4 pt): a `hairline-strong` track with a
+/// `gradient-soft` fill (spec §5.11; `Hue.performance` fails 3:1 on a light card, T5).
+private struct MenuBarMeter: View {
+    let fraction: Double
+
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    .fill(Theme.Derived.hairlineStrong)
+                RoundedRectangle(cornerRadius: 2, style: .continuous)
+                    .fill(Theme.Gradient.soft)
+                    .frame(width: min(max(fraction, 0), 1) * geo.size.width)
+            }
+        }
+        .frame(height: 4)
     }
 }
