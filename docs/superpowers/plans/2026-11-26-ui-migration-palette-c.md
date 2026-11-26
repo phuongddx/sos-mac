@@ -2,7 +2,7 @@
 
 > **For agentic workers:** implement this plan PR by PR with the superpowers executing-plans workflow (one branch per PR, task-by-task). Steps use checkbox (`- [ ]`) syntax for tracking. Read the spec first: [`docs/superpowers/specs/2026-11-26-ui-migration-palette-c-design.md`](../specs/2026-11-26-ui-migration-palette-c-design.md).
 
-Status: **Draft for review. Do not start until Phương approves the spec** and the decisions in §6 below are settled or their defaults accepted.
+Status: **Approved.** Phương approved the spec and settled every open decision (spec §10) on 2026-11-26; implementation may start.
 Date: 2026-11-26
 Code baseline: `main` @ `0587765`.
 

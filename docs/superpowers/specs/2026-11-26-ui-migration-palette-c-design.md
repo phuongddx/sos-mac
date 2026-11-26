@@ -1,6 +1,6 @@
 # SOS Mac UI Migration — Palette C "Midnight Glass" (Design Spec)
 
-Status: **Draft for review. Not approved for implementation.** Phương approves this document (and the open decisions in §10) before any screen PR starts.
+Status: **Approved for implementation.** Phương approved this document and settled every open decision in §10 on 2026-11-26.
 Date: 2026-11-26
 Author: SOS Mac bot. Design: @Designer (OpenDesign project "SOS Mac Redesign v1 — Aurora Indigo"). Palette research: Worker-G1 (`sos-mac-purple-neon-palette-g1.md`).
 Code baseline: `main` @ `0587765`. Current UI: [`docs/redesign/current-ui-inventory.md`](../../redesign/current-ui-inventory.md) ("inventory" below).
@@ -766,7 +766,34 @@ Also out: localisation; menu-bar auto-launch; a per-module status or badge in th
 
 ---
 
-## 10. Open decisions for Phương
+## 10. Decisions — settled by Phương, 2026-11-26
+
+> **Status: Decided.** Phương reviewed this spec on 2026-11-26 and accepted every recommendation below (OD-1 → OD-18, OD-a, OD-b). The accepted option is now the decision, not a default. The original options and rationale are kept below for the record.
+>
+> **OD-1 note:** PR 1 implements with the derived `[D]` light values exactly as tabulated in §2.3–2.4. The Designer's final Palette C light values replace them before PR 1 merges into the integration branch (coordination via Zed).
+
+| Item | Decision (Phương, 2026-11-26) |
+|---|---|
+| OD-1 | (1) Report's C light + the derived `[D]` values; Designer's final light values replace them before PR 1 merges |
+| OD-2 | (1) Real macOS window toolbar |
+| OD-3 | (1) Scan keeps running; sidebar shows a cyan busy dot |
+| OD-4 | (1) macOS sheet for confirmations |
+| OD-5 | Minimum window 960 × 600 |
+| OD-6 | (1) No separate high-contrast variants |
+| OD-a | (2) Similar Images: nothing pre-selected |
+| OD-b | (1) Show the total size of each duplicate set |
+| OD-7 | Nothing pre-selected in iCloud Drive |
+| OD-8 | Keep Junk "Ignore" |
+| OD-9 | Include the running-app check before uninstalling |
+| OD-10 | (i) Include the failed-check state; (ii) explicit Check button only |
+| OD-11 | (1) Add `inUseBytes` in CleanCore (PR E1) and use it in the UI |
+| OD-12 | Real app icons on Uninstaller and Updater (letter tile fallback only) |
+| OD-13 | (1) Local name filter in the Uninstaller |
+| OD-14 | (1) Keep the current behaviour; copy "Open SOS Mac at login" |
+| OD-15 | Remove "Check VirusTotal" |
+| OD-16 | (1) Pin a read-only prototype snapshot in `docs/redesign/prototype/` |
+| OD-17 | Background snapshot script by default; XCUITest only with Phương at the machine |
+| OD-18 | (1) Full Disk Access / iCloud as instructions in banner text, no button |
 
 Each item: the question, the options, my recommendation, and the default I will plan with if it stays open. "Blocks" names the first PR that needs the answer.
 
