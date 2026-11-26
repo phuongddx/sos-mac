@@ -60,6 +60,7 @@
 		B291176399D37249D9059EE4 /* SOSButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22EC34D67EBF39DAB19C31B7 /* SOSButtonStyle.swift */; };
 		B3BA61A0E30BB10F63410FE9 /* BadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E0B72A04198D2C4C56BD2A9 /* BadgeView.swift */; };
 		B8C5878B6778CB1B3A13E84F /* ProtectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A434E7961B33074CE62CB1F /* ProtectionView.swift */; };
+		BBF734014F4FBA38476B323D /* SOSCheckboxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */; };
 		BD71724FAF539B30C395699C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25382720F5D7E946EA383D8 /* EmptyStateView.swift */; };
 		BFB9A6BD1B872593B8AE2E6E /* DuplicateFinderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */; };
 		C4ED66EFBFB0B5605E5E8EC9 /* AuroraBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410827EB99A79421DCD4BE06 /* AuroraBackground.swift */; };
@@ -146,6 +147,7 @@
 		73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevationModifier.swift; sourceTree = "<group>"; };
 		763ECBD32513F45F9539E313 /* DuplicateFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderView.swift; sourceTree = "<group>"; };
 		7B273DE218A656524EA73BAF /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
+		7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSCheckboxTests.swift; sourceTree = "<group>"; };
 		81C7D66DD1EE9A33BC0AC613 /* SOSCheckbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSCheckbox.swift; sourceTree = "<group>"; };
 		81CEFBC9F798A11B713EDB0E /* ResultTileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultTileView.swift; sourceTree = "<group>"; };
 		8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraSurface.swift; sourceTree = "<group>"; };
@@ -310,6 +312,7 @@
 			isa = PBXGroup;
 			children = (
 				00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */,
+				7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */,
 				971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */,
 				BFA193C1EA5BD96B19DE3B6D /* UITestHooksTests.swift */,
 			);
@@ -735,6 +738,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BBF734014F4FBA38476B323D /* SOSCheckboxTests.swift in Sources */,
 				27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */,
 				FA25CBA768BC9879F743EFDB /* ThemeContrastTests.swift in Sources */,
 				6F39304CD1EE0F2EEE12E060 /* UITestHooksTests.swift in Sources */,

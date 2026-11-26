@@ -10,10 +10,10 @@ import SwiftUI
 /// `radial-gradient(50% 60% at 30% 10%, hue, transparent 70%)` and
 /// `radial-gradient(40% 50% at 85% 0%, indigo, transparent 70%)`, clipped to the content.
 struct AuroraBackground: View {
-    /// Brand indigo of the second bloom (spec §4.9, `#6366F1`). It is not a `Theme.Color` token
-    /// yet — it is also the last stop of `Theme.Gradient.soft` and `Theme.Gradient.aurora`.
-    /// Proposed as `Theme.Color.indigo`; until then it lives here.
-    private static let indigo = Color(hex: "#6366F1")
+    /// Brand indigo of the second bloom (spec §4.9, `#6366F1`) — Palette C's indigo is the
+    /// Junk hue value, so the token is reused instead of a second hard-coded hex. If the
+    /// palette re-tunes, this follows the brand stop of `Gradient.soft`/`Gradient.aurora`.
+    private static let indigo = Theme.Hue.junk
 
     let hue: Color
 
