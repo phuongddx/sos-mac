@@ -101,7 +101,7 @@ final class ModuleStore {
         case .dashboard:
             return false
         case .smartCare:
-            return _smartCare?.phase == .scanning || _smartCare?.phase == .cleaning
+            return _smartCare?.phase == .scanning || (_smartCare?.isCleaning ?? false)
         case .junkCleaner:
             guard let junk = _junkCleaner else { return false }
             // PR 5: `.cleaning` carries its selection count, so it needs a pattern match.
