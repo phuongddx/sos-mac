@@ -50,9 +50,11 @@ while getopts "p:s:a:w:1d:ne:h" opt; do
     *) usage >&2; exit 2 ;;
   esac
 done
-for pair in "${EXTRA_ENV[@]}"; do
-  [[ "$pair" =~ ^SOSMAC_UITEST_[A-Z_]+=[A-Za-z0-9._-]+$ ]] || die "bad -e pair (want SOSMAC_UITEST_KEY=value): $pair"
-done
+if [[ ${#EXTRA_ENV[@]} -gt 0 ]]; then
+  for pair in "${EXTRA_ENV[@]}"; do
+    [[ "$pair" =~ ^SOSMAC_UITEST_[A-Z_]+=[A-Za-z0-9._-]+$ ]] || die "bad -e pair (want SOSMAC_UITEST_KEY=value): $pair"
+  done
+fi
 [[ -n "$NAME" ]] || { usage >&2; exit 2; }
 if [[ -z "$SPECS" ]]; then
   # PR 5's default matrix: the eight Junk & Cache lifecycle states (start/scanning/
@@ -129,9 +131,11 @@ for appearance in ${APPEARANCES//,/ }; do
       --env "SOSMAC_UITEST_WINDOW_SIZE=$SIZE"
       --env "SOSMAC_UITEST_OUTPUT_DIR=$OUT"
     )
-    for pair in "${EXTRA_ENV[@]}"; do
-      open_args+=(--env "$pair")
-    done
+    if [[ ${#EXTRA_ENV[@]} -gt 0 ]]; then
+      for pair in "${EXTRA_ENV[@]}"; do
+        open_args+=(--env "$pair")
+      done
+    fi
     open -n -g -a "$APP" "${open_args[@]}"
 
     # Our pid: the process whose executable is the throwaway build.
