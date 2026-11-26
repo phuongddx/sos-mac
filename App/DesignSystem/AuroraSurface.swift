@@ -37,3 +37,22 @@ extension View {
         modifier(AuroraSurface(cornerRadius: cornerRadius))
     }
 }
+
+#if DEBUG
+/// SwiftUI's `accessibilityReduceTransparency` is read-only, so the UITest hook
+/// (PR 0) cannot override it directly. Debug code that adapts to reduced transparency
+/// reads `accessibilityReduceTransparency || uiTestReduceTransparency`. It is `false`
+/// unless `SOSMAC_UITEST_REDUCE_TRANSPARENCY=1`, so it can only force the reduced
+/// look on, never hide a real system setting. Defined here — not in `UITestHooks.swift` —
+/// so this file stays self-contained and shareable with the `MenuBarHelper` target.
+private struct UITestReduceTransparencyKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    var uiTestReduceTransparency: Bool {
+        get { self[UITestReduceTransparencyKey.self] }
+        set { self[UITestReduceTransparencyKey.self] = newValue }
+    }
+}
+#endif

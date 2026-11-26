@@ -77,49 +77,49 @@ struct DashboardView: View {
                 ModuleCardView(
                     systemImage: "trash", title: "Junk & Cache", subtitle: "Cache & temp files",
                     stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral,
-                    hue: Theme.hue(for: .junkCleaner)
+                    hue: Theme.hue(for: .junkCleaner), ink: Theme.ink(for: .junkCleaner)
                 ) { onSelect(.junkCleaner) }
 
                 ModuleCardView(
                     systemImage: "xmark.bin", title: "Uninstaller", subtitle: "Apps & leftovers",
                     stat: "Not reviewed this session", badgeText: "Open", badgeStyle: .neutral,
-                    hue: Theme.hue(for: .uninstaller)
+                    hue: Theme.hue(for: .uninstaller), ink: Theme.ink(for: .uninstaller)
                 ) { onSelect(.uninstaller) }
 
                 ModuleCardView(
                     systemImage: "arrow.triangle.2.circlepath", title: "Updater", subtitle: "App updates",
                     stat: "Not checked this session", badgeText: "Open", badgeStyle: .neutral,
-                    hue: Theme.hue(for: .updater)
+                    hue: Theme.hue(for: .updater), ink: Theme.ink(for: .updater)
                 ) { onSelect(.updater) }
 
                 ModuleCardView(
                     systemImage: "square.grid.3x3.fill", title: "Space Lens", subtitle: "Disk usage map",
                     stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral,
-                    hue: Theme.hue(for: .spaceLens)
+                    hue: Theme.hue(for: .spaceLens), ink: Theme.ink(for: .spaceLens)
                 ) { onSelect(.spaceLens) }
 
                 ModuleCardView(
                     systemImage: "doc.on.doc", title: "Duplicate Finder", subtitle: "Exact & similar files",
                     stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral,
-                    hue: Theme.hue(for: .duplicateFinder)
+                    hue: Theme.hue(for: .duplicateFinder), ink: Theme.ink(for: .duplicateFinder)
                 ) { onSelect(.duplicateFinder) }
 
                 ModuleCardView(
                     systemImage: "gauge.with.dots.needle.50percent", title: "Performance", subtitle: "Live system metrics",
                     stat: performanceStat, badgeText: "Live", badgeStyle: .safe,
-                    hue: Theme.hue(for: .performance)
+                    hue: Theme.hue(for: .performance), ink: Theme.ink(for: .performance)
                 ) { onSelect(.performance) }
 
                 ModuleCardView(
                     systemImage: "icloud", title: "Cloud Cleanup", subtitle: "Drive · Dropbox · OneDrive · iCloud",
                     stat: "Not opened this session", badgeText: "Open", badgeStyle: .neutral,
-                    hue: Theme.hue(for: .cloudCleanup)
+                    hue: Theme.hue(for: .cloudCleanup), ink: Theme.ink(for: .cloudCleanup)
                 ) { onSelect(.cloudCleanup) }
 
                 ModuleCardView(
                     systemImage: "shield.lefthalf.filled", title: "Protection", subtitle: "Known-signature malware scan",
                     stat: "Not scanned this session", badgeText: "Open", badgeStyle: .neutral,
-                    hue: Theme.hue(for: .protection)
+                    hue: Theme.hue(for: .protection), ink: Theme.ink(for: .protection)
                 ) { onSelect(.protection) }
             }
         }
