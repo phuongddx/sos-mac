@@ -85,8 +85,8 @@ review/cleaning/done (nothing is installed), Performance has no scan lifecycle, 
   sheets (OD-4/CF-1), so dialogs are not part of this static matrix (covered by `ConfirmSheetTests` and manual runs).
 - **Not in the app matrix:** the board's Palette A light reference, the menu-bar popover (separate MenuBarHelper
   target) and the `.tag-engine` annotations (design notes, not UI).
-- **Dock wording per module (PR 16, Appendix A):** Space Lens results "Review…" / done "Back to Map" / empty
-  "Choose Folder…"; Uninstaller "Review" (disabled until an app is chosen) with "Measure Again", done "Back to
+- **Dock wording per module (PR 16, Appendix A):** Space Lens results "Review…" / done CTA "Scan Again" with the
+  card's "Back to Map" leading / empty "Choose Folder…"; Uninstaller "Review" (disabled until an app is chosen) with "Measure Again", done "Back to
   Apps"; Updater "Check Again" (no disabled Clean); Protection "Review" with no disabled Clean or Open Trash;
   Cloud API providers have no Open Trash after a server-side delete. Other modules keep the default labels.
 - **Dashboard orb ring (PR 16):** the small hero orb now has the prototype's thin ring (inset 10 pt); full-size

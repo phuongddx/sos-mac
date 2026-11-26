@@ -8,11 +8,11 @@ import CleanCore
 /// `ModuleScreen` (toolbar, aurora canvas, dock, sheet).
 ///
 /// Documented deviations from the prototype (also in the PR 9 gallery README):
-/// - `results` keeps the frame's hard-coded "Clean" CTA, disabled: an app is removed from
-///   its own review, never in bulk. The frame cannot relabel it without touching
-///   `ModuleScreen`, which is outside this PR's write set.
-/// - `done` / `empty` keep the frame's "Scan Again" CTA; the card's own buttons carry the
-///   honest labels ("Back to Apps", "Check Again").
+/// - `results` carries the dock's per-module "Review" CTA (Appendix A, PR 16), disabled
+///   with a hint: an app is removed from its own review, never in bulk, so the state
+///   offers no primary action.
+/// - `done` / `empty` show "Back to Apps" / "Check Again" on the card; the dock matches
+///   through `ModuleIdentity.dock` (Appendix A, PR 16).
 /// - Two-column review: the app panel sits over the frame's (empty) groups column.
 struct UninstallerView: View {
     @Environment(ModuleStore.self) private var store
@@ -383,7 +383,8 @@ private struct UninstallerScreen: View {
             if viewModel.lifecycle == .error {
                 actions.primary = { Task { await viewModel.retryFailedInspects() } }
             } else {
-                // "Clean" stays disabled: an app is removed from its own review (deviation).
+                // The dock CTA is "Review" (Appendix A): an app is removed from its own
+                // review, never in bulk — no primary action while browsing the list.
                 actions.scanAgain = { viewModel.startInspectAll() }
             }
         case .reviewing:

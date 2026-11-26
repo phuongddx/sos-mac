@@ -102,8 +102,8 @@ struct ModuleIdentity: Hashable, Sendable {
             // §5.5: the cleanup list opens from "Review…" (one button, not two).
             copy.resultsAction = "Review…"
             copy.openReview = nil
-            // §5.5 done: Back to Map leads; §5.5 empty: Choose Folder….
-            copy.doneAction = "Back to Map"
+            // §5.5 done: the card's "Back to Map" leads (prominent); the dock CTA is
+            // "Scan Again" with "Open Trash" trailing. Empty: "Choose Folder…".
             copy.emptyAction = "Choose Folder…"
         case .uninstaller:
             // §5.7: results "Review" + "Measure Again"; done "Back to Apps"; empty "Check Again".
