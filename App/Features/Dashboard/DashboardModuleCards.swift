@@ -84,7 +84,7 @@ struct DashboardModuleSection: View {
             DashboardSectionLabel(text: title)
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: Self.spacing) {
-                    ForEach(entries) { card($0).frame(minWidth: Self.minimumCardWidth) }
+                    ForEach(entries) { card($0).frame(minWidth: Self.minimumCardWidth, idealWidth: Self.minimumCardWidth) }
                 }
                 VStack(spacing: Self.spacing) {
                     ForEach(Array(stride(from: 0, to: entries.count, by: 2)), id: \.self) { start in
