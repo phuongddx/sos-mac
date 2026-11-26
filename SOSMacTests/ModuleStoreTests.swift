@@ -66,7 +66,9 @@ struct ModuleStoreTests {
         // The view model is the exact type the store owns; a scan is started,
         // "the view goes away" (there is no teardown to call anymore — that is
         // the change), and the scan must still finish with its results.
-        let viewModel = DuplicateFinderViewModel(rootPath: try Self.makeTree(fileCount: 6000))
+        let rootPath = try Self.makeTree(fileCount: 6000)
+        defer { try? FileManager.default.removeItem(atPath: rootPath) }
+        let viewModel = DuplicateFinderViewModel(rootPath: rootPath)
         #expect(viewModel.startScan())
 
         var sawScanning = false
@@ -85,7 +87,9 @@ struct ModuleStoreTests {
 
     @Test("a second startScan on a scanning module is refused")
     func secondStartScanIsRefused() async throws {
-        let viewModel = DuplicateFinderViewModel(rootPath: try Self.makeTree(fileCount: 6000))
+        let rootPath = try Self.makeTree(fileCount: 6000)
+        defer { try? FileManager.default.removeItem(atPath: rootPath) }
+        let viewModel = DuplicateFinderViewModel(rootPath: rootPath)
         #expect(viewModel.startScan())
         for _ in 0..<500 {
             if viewModel.phase == .scanning { break }
