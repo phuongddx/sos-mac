@@ -25,7 +25,7 @@ struct UpdaterView: View {
         .navigationTitle("Updater")
         .task {
             viewModel.loadApps()
-            await viewModel.autoCheckIfNeeded()
+            viewModel.autoCheckIfNeeded()
         }
     }
 

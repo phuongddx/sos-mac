@@ -40,12 +40,13 @@ final class UpdaterViewModel {
             .map { AppUpdateRow(app: $0) }
     }
 
-    /// The one automatic check per session (PR 3); explicit checks still go
-    /// through `checkAll()` from the buttons.
-    func autoCheckIfNeeded() async {
+    /// The one automatic check per session (PR 3). Unstructured, like the other
+    /// modules' scans, so navigating away does not cancel it (OD-3); explicit
+    /// checks still go through `checkAll()` from the buttons.
+    func autoCheckIfNeeded() {
         guard !hasAutoChecked else { return }
         hasAutoChecked = true
-        await checkAll()
+        Task { await checkAll() }
     }
 
     /// Reachable from three places (`.task`, the empty state's action, and

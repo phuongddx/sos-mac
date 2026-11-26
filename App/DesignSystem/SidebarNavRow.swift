@@ -98,6 +98,9 @@ struct SidebarNavRow: View {
         .frame(height: 32)
         .background(rowFill, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        // Spec §8: colour is never the only signal — the row says "scanning"
+        // for VoiceOver when the busy dot is showing.
+        .accessibilityLabel(isScanning ? "\(title), scanning" : title)
         .onHover { isHovering = $0 }
         .animation(Theme.Motion.quick, value: isHovering)
     }
