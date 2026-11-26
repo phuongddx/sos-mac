@@ -55,8 +55,8 @@ per-item moving progress and an honest Done card ("At least …" wherever a fold
 included), plus a "Quit «App» first" check for running apps.
 ## Safety impact
 Uninstalling always opens the confirmation (Cancel default); running apps are blocked.
-Deletes only go through ProgressiveCleaner → Cleaner.clean (Trash). No removeItem, no
-invented sizes.
+Deletes only go through ProgressiveCleaner → Cleaner.clean (Trash). No removeItem in
+app code, no invented sizes.
 ## Prototype states implemented
 start · scanning · results · review · cleaning · done · empty · error
 ## Tests run
