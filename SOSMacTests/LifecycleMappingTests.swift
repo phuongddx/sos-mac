@@ -128,3 +128,109 @@ struct LifecycleMappingTests {
         }
     }
 }
+
+/// PR 16: the per-module dock wording the shared frame reads from `ModuleIdentity.dock`
+/// (spec Appendix A — "one verb per idea"). The defaults are the cleaner modules' text, so
+/// every screen that does not override a label keeps today's dock exactly.
+@Suite("Dock copy (Appendix A)")
+struct DockCopyTests {
+
+    private static let cleaners: [SidebarDestination] = [.smartCare, .junkCleaner, .duplicateFinder, .cloudCleanup]
+
+    @Test("cleaner modules keep the frame's default wording", arguments: cleaners)
+    func cleanersKeepDefaults(module: SidebarDestination) {
+        let dock = ModuleIdentity(module: module).dock
+        #expect(dock.resultsAction == "Clean")
+        #expect(dock.openReview == "Review Items…")
+        #expect(dock.nothingSelectedMeta == "Nothing selected")
+        #expect(dock.resultsHint == nil)
+        #expect(dock.resultsFinish == "Scan Again")
+        #expect(dock.doneAction == "Scan Again")
+        #expect(dock.doneSecondary == "Open Trash")
+        #expect(dock.emptyAction == "Scan Again")
+        #expect(dock == DockCopy())
+    }
+
+    @Test("Space Lens: Review…, Scan Again, Choose Folder…")
+    func spaceLens() {
+        let dock = ModuleIdentity(module: .spaceLens).dock
+        #expect(dock.resultsAction == "Review…")
+        #expect(dock.openReview == nil)
+        #expect(dock.resultsFinish == "Scan Again")
+        #expect(dock.doneAction == "Scan Again")
+        #expect(dock.doneSecondary == "Open Trash")
+        #expect(dock.emptyAction == "Choose Folder…")
+    }
+
+    @Test("Uninstaller: Review + hint, Measure Again, Back to Apps, Check Again")
+    func uninstaller() {
+        let dock = ModuleIdentity(module: .uninstaller).dock
+        #expect(dock.resultsAction == "Review")
+        #expect(dock.openReview == nil)
+        #expect(dock.resultsHint == "Choose an app to review what it left behind")
+        #expect(dock.resultsFinish == "Measure Again")
+        #expect(dock.doneAction == "Back to Apps")
+        #expect(dock.doneSecondary == "Open Trash")
+        #expect(dock.emptyAction == "Check Again")
+    }
+
+    @Test("Updater: read-only — Check Again, nothing to clean, review or trash")
+    func updater() {
+        let dock = ModuleIdentity(module: .updater).dock
+        #expect(dock.resultsAction == "Check Again")
+        #expect(dock.openReview == nil)
+        #expect(dock.resultsFinish == nil)
+        #expect(dock.doneSecondary == nil)
+        #expect(dock.emptyAction == "Check Again")
+    }
+
+    @Test("Protection (§5.10): Review + hint, Scan Again, no Open Trash — it quarantines")
+    func protection() {
+        let dock = ModuleIdentity(module: .protection).dock
+        #expect(dock.resultsAction == "Review")
+        #expect(dock.openReview == nil)
+        #expect(dock.resultsHint == "Review the finding, then quarantine it")
+        #expect(dock.resultsFinish == "Scan Again")
+        #expect(dock.doneAction == "Scan Again")
+        #expect(dock.doneSecondary == nil)
+        #expect(dock.emptyAction == "Scan Again")
+    }
+
+    @Test("start and review CTA labels are unchanged by the dock copy")
+    func startAndReviewLabels() {
+        #expect(ModuleIdentity(module: .updater).startActionTitle == "Check")
+        #expect(ModuleIdentity(module: .uninstaller).startActionTitle == "Measure All")
+        #expect(ModuleIdentity(module: .protection).reviewActionTitle == "Quarantine…")
+        #expect(ModuleIdentity(module: .junkCleaner).startActionTitle == "Scan")
+        #expect(ModuleIdentity(module: .junkCleaner).reviewActionTitle == "Move to Trash…")
+    }
+
+    @Test("Cloud API providers have no Trash to open; iCloud Drive keeps it")
+    func cloudDoneSecondary() {
+        #expect(CloudCleanupView.frameIdentity(for: .iCloudDrive).dock.doneSecondary == "Open Trash")
+        for provider in CloudCleanupViewModel.Provider.allCases where provider != .iCloudDrive {
+            #expect(CloudCleanupView.frameIdentity(for: provider).dock.doneSecondary == nil)
+        }
+    }
+}
+
+/// PR 16 (declared extension 2): the orb ring inset is a metric. Every full-size orb keeps the
+/// spec's 34 pt; the Dashboard's 112 pt orb passes the prototype's 10 pt.
+@Suite("Orb ring inset")
+struct OrbRingInsetTests {
+    @Test("start, scanning and done orbs keep the 34 pt ring")
+    func fullSizeOrbsKeepDefault() {
+        #expect(ModuleOrbView.Metrics.start.ringInset == 34)
+        #expect(ModuleOrbView.Metrics.scanning.ringInset == 34)
+        #expect(ModuleOrbView.Metrics.done.ringInset == 34)
+        #expect(ModuleOrbView.Metrics(side: 112, glyphSide: 68, glyphRadius: 18, symbolSize: 34).ringInset == 34)
+    }
+
+    @Test("the Dashboard orb's ring sits at 10 pt, inside its 112 pt side")
+    func dashboardRing() {
+        let metrics = ModuleOrbView.Metrics(side: 112, glyphSide: 68, glyphRadius: 18, symbolSize: 34, ringInset: 10)
+        #expect(metrics.ringInset == 10)
+        // The ring's diameter must clear the glyph tile (otherwise it hides behind it).
+        #expect(metrics.side - 2 * metrics.ringInset > metrics.glyphSide)
+    }
+}

@@ -12,7 +12,7 @@ left, light on the right**; `cloud-contact-sheet.png` is the whole overview
 
 Captured with `Scripts/ui-snapshots.sh -p pr-11 -s
 cloud=start,cloud=scanning,cloud=results,cloud=review,cloud=cleaning,cloud=done,cloud=empty,cloud=error,cloud=gdrive,cloud=dropbox,cloud=onedrive,cloud=drive`
-— background-only window capture, 1200×760 pt (2400×1520 px). The extra state
+— background-only window capture, 1200×760 pt (2400×1520 px; regenerated in PR 16, see the last section). The extra state
 names are lowercase fixture keys spelled by
 `CloudCleanupViewModel.loadFixtureFromLaunchHooks`: `gdrive` / `dropbox` /
 `onedrive` select their provider in `notConfigured`; `drive` selects Google
@@ -71,6 +71,21 @@ Drive and applies the fixture listing (no launch-variable changes needed).
   exists in the view model and view but is reachable only post-OAuth.
 - The doubled toolbar title is existing shared-frame behaviour (also visible
   in PR 5 and PR 9).
+
+## Regenerated in PR 16 (cleanup)
+
+Every sheet in this folder was re-captured from the final PR 16 build, fixture data only
+(`SOSMAC_UITEST_FIXTURES=1`, `open -g` background launch, `screencapture -l` window capture,
+no foreground, no permission prompt, no real scan). Each `<screen>-<state>-sheet.png` is the dark capture (left) and the light capture (right), each scaled to 920 px wide and joined side by side.
+
+```bash
+Scripts/ui-snapshots.sh -p pr-11 -d /tmp/sosmac-pr16-dd -s cloud=start,…,cloud=error,cloud=gdrive,cloud=dropbox,cloud=onedrive,cloud=drive
+```
+
+- Captures: 24; every one is 2400×1520 px (the raw per-appearance files are generated into the
+  git-ignored `artifacts/ui-snapshots/` and are not committed); no capture is blank.
+- Sheets: 12 × 1840×583. Contact sheet: 1808×1746 (4 per row, dark then light) (dark first, then light).
+- Dock labels (PR 16): iCloud Drive keeps the cleaner defaults. API providers (Google Drive, Dropbox, OneDrive) never show "Open Trash" after a server-side delete — their Done dock has no secondary button (`DockCopy(doneSecondary: nil)`) — which no fixture state reaches (the `drive` state is the pre-delete surface). The API-provider results CTA still reads "Clean": the round 80 pt CTA cannot hold "Delete from Google Drive…", which is the label of the confirm button and of the `drive` dock's own button.
 
 ## PR-description skeleton
 

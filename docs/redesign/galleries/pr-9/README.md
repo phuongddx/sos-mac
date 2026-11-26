@@ -28,10 +28,11 @@ window capture, 1200×760 pt.
   "At least …". Only the app bundle and associated files have measured sizes.
 - **Stop keeps measured sizes.** Stopping Measure All keeps the apps already measured
   (Junk's F2 discards). Nothing is invented for the rest.
-- **Frame CTAs are fixed.** The shared `ModuleScreen` hard-codes the results CTA "Clean"
-  (shown disabled — an app is chosen per row) and the done/empty CTA "Scan Again"; the
-  card carries "Back to Apps" / "Check Again". Label overrides in `ModuleScreen` are a
-  recommended follow-up (out of this PR's write set).
+- **Dock labels follow Appendix A (PR 16).** Results shows the CTA "Review" (disabled — an
+  app is chosen per row, so the left side says "Choose an app to review what it left
+  behind") with "Measure Again" trailing; done shows "Back to Apps" with "Open Trash";
+  empty shows "Check Again". The CTA stays disabled in results because no app is selected —
+  it is not a wired-up Review.
 - **App panel is an overlay** on the review frame's fixed 250 pt groups column
   (Uninstaller has one app, not a list of groups).
 - **Confirmation list shows the engine size** with a "(folder)" suffix, because the shared
@@ -44,6 +45,20 @@ window capture, 1200×760 pt.
   "Quit «App» first" banner (OD-9, running-app check) and Open Trash — covered by
   `SOSMacTests/UninstallerViewModelTests` and the manual run.
 - The doubled toolbar title is existing shared-frame behaviour (also visible in PR 5).
+
+## Regenerated in PR 16 (cleanup)
+
+Every sheet in this folder was re-captured from the final PR 16 build, fixture data only
+(`SOSMAC_UITEST_FIXTURES=1`, `open -g` background launch, `screencapture -l` window capture,
+no foreground, no permission prompt, no real scan). Each `<screen>-<state>-sheet.png` is the dark capture (left) and the light capture (right), each scaled to 920 px wide and joined side by side.
+
+```bash
+Scripts/ui-snapshots.sh -p pr-9 -d /tmp/sosmac-pr16-dd   # uninstaller=start … uninstaller=error
+```
+
+- Captures: 16; every one is 2400×1520 px (the raw per-appearance files are generated into the
+  git-ignored `artifacts/ui-snapshots/` and are not committed); no capture is blank.
+- Sheets: 8 × 1840×583. Contact sheet: 1808×1164 (4×4) (dark first, then light).
 
 ## PR-description skeleton
 

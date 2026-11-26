@@ -42,7 +42,7 @@ struct DashboardView: View {
     private static let contentPadding = EdgeInsets(top: 4, leading: 32, bottom: 32, trailing: 32)
     /// The hero's right column (prototype `grid-template-columns: 1fr 300px`).
     private static let storageColumnWidth: CGFloat = 300
-    private static let orbMetrics = ModuleOrbView.Metrics(side: 112, glyphSide: 68, glyphRadius: 18, symbolSize: 34)
+    private static let orbMetrics = ModuleOrbView.Metrics(side: 112, glyphSide: 68, glyphRadius: 18, symbolSize: 34, ringInset: 10)
 
     private var launcher: DashboardLauncher {
         DashboardLauncher(smartCare: { store.smartCare }, navigate: onSelect)

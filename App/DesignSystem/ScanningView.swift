@@ -85,7 +85,7 @@ struct ScanningView: View {
 
                 if let lede {
                     Text(lede)
-                        .font(.system(size: Theme.TextSize.sm))
+                        .font(.system(size: 14))
                         .foregroundStyle(Theme.Color.textSecondary)
                         .frame(maxWidth: Self.contentWidth, alignment: .leading)
                         .padding(.bottom, Theme.Spacing.s1)

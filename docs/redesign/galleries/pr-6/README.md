@@ -9,7 +9,7 @@ light on the right**; `duplicates-contact-sheet.png` (Exact) and
 bottom two light). Similar-mode sheets are named `duplicates-similar<state>-sheet.png`.
 
 Captured with `Scripts/ui-snapshots.sh -p pr-6 -s duplicates=<state>,duplicates=similar<state>,…`
-— background-only window capture, 1200×760 pt. Similar mode is selected by a `similar`
+— background-only window capture, 1200×760 pt (regenerated in PR 16, see the last section). Similar mode is selected by a `similar`
 prefix on the state name (the script and hooks are out of this PR's write set; the prefix is
 parsed in `DuplicateFinderViewModel.loadFixtureFromLaunchHooks`, DEBUG only).
 
@@ -54,6 +54,22 @@ sheets are the same picture.
 - **Shared-frame quirks, not changed here** (outside the write set; same as Junk & Cache):
   the toolbar shows the module title twice, the Start bullets are centred rather than
   left-aligned, and the review dock repeats the selection summary on both sides.
+
+## Regenerated in PR 16 (cleanup)
+
+Every sheet in this folder was re-captured from the final PR 16 build, fixture data only
+(`SOSMAC_UITEST_FIXTURES=1`, `open -g` background launch, `screencapture -l` window capture,
+no foreground, no permission prompt, no real scan). Each `<screen>-<state>-sheet.png` is the dark capture (left) and the light capture (right), each scaled to 920 px wide and joined side by side.
+
+```bash
+Scripts/ui-snapshots.sh -p pr-6 -d /tmp/sosmac-pr16-dd -s duplicates=start,…,duplicates=error,duplicates=similarstart,…,duplicates=similarerror
+```
+
+- Captures: 32; every one is 2400×1520 px (the raw per-appearance files are generated into the
+  git-ignored `artifacts/ui-snapshots/` and are not committed); no capture is blank.
+- Sheets: 16 × 1840×583 (8 Exact + 8 Similar). Contact sheet: `duplicates-contact-sheet.png` and `duplicates-similar-contact-sheet.png`, each 1808×1164 (4×4) (dark first, then light).
+- The Done sheets are in the set: `duplicates-done-sheet.png` ("2,86 GB moved to the Trash", Copies 8, **Sets kept 6**) and `duplicates-similardone-sheet.png` ("7,6 MB moved to the Trash", Copies 2, **Sets kept 1**). Neither shows a "Couldn't move" stat, because the fixture moves everything.
+- Duplicate Finder keeps the default dock labels, so no label changed here.
 
 ## PR-description skeleton
 
