@@ -106,13 +106,13 @@ struct ModuleStoreTests {
         let store = ModuleStore(modelContext: try Self.makeContext())
         let viewModel = store.updater
         // Real enumeration result is machine-dependent; what matters is that a
-        // second visit does not rebuild the rows (hasLoadedApps guard). The
-        // auto-check flag starts false and is flipped exactly once, in
-        // `autoCheckIfNeeded` (not called here: it would hit real update feeds).
+        // second visit does not rebuild the rows (hasLoadedApps guard). PR 10
+        // (OD-10): visiting never starts a check, so the phase stays `idle` and no
+        // update feed is contacted.
         viewModel.loadApps()
         viewModel.loadApps()
         #expect(viewModel.hasLoadedApps)
-        #expect(!viewModel.hasAutoChecked)
+        #expect(viewModel.phase == .idle)
     }
 
     private static func waitUntilFinished(_ viewModel: DuplicateFinderViewModel) async -> Bool {
