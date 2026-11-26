@@ -30,6 +30,10 @@ struct ComponentGalleryView: View {
 
     @State private var checkbox: SOSCheckbox.State = .mixed
     @State private var rowSelected = true
+    /// The `results` sample's confirmation, presented through `ModuleScreen`'s own sheet
+    /// path (`ModuleSheetPresentation` / `ModuleOverlay.confirmation`) — the same path every
+    /// screen will use.
+    @State private var resultsOverlay: ModuleOverlay?
 
     var body: some View {
         ScrollView {
@@ -52,12 +56,14 @@ struct ComponentGalleryView: View {
                 section("review", "ReviewFrameView — three columns · two columns · kept and focused rows · virtualised") { review }
                 section("review-bar", "ReviewBarView — selection and empty · custom noun") { reviewBars }
                 section("confirm", "ConfirmSheet — trash · cloud · uninstall · quarantine · cleanup list") { confirms }
+                section("sheet", "ConfirmSheet — the real macOS sheet presentation (OD-4, CF-1)") { sheetPresentation }
             }
             .padding(Theme.Spacing.s8)
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .auroraBackground(hue: Theme.Hue.junk)
         .background(Theme.Color.bgBase)
+        .task { resultsOverlay = .confirmation(sheetConfirmModel) }
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("gallery")
     }
@@ -379,7 +385,8 @@ struct ComponentGalleryView: View {
                 escape: ModuleScreen.Actions.Escape(label: "Open System Settings", action: {})),
             progress: state == .scanning ? 0.62 : nil,
             selection: state == .results || state == .review
-                ? ModuleScreen.SelectionSummary(count: 3, sizeText: "1.18 GB") : nil
+                ? ModuleScreen.SelectionSummary(count: 3, sizeText: "1.18 GB") : nil,
+            overlay: state == .results ? $resultsOverlay : nil
         ) {
             switch state {
             case .start:
@@ -675,7 +682,7 @@ struct ComponentGalleryView: View {
                 onGroup: { _ in },
                 detail: nil)
                 .frame(height: 260)
-            Text("Middle column is a SwiftUI List: rows are virtualised (100k-row safe).")
+            Text("Middle column is a virtualised List — a large-fixture pass lands with the screen PRs.")
                 .font(Theme.Font.subheadline)
                 .foregroundStyle(Theme.Color.textSecondary)
         }
@@ -717,6 +724,50 @@ struct ComponentGalleryView: View {
         }
     }
 
+
+    /// The presentation the spec requires (OD-4): a real macOS sheet, not a drawn overlay —
+    /// keyboard trapping, Escape and VoiceOver semantics come free, and the system draws the
+    /// material. Cancel is the default button, so Return and Enter never trigger a removal
+    /// (CF-1); Escape dismisses onto the same cancel path. The sheet drops over the top of
+    /// the window, exactly as it does on a real screen.
+    /// The confirmation the `results` sample presents through `ModuleScreen`'s sheet path.
+    private var sheetConfirmModel: ConfirmSheet.Model {
+        ConfirmSheet.Model(
+            variant: .trash,
+            count: sheetItems.count,
+            sizeText: ConfirmItemList.sizeText(for: sheetItems.reduce(Int64(0)) { $0 + $1.size }),
+            includesSystemCaches: true,
+            isFromResults: true,
+            items: sheetItems,
+            hue: Theme.Hue.junk,
+            confirm: { _ in },
+            cancel: {},
+            reviewItems: {})
+    }
+
+    private var sheetPresentation: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("The `results` frame presents its confirmation through `ModuleScreen`'s sheet path (`ModuleOverlay.confirmation`), so the capture shows the real macOS sheet: the system presentation, the scrolling item list (max-height 132) and Cancel as the default button (CF-1).")
+                .font(Theme.Font.callout)
+                .foregroundStyle(Theme.Color.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .frame(height: 120, alignment: .topLeading)
+    }
+
+    /// Six sample items: the first 5 plus the overflow row, so the list scrolls inside its
+    /// 132 pt box and the buttons below stay visible.
+    private var sheetItems: [ConfirmItem] {
+        [
+            ConfirmItem(id: "sheet-1", name: "Cache.db", size: 612_500_000),
+            ConfirmItem(id: "sheet-2", name: "journal.sqlite", size: 18_400_000),
+            ConfirmItem(id: "sheet-3", name: "old-system.log", size: 96_000_000),
+            ConfirmItem(id: "sheet-4", name: "one-off.tmp", size: 4_096),
+            ConfirmItem(id: "sheet-5", name: "two-off.tmp", size: 8_192),
+            ConfirmItem(id: "sheet-6", name: "three-off.tmp", size: 12_288),
+        ]
+    }
 
     private func confirmModel(_ variant: ConfirmSheet.Variant,
                               items: [ConfirmItem],
