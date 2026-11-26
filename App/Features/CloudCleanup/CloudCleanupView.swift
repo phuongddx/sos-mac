@@ -29,6 +29,8 @@ private struct CloudCleanupScreen: View {
     /// names them through one concrete frame (the reference screen's note).
     private typealias CloudFrame = ModuleScreen<AnyView>
 
+    @Environment(\.self) private var environment
+
     /// The sheet `ModuleScreen` presents (OD-4): a `ConfirmSheet` built by
     /// the view model, cleared on dismiss (Escape and Cancel land here too)
     /// and on a provider switch (a confirmation belongs to one provider).
@@ -302,140 +304,182 @@ private struct CloudCleanupScreen: View {
         return "\(count.formatted()) \(count == 1 ? "file" : "files")"
     }
 
-    // MARK: - iCloud review
+    // MARK: - Review lists (all sets inline — the prototype's cloud layout)
 
-    private var iCloudReviewContent: some View {
-        ReviewFrameView(
-            sections: [ReviewFrameView.GroupSection(id: "icloud-sets",
-                                                    title: "Duplicate sets",
-                                                    groups: iCloudGroupModels)],
-            listHead: iCloudListHead,
-            items: iCloudItemModels,
-            onToggleItem: { viewModel.toggleSelection(key: $0.id) },
-            onFocusItem: { viewModel.focusItem(key: $0.id) },
-            onGroup: { viewModel.selectSet($0.id) },
-            detail: iCloudDetail)
-    }
-
-    private var iCloudGroupModels: [ReviewGroupRow.Model] {
-        viewModel.sets.map { set in
-            let extra = set.extraItems.count
-            return ReviewGroupRow.Model(
-                id: set.id,
-                label: set.title,
-                sub: "\(extra) extra \(extra == 1 ? "copy" : "copies") · \(ByteFormatter.string(fromByteCount: set.extraBytes))",
-                selectedCount: viewModel.selectedCount(in: set),
-                eligibleCount: extra,
-                isCurrent: set.id == viewModel.currentSet?.id)
+    /// The review surfaces draw **every set expanded in one list** (the
+    /// prototype's `?screen=cloud&state=review` / `state=drive`): with the
+    /// providers column beside them, a groups + items + detail split leaves
+    /// the middle column too narrow, and the prototype never uses one for
+    /// Cloud. Composed from the shared `ReviewItemRow` and Theme tokens; the
+    /// keep lock, the row badges and the selection rules are the frame's.
+    private func inlineSetsContent(head: InlineListHead,
+                                   banner: BannerView?,
+                                   sets: [InlineSet]) -> some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 0, pinnedViews: [.sectionHeaders]) {
+                inlineListHead(head)
+                if let banner {
+                    banner
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                ForEach(sets) { set in
+                    Section {
+                        ForEach(set.rows) { row in
+                            ReviewItemRow(model: row,
+                                          toggle: { viewModel.toggleSelection(key: row.id) },
+                                          focus: { })
+                        }
+                    } header: {
+                        setHead(title: set.title, sub: set.sub)
+                    }
+                }
+                // The scroll's breathing room at the bottom.
+                Color.clear.frame(height: Theme.Spacing.s5)
+            }
         }
+        .accessibilityIdentifier("cloud-review")
     }
 
-    private var iCloudListHead: ReviewFrameView.ListHead {
-        let set = viewModel.currentSet
-        let extras = set?.extraItems ?? []
+    /// The review list head (§4.5): title + sub on the left, Select All /
+    /// Deselect All on the right, each disabled when it would change nothing.
+    private func inlineListHead(_ head: InlineListHead) -> some View {
+        HStack(alignment: .center, spacing: Theme.Spacing.s3 - 2) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(head.title)
+                    .font(Theme.Font.headline)
+                    .foregroundStyle(Theme.Color.textPrimary)
+                    .lineLimit(1)
+                if let sub = head.sub {
+                    Text(sub)
+                        .font(Theme.Font.subheadline)
+                        .foregroundStyle(Theme.Color.textSecondary)
+                        .lineLimit(1)
+                }
+            }
+            .frame(minWidth: 0, maxWidth: .infinity, alignment: .leading)
+            HStack(spacing: Theme.Spacing.s2 - 2) {
+                Button("Select All") { viewModel.selectAllExtras() }
+                    .buttonStyle(.sosPlain)
+                    .disabled(!head.isSelectAllEnabled)
+                    .accessibilityIdentifier("cloud-select-all")
+                Button("Deselect All") { viewModel.deselectAll() }
+                    .buttonStyle(.sosPlain)
+                    .disabled(!head.isDeselectAllEnabled)
+                    .accessibilityIdentifier("cloud-deselect-all")
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Theme.Derived.hairline).frame(height: 1)
+        }
+        .background(Theme.Color.card)
+        .accessibilityElement(children: .contain)
+    }
+
+    /// The prototype's `.set-head`: the set's title and its per-copy line,
+    /// pinned while the set's rows scroll past.
+    private func setHead(title: String, sub: String) -> some View {
+        HStack(alignment: .center, spacing: 10) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(Theme.Font.headline)
+                    .foregroundStyle(Theme.Color.textPrimary)
+                    .lineLimit(1)
+                Text(sub)
+                    .font(Theme.Font.subheadline)
+                    .foregroundStyle(Theme.Color.textSecondary)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(EdgeInsets(top: 12, leading: 16, bottom: 8, trailing: 16))
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(ColorMix.mix(Theme.Color.bgBase, Theme.Color.card, fraction: 0.88, in: environment))
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(Theme.Derived.hairline).frame(height: 1)
+        }
+        .accessibilityAddTraits(.isHeader)
+    }
+
+    /// The head's facts for the selected provider: how many of the extra
+    /// copies are already selected gates the two bulk buttons.
+    private var iCloudInlineHead: InlineListHead {
+        let extras = viewModel.sets.flatMap(\.extraItems)
         let selected = extras.filter { (viewModel.selectedPaths[.iCloudDrive] ?? []).contains($0.path) }
-        return ReviewFrameView.ListHead(
+        return InlineListHead(
             title: "\(viewModel.selectedProvider.rawValue) · \(viewModel.sets.count.formatted()) \(viewModel.sets.count == 1 ? "set" : "sets")",
             sub: "The newest copy by date modified is kept.",
             isSelectAllEnabled: selected.count < extras.count,
-            isDeselectAllEnabled: !selected.isEmpty,
-            selectAll: { viewModel.selectAllInCurrentSet() },
-            deselectAll: { viewModel.deselectAllInCurrentSet() })
+            isDeselectAllEnabled: !selected.isEmpty)
     }
 
-    private var iCloudItemModels: [ReviewItemRow.Model] {
-        (viewModel.currentSet?.items ?? []).map { item in
-            let kept = viewModel.isKept(item.path)
-            return ReviewItemRow.Model(
-                id: item.path,
-                name: (item.path as NSString).lastPathComponent,
-                path: item.path,
-                sizeText: ByteFormatter.string(fromByteCount: item.size),
-                isKept: kept,
-                isSelected: !kept && (viewModel.selectedPaths[.iCloudDrive] ?? []).contains(item.path),
-                isFocused: viewModel.focusedItem?.path == item.path)
-        }
-    }
-
-    private var iCloudDetail: AnyView? {
-        guard let item = viewModel.focusedItem else { return nil }
-        return AnyView(CloudICloudDetail(item: item, isKept: viewModel.isKept(item.path)))
-    }
-
-    // MARK: - API provider results (the server-delete surface)
-
-    /// `?screen=cloud&state=drive`: the sets list with **nothing selected**,
-    /// the warn banner above the list, and the review bar's danger CTA that
-    /// opens the cloud confirmation. Rendered through the shared review
-    /// frame; the prototype draws the sets inline — a documented difference
-    /// (the app's review pattern is the frame, PR 6 and PR 7 alike).
-    private func apiResultsContent(_ provider: CloudCleanupViewModel.Provider) -> some View {
-        ReviewFrameView(
-            sections: [ReviewFrameView.GroupSection(id: "api-sets",
-                                                    title: "Duplicate sets",
-                                                    groups: apiGroupModels)],
-            listHead: apiListHead(provider),
-            items: apiItemModels,
-            onToggleItem: { viewModel.toggleSelection(key: $0.id) },
-            onFocusItem: { viewModel.focusItem(key: $0.id) },
-            onGroup: { viewModel.selectSet($0.id) },
-            detail: apiDetail)
-    }
-
-    private var apiGroupModels: [ReviewGroupRow.Model] {
-        viewModel.apiSets.map { set in
-            let extra = set.extraItems.count
-            return ReviewGroupRow.Model(
-                id: set.id,
-                label: set.title,
-                sub: "\(extra) extra \(extra == 1 ? "copy" : "copies") · \(ByteFormatter.string(fromByteCount: set.extraBytes))",
-                selectedCount: viewModel.selectedAPICount(in: set),
-                eligibleCount: extra,
-                isCurrent: set.id == viewModel.currentAPISet?.id)
-        }
-    }
-
-    private func apiListHead(_ provider: CloudCleanupViewModel.Provider) -> ReviewFrameView.ListHead {
-        let set = viewModel.currentAPISet
-        let extras = set?.extraItems ?? []
+    private func apiInlineHead(_ provider: CloudCleanupViewModel.Provider) -> InlineListHead {
+        let extras = viewModel.apiSets.flatMap(\.extraItems)
         let selected = extras.filter { (viewModel.selectedPaths[provider] ?? []).contains($0.id) }
-        return ReviewFrameView.ListHead(
+        return InlineListHead(
             title: "\(provider.rawValue) · \(viewModel.apiSets.count.formatted()) \(viewModel.apiSets.count == 1 ? "set" : "sets")",
             sub: "\(viewModel.listedFileCount.formatted()) files listed. Nothing is selected: deleting happens on \(provider.rawValue)’s servers.",
             isSelectAllEnabled: selected.count < extras.count,
-            isDeselectAllEnabled: !selected.isEmpty,
-            selectAll: { viewModel.selectAllInCurrentSet() },
-            deselectAll: { viewModel.deselectAllInCurrentSet() },
-            banner: AnyView(serverDeleteBanner(provider)))
+            isDeselectAllEnabled: !selected.isEmpty)
     }
 
-    /// §4.7/§5.6: the warn banner sits above the list it names.
-    private func serverDeleteBanner(_ provider: CloudCleanupViewModel.Provider) -> some View {
-        BannerView(kind: .warn,
-                   title: "Deleting here is not Move to Trash",
-                   text: "Files go to \(provider.rawValue)’s own trash, on \(provider.rawValue)’s servers. SOS Mac can’t undo it.")
-            .accessibilityIdentifier("cloud-server-delete-banner")
-    }
-
-    private var apiItemModels: [ReviewItemRow.Model] {
-        (viewModel.currentAPISet?.items ?? []).map { file in
-            let kept = viewModel.isKept(file.id)
-            return ReviewItemRow.Model(
-                id: file.id,
-                name: file.name,
-                path: file.modifiedDate.map { "Modified \($0.formatted(date: .abbreviated, time: .shortened))" },
-                sizeText: ByteFormatter.string(fromByteCount: file.size),
-                isKept: kept,
-                isSelected: !kept && (viewModel.selectedPaths[viewModel.selectedProvider] ?? []).contains(file.id),
-                isFocused: viewModel.focusedAPIFile?.id == file.id)
+    private var iCloudInlineSets: [InlineSet] {
+        viewModel.sets.map { set in
+            InlineSet(
+                id: set.id,
+                title: set.title,
+                sub: "\(set.items.count) \(set.items.count == 1 ? "copy" : "copies") · \(ByteFormatter.string(fromByteCount: set.copySize)) each",
+                rows: set.items.map { item in
+                    let kept = viewModel.isKept(item.path)
+                    return ReviewItemRow.Model(
+                        id: item.path,
+                        name: (item.path as NSString).lastPathComponent,
+                        path: item.path,
+                        sizeText: ByteFormatter.string(fromByteCount: item.size),
+                        isKept: kept,
+                        isSelected: !kept && (viewModel.selectedPaths[.iCloudDrive] ?? []).contains(item.path))
+                })
         }
     }
 
-    private var apiDetail: AnyView? {
-        guard let file = viewModel.focusedAPIFile else { return nil }
-        return AnyView(CloudAPIDetail(file: file,
-                                      provider: viewModel.selectedProvider,
-                                      isKept: viewModel.isKept(file.id)))
+    private func apiInlineSets(_ provider: CloudCleanupViewModel.Provider) -> [InlineSet] {
+        viewModel.apiSets.map { set in
+            InlineSet(
+                id: set.id,
+                title: set.title,
+                sub: "\(set.items.count) \(set.items.count == 1 ? "copy" : "copies") · \(ByteFormatter.string(fromByteCount: set.copySize)) each",
+                rows: set.items.map { file in
+                    let kept = viewModel.isKept(file.id)
+                    return ReviewItemRow.Model(
+                        id: file.id,
+                        name: file.name,
+                        path: file.modifiedDate.map { "Modified \($0.formatted(date: .abbreviated, time: .shortened))" },
+                        sizeText: ByteFormatter.string(fromByteCount: file.size),
+                        isKept: kept,
+                        isSelected: !kept && (viewModel.selectedPaths[provider] ?? []).contains(file.id))
+                })
+        }
+    }
+
+    private var iCloudReviewContent: some View {
+        inlineSetsContent(head: iCloudInlineHead, banner: nil, sets: iCloudInlineSets)
+    }
+
+    private func apiResultsContent(_ provider: CloudCleanupViewModel.Provider) -> some View {
+        inlineSetsContent(head: apiInlineHead(provider),
+                          banner: serverDeleteBanner(provider),
+                          sets: apiInlineSets(provider))
+    }
+
+    /// §4.7/§5.6: the warn banner sits above the list it names.
+    private func serverDeleteBanner(_ provider: CloudCleanupViewModel.Provider) -> BannerView {
+        BannerView(kind: .warn,
+                   title: "Deleting here is not Move to Trash",
+                   text: "Files go to \(provider.rawValue)’s own trash, on \(provider.rawValue)’s servers. SOS Mac can’t undo it.")
     }
 
     // MARK: - Cleaning, done, empty, error
@@ -697,68 +741,23 @@ private struct CloudCleanupScreen: View {
     private static let tileSpacing: CGFloat = 14
     /// The prototype's `.results` side padding (styles.css).
     private static let contentPadding: CGFloat = 40
-}
 
-/// The iCloud review frame's detail column: the copy's path, size, modified
-/// date and the keep explanation — with the iCloud-specific consequence
-/// (other devices) spelled out where the user decides.
-private struct CloudICloudDetail: View {
-    let item: ScanItem
-    /// This copy is the set's keep copy: it can't be selected.
-    let isKept: Bool
-
-    var body: some View {
-        ReviewDetailView(title: (item.path as NSString).lastPathComponent) {
-            if isKept {
-                ReviewDetailView.FreeRow {
-                    KeepBadge()
-                }
-            }
-            ReviewDetailView.PathRow(label: "Location", value: item.path)
-            ReviewDetailView.KeyRow(label: "Size", value: ByteFormatter.string(fromByteCount: item.size))
-            ReviewDetailView.KeyRow(label: "Date modified", value: Self.modifiedText(item.lastModified))
-            ReviewDetailView.Explanation(
-                leadIn: isKept ? "Kept automatically." : "An extra copy.",
-                text: isKept
-                    ? "This is the newest copy by date modified, so it can’t be selected."
-                    : "A copy of the newest file. It goes to the Trash on this Mac; iCloud removes the copy from your other devices once you empty the Trash.")
-        }
+    /// The inline review list's head facts: the title/sub lines and the two
+    /// bulk buttons' gates (each disabled when it would change nothing).
+    private struct InlineListHead {
+        let title: String
+        var sub: String?
+        var isSelectAllEnabled: Bool
+        var isDeselectAllEnabled: Bool
     }
 
-    private static func modifiedText(_ date: Date?) -> String {
-        guard let date else { return "Unknown" }
-        return date.formatted(date: .abbreviated, time: .shortened)
+    /// One set drawn inline: its header facts and its rows (the prototype's
+    /// `.set-head` + its `.irow`s).
+    private struct InlineSet: Identifiable {
+        let id: String
+        let title: String
+        let sub: String
+        let rows: [ReviewItemRow.Model]
     }
 }
 
-/// The server-delete detail column: provider, size, modified date, and the
-/// honest explanation of what a delete does — reversible only on the
-/// provider's side, never from this Mac.
-private struct CloudAPIDetail: View {
-    let file: CloudFileMetadata
-    let provider: CloudCleanupViewModel.Provider
-    let isKept: Bool
-
-    var body: some View {
-        ReviewDetailView(title: file.name) {
-            if isKept {
-                ReviewDetailView.FreeRow {
-                    KeepBadge()
-                }
-            }
-            ReviewDetailView.KeyRow(label: "Provider", value: provider.rawValue)
-            ReviewDetailView.KeyRow(label: "Size", value: ByteFormatter.string(fromByteCount: file.size))
-            ReviewDetailView.KeyRow(label: "Date modified", value: Self.modifiedText(file.modifiedDate))
-            ReviewDetailView.Explanation(
-                leadIn: isKept ? "Kept automatically." : "An extra copy.",
-                text: isKept
-                    ? "This is the newest copy by modified date, so it can’t be selected."
-                    : "Deleting removes the file on \(provider.rawValue)’s servers — not to the Trash on this Mac. Restore it only from \(provider.rawValue)’s own trash.")
-        }
-    }
-
-    private static func modifiedText(_ date: Date?) -> String {
-        guard let date else { return "Unknown" }
-        return date.formatted(date: .abbreviated, time: .shortened)
-    }
-}
