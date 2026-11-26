@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The aurora background (spec §4.9), which replaces `.auroraBloom()` on every screen: two
+/// The aurora background (spec §4.9): two
 /// non-interactive radial washes behind the content — the module hue at `Glow.auroraAlpha`
 /// (upper left) and a brand indigo of the same strength (upper right). It is how the module hue
 /// reaches the content area.
