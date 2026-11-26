@@ -73,6 +73,23 @@ targets:
       - package: CleanCore
         product: CleanCore
 
+  SOSMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: SOSMacTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac.tests
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/SOSMac.app/Contents/MacOS/SOSMac"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+    dependencies:
+      - target: SOSMac
+
   SOSMacUITests:
     type: bundle.ui-testing
     platform: macOS
@@ -113,10 +130,12 @@ schemes:
     build:
       targets:
         SOSMac: all
+        SOSMacTests: [test]
         SOSMacUITests: [test]
     run:
       config: Debug
     test:
       config: Debug
       targets:
+        - SOSMacTests
         - SOSMacUITests

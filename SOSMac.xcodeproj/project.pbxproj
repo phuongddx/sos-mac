@@ -18,6 +18,7 @@
 		1D06AB7F38F03BC556400EB7 /* ScanProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC67E979C262C1B384952044 /* ScanProgressTracker.swift */; };
 		1D3798F980BB1E4064A8BD92 /* AuroraCareScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B59147E006B726F9138C2B12 /* AuroraCareScreenshotTests.swift */; };
 		2773C6BA3401153349B7A752 /* AuroraBloomModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */; };
+		27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */; };
 		283D3A9E02E9DFF48AFB6210 /* HealthDialView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25FCCD11654F615F38FBC7AE /* HealthDialView.swift */; };
 		29AC5FD388B0CFD5BBEE361C /* TreemapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 35EB24D1CC05056D12B5D6DD /* TreemapKit */; };
 		302D413F61D134A94F8799EF /* SidebarNavRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68651E3F484F9D5B790F279C /* SidebarNavRow.swift */; };
@@ -79,6 +80,13 @@
 			remoteGlobalIDString = 80C8485EDEE67072AE469396;
 			remoteInfo = SOSMac;
 		};
+		AECC33CD082BFF37EE6CAF85 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1AE0FE96F145338D24088645 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 80C8485EDEE67072AE469396;
+			remoteInfo = SOSMac;
+		};
 		C01DE2D8B6FC01A6AE906E61 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 1AE0FE96F145338D24088645 /* Project object */;
@@ -89,7 +97,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarDestinationTests.swift; sourceTree = "<group>"; };
 		09BAF8424C039491F5324208 /* JunkCleanerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JunkCleanerViewModel.swift; sourceTree = "<group>"; };
+		0A2A54290A0C90569DA0BE23 /* SOSMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SOSMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A434E7961B33074CE62CB1F /* ProtectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtectionView.swift; sourceTree = "<group>"; };
 		10DAA0AD06134B381646E567 /* UpdaterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterView.swift; sourceTree = "<group>"; };
 		166E1A0591F7BDC42C0E7853 /* PrivilegedHelper */ = {isa = PBXFileReference; includeInIndex = 0; path = PrivilegedHelper; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -200,6 +210,7 @@
 				031D2175453B3650FA05DA1D /* MenuBarHelper */,
 				3591A759099A03CB61D76D3E /* Packages */,
 				E611D953C857CEE55508FCE2 /* PrivilegedHelper */,
+				5FD202B260011B119848872E /* SOSMacTests */,
 				BDC8CFB2E7DB46D06FD11255 /* SOSMacUITests */,
 				2C72880C804DAEB47011B4D1 /* Products */,
 			);
@@ -211,6 +222,7 @@
 				C43826BD2FA6A0D54664D89D /* MenuBarHelper.app */,
 				166E1A0591F7BDC42C0E7853 /* PrivilegedHelper */,
 				5C3280BFF2C7337B3913B507 /* SOSMac.app */,
+				0A2A54290A0C90569DA0BE23 /* SOSMacTests.xctest */,
 				E5454942F08539F2B5554DD6 /* SOSMacUITests.xctest */,
 			);
 			name = Products;
@@ -259,6 +271,14 @@
 				E244407C254EC7244F5679A6 /* SmartCareViewModel.swift */,
 			);
 			path = SmartCare;
+			sourceTree = "<group>";
+		};
+		5FD202B260011B119848872E /* SOSMacTests */ = {
+			isa = PBXGroup;
+			children = (
+				00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */,
+			);
+			path = SOSMacTests;
 			sourceTree = "<group>";
 		};
 		629744F5A23957F4DCE526F7 /* App */ = {
@@ -480,6 +500,24 @@
 			productReference = E5454942F08539F2B5554DD6 /* SOSMacUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		DC2555E2A721C8CD296A66C0 /* SOSMacTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 827983E703B715564F6F86B6 /* Build configuration list for PBXNativeTarget "SOSMacTests" */;
+			buildPhases = (
+				A31F12539A07EC4BAE5BD9CF /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				327D6967D25BB4BC0031E45A /* PBXTargetDependency */,
+			);
+			name = SOSMacTests;
+			packageProductDependencies = (
+			);
+			productName = SOSMacTests;
+			productReference = 0A2A54290A0C90569DA0BE23 /* SOSMacTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -502,10 +540,12 @@
 						ProvisioningStyle = Automatic;
 						TestTargetID = 80C8485EDEE67072AE469396;
 					};
+					DC2555E2A721C8CD296A66C0 = {
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 7204ECF185D832CD34AA5F6F /* Build configuration list for PBXProject "SOSMac" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -519,13 +559,15 @@
 				6CA7B90501C92CBD17BA0BC5 /* XCLocalSwiftPackageReference "Packages/TreemapKit" */,
 			);
 			preferredProjectObjectVersion = 77;
+			productRefGroup = 2C72880C804DAEB47011B4D1 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0F44861A6320DC1CC94A51C6 /* MenuBarHelper */,
-				1E8F47B298496F8078E1C1BB /* PrivilegedHelper */,
 				80C8485EDEE67072AE469396 /* SOSMac */,
+				0F44861A6320DC1CC94A51C6 /* MenuBarHelper */,
+				DC2555E2A721C8CD296A66C0 /* SOSMacTests */,
 				DAAC64D4060DF2CB19ED3851 /* SOSMacUITests */,
+				1E8F47B298496F8078E1C1BB /* PrivilegedHelper */,
 			);
 		};
 /* End PBXProject section */
@@ -632,6 +674,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A31F12539A07EC4BAE5BD9CF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AB80D1051861F62752A8916E /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -666,6 +716,11 @@
 			isa = PBXTargetDependency;
 			target = 0F44861A6320DC1CC94A51C6 /* MenuBarHelper */;
 			targetProxy = C01DE2D8B6FC01A6AE906E61 /* PBXContainerItemProxy */;
+		};
+		327D6967D25BB4BC0031E45A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 80C8485EDEE67072AE469396 /* SOSMac */;
+			targetProxy = AECC33CD082BFF37EE6CAF85 /* PBXContainerItemProxy */;
 		};
 		33B4A1AE1EDE0B0F63FD8B9F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -782,6 +837,26 @@
 			};
 			name = Debug;
 		};
+		2C7E90D09BFA7D8A4351D270 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nextlabs.sosmac.tests;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SOSMac.app/Contents/MacOS/SOSMac";
+			};
+			name = Release;
+		};
 		3EDFDDB200302644CE6A3613 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -800,6 +875,26 @@
 				TEST_TARGET_NAME = SOSMac;
 			};
 			name = Release;
+		};
+		46FB1AB4A47499CEB3C7A820 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nextlabs.sosmac.tests;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SOSMac.app/Contents/MacOS/SOSMac";
+			};
+			name = Debug;
 		};
 		4BD3B715D50CB37CDB334725 /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -984,6 +1079,15 @@
 			buildConfigurations = (
 				11A7D6A6B6FE83DA1E263017 /* Debug */,
 				4BD3B715D50CB37CDB334725 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		827983E703B715564F6F86B6 /* Build configuration list for PBXNativeTarget "SOSMacTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				46FB1AB4A47499CEB3C7A820 /* Debug */,
+				2C7E90D09BFA7D8A4351D270 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
