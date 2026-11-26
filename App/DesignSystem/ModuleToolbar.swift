@@ -55,8 +55,16 @@ private struct ModuleToolbarModifier: ViewModifier {
                         .accessibilityIdentifier("toolbar-back")
                     }
                 }
-                ToolbarItem(placement: .principal) {
-                    ModuleToolbarTitle(title: model.title, subtitle: model.subtitle)
+                if #available(macOS 26, *) {
+                    // The prototype draws the title as plain text, not inside a glass capsule.
+                    ToolbarItem(placement: .principal) {
+                        ModuleToolbarTitle(title: model.title, subtitle: model.subtitle)
+                    }
+                    .sharedBackgroundVisibility(.hidden)
+                } else {
+                    ToolbarItem(placement: .principal) {
+                        ModuleToolbarTitle(title: model.title, subtitle: model.subtitle)
+                    }
                 }
                 if let tools = model.tools {
                     ToolbarItem(placement: .primaryAction) {
