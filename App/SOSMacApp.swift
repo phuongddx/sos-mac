@@ -42,19 +42,14 @@ enum SidebarDestination: String, CaseIterable, Identifiable {
 }
 
 struct RootView: View {
-    @State private var selection: SidebarDestination? = .dashboard
+    @State private var selection: SidebarDestination? = RootView.initialSelection
 
-    /// UI-test-only appearance override, set via `SOSMAC_UITEST_APPEARANCE`
-    /// launch environment ("light"/"dark") so screenshot verification doesn't
-    /// depend on — or mutate — the user's actual system appearance. `nil`
-    /// (the default in every normal launch) leaves the system appearance in
-    /// full control, exactly as before.
-    private var uiTestColorScheme: ColorScheme? {
-        switch ProcessInfo.processInfo.environment["SOSMAC_UITEST_APPEARANCE"] {
-        case "light": return .light
-        case "dark": return .dark
-        default: return nil
-        }
+    private static var initialSelection: SidebarDestination {
+        #if DEBUG
+        return UITestHooks.current.destination ?? .dashboard
+        #else
+        return .dashboard
+        #endif
     }
 
     var body: some View {
@@ -86,7 +81,24 @@ struct RootView: View {
             }
         }
         .frame(minWidth: 720, minHeight: 480)
-        .preferredColorScheme(uiTestColorScheme)
+        .uiTestHooks()
+    }
+}
+
+private extension View {
+    /// Debug-only `SOSMAC_UITEST_*` overrides (see `UITestHooks`). In Release, and in a
+    /// Debug launch with no variables, this changes nothing.
+    @ViewBuilder
+    func uiTestHooks() -> some View {
+        #if DEBUG
+        let hooks = UITestHooks.current
+        self
+            .preferredColorScheme(hooks.colorScheme)
+            .environment(\.uiTestReduceTransparency, hooks.reduceTransparency)
+            .background { if let size = hooks.windowSize { UITestWindowSizer(size: size) } }
+        #else
+        self
+        #endif
     }
 }
 
