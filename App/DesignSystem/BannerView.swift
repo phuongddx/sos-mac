@@ -101,8 +101,11 @@ struct BannerView: View {
         .padding(.vertical, Metrics.verticalPadding)
         .padding(.horizontal, Metrics.horizontalPadding)
         // The tint is defined over `card`, so the banner is opaque wherever it sits.
-        .background(color.opacity(Metrics.backgroundAlpha))
-        .background(Theme.Color.card)
+        .background(
+            RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous)
+                .fill(Theme.Color.card)
+                .overlay(color.opacity(Metrics.backgroundAlpha))
+        )
         .overlay(
             RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous)
                 .strokeBorder(color.opacity(Metrics.borderAlpha), lineWidth: 1)
