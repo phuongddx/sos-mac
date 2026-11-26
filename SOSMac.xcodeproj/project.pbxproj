@@ -41,6 +41,7 @@
 		77C50036ABEC8F54C3F86362 /* ProtectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80C73390FD3C0119541F076 /* ProtectionViewModel.swift */; };
 		7812BF7A3831BCCE1307EA7E /* HelperXPCListenerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7ECA1B33611E22001EF44C /* HelperXPCListenerDelegate.swift */; };
 		78879E5A7BE2B8C2721395E8 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78116D60A7591C3E1D1E111 /* Theme.swift */; };
+		7D9BBB20AB26D0CFE845E76D /* AuroraSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */; };
 		89A677FD9979FA784AE0C17A /* ASWebAuthSessionPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE74DC5C8E5A6D70E4BDB9E /* ASWebAuthSessionPresenter.swift */; };
 		8A7D4331AFFDCB5D68F6FE3C /* JunkCleanerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09BAF8424C039491F5324208 /* JunkCleanerViewModel.swift */; };
 		8CB197C5A6E43082A88B95AE /* HelperOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD009D570D83BC9D450F00E2 /* HelperOperations.swift */; };
@@ -116,6 +117,7 @@
 		73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevationModifier.swift; sourceTree = "<group>"; };
 		763ECBD32513F45F9539E313 /* DuplicateFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderView.swift; sourceTree = "<group>"; };
 		7B273DE218A656524EA73BAF /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
+		8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraSurface.swift; sourceTree = "<group>"; };
 		8F0AC3C62BF924A8FD115848 /* SummaryCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryCardView.swift; sourceTree = "<group>"; };
 		99909B8A48785AADED1E723A /* CareCardModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareCardModifier.swift; sourceTree = "<group>"; };
 		9A34B85C63A2C70EA9CC995A /* PrivilegedHelperClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedHelperClient.swift; sourceTree = "<group>"; };
@@ -296,6 +298,7 @@
 			isa = PBXGroup;
 			children = (
 				BB172A55E6FDD2279F882CAE /* AuroraBloomModifier.swift */,
+				8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */,
 				6E0B72A04198D2C4C56BD2A9 /* BadgeView.swift */,
 				99909B8A48785AADED1E723A /* CareCardModifier.swift */,
 				73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */,
@@ -505,7 +508,6 @@
 				};
 			};
 			buildConfigurationList = 7204ECF185D832CD34AA5F6F /* Build configuration list for PBXProject "SOSMac" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -519,13 +521,14 @@
 				6CA7B90501C92CBD17BA0BC5 /* XCLocalSwiftPackageReference "Packages/TreemapKit" */,
 			);
 			preferredProjectObjectVersion = 77;
+			productRefGroup = 2C72880C804DAEB47011B4D1 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				0F44861A6320DC1CC94A51C6 /* MenuBarHelper */,
-				1E8F47B298496F8078E1C1BB /* PrivilegedHelper */,
 				80C8485EDEE67072AE469396 /* SOSMac */,
+				0F44861A6320DC1CC94A51C6 /* MenuBarHelper */,
 				DAAC64D4060DF2CB19ED3851 /* SOSMacUITests */,
+				1E8F47B298496F8078E1C1BB /* PrivilegedHelper */,
 			);
 		};
 /* End PBXProject section */
@@ -589,6 +592,7 @@
 			files = (
 				89A677FD9979FA784AE0C17A /* ASWebAuthSessionPresenter.swift in Sources */,
 				2773C6BA3401153349B7A752 /* AuroraBloomModifier.swift in Sources */,
+				7D9BBB20AB26D0CFE845E76D /* AuroraSurface.swift in Sources */,
 				B3BA61A0E30BB10F63410FE9 /* BadgeView.swift in Sources */,
 				0980BEA718F6AC9A78614779 /* CareCardModifier.swift in Sources */,
 				728C27220348DC8271916BB8 /* CloudCleanupView.swift in Sources */,
