@@ -57,6 +57,8 @@ targets:
     platform: macOS
     sources:
       - path: MenuBarHelper
+      - path: App/DesignSystem/Theme.swift
+      - path: App/DesignSystem/AuroraSurface.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac.menubarhelper

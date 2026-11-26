@@ -47,11 +47,13 @@
 		7812BF7A3831BCCE1307EA7E /* HelperXPCListenerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7ECA1B33611E22001EF44C /* HelperXPCListenerDelegate.swift */; };
 		78879E5A7BE2B8C2721395E8 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78116D60A7591C3E1D1E111 /* Theme.swift */; };
 		7D9BBB20AB26D0CFE845E76D /* AuroraSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */; };
+		8994C8664854716C9311CA9E /* AuroraSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */; };
 		89A677FD9979FA784AE0C17A /* ASWebAuthSessionPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE74DC5C8E5A6D70E4BDB9E /* ASWebAuthSessionPresenter.swift */; };
 		8A7D4331AFFDCB5D68F6FE3C /* JunkCleanerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09BAF8424C039491F5324208 /* JunkCleanerViewModel.swift */; };
 		8CB197C5A6E43082A88B95AE /* HelperOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD009D570D83BC9D450F00E2 /* HelperOperations.swift */; };
 		9048E53AD6C3B192A1A0A66D /* ModuleTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98E5B704E377BCA702F23AB /* ModuleTileView.swift */; };
 		920A4CDCE15A91C7105AF525 /* TreemapCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169861D77A35617E7FED9E0A /* TreemapCanvasView.swift */; };
+		9305D727F566D6C90DA549FF /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78116D60A7591C3E1D1E111 /* Theme.swift */; };
 		96A2FFBEDA9B53B465AEB41A /* JunkCleanerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575242D8CA34B18FD76DD4FE /* JunkCleanerView.swift */; };
 		9C256ECFD03A15A92272C000 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2212133287D5A40215D51B3F /* Assets.xcassets */; };
 		9F677E2B9ABC28418466526F /* BannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9BD42E1F51C8416E7A7986 /* BannerView.swift */; };
@@ -71,6 +73,7 @@
 		D43BD385637D22053A3464D6 /* SOSMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B658F774CB266713577506C2 /* SOSMacApp.swift */; };
 		D4761BBD0776A6D89B63A73F /* SmartCareViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E244407C254EC7244F5679A6 /* SmartCareViewModel.swift */; };
 		D8C735AEECD1B5CB23CBA24B /* VolumeStorageInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60925814F21D41B971FD4766 /* VolumeStorageInfo.swift */; };
+		DCBDB97B3029AF32E088BB1D /* MenuBarPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313B297F15BD7FB50466F914 /* MenuBarPopover.swift */; };
 		DDABCDA3D5687DA3D9226741 /* ProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */; };
 		E1CFC6345E8746F24381C098 /* CloudCleanupViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E613731BF2E7935588A184F1 /* CloudCleanupViewModel.swift */; };
 		E5A667E7EF1EE19E7E587638 /* RedesignSmokeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1E85D262BB7F5B40BE39E7F /* RedesignSmokeTests.swift */; };
@@ -131,6 +134,7 @@
 		2212133287D5A40215D51B3F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		22EC34D67EBF39DAB19C31B7 /* SOSButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSButtonStyle.swift; sourceTree = "<group>"; };
 		25FCCD11654F615F38FBC7AE /* HealthDialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDialView.swift; sourceTree = "<group>"; };
+		313B297F15BD7FB50466F914 /* MenuBarPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopover.swift; sourceTree = "<group>"; };
 		3378D6B53CDCB0474385C0B8 /* CloudCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCleanupView.swift; sourceTree = "<group>"; };
 		34D556598CDC035EE94F81C8 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderViewModel.swift; sourceTree = "<group>"; };
@@ -226,6 +230,7 @@
 			children = (
 				55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */,
 				E854DD88191E34B25816AF4E /* MenuBarMetricsMonitor.swift */,
+				313B297F15BD7FB50466F914 /* MenuBarPopover.swift */,
 			);
 			path = MenuBarHelper;
 			sourceTree = "<group>";
@@ -757,8 +762,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8994C8664854716C9311CA9E /* AuroraSurface.swift in Sources */,
 				EFDE7593D4F73BCC2E1BEAF7 /* MenuBarHelperApp.swift in Sources */,
 				C525BF54959EB6033641B5C1 /* MenuBarMetricsMonitor.swift in Sources */,
+				DCBDB97B3029AF32E088BB1D /* MenuBarPopover.swift in Sources */,
+				9305D727F566D6C90DA549FF /* Theme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
