@@ -56,6 +56,7 @@
 		7D6DCFA67BEF550AED2CFB2D /* ResultsHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F9222D01A9BB3EFA06D707 /* ResultsHeaderView.swift */; };
 		7D9BBB20AB26D0CFE845E76D /* AuroraSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */; };
 		84205A2671998584B0641409 /* ReviewFrameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4D8888421C6C248085AA4EB /* ReviewFrameView.swift */; };
+		843A670F6C23BFB0C66E4056 /* SmartCareReviewBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7945E248A4E3A0459F1AE7D7 /* SmartCareReviewBuilder.swift */; };
 		857D46AD8EB43951B54708E6 /* ReviewGroupRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EFB74DF3E71FED7ADC9C9BB /* ReviewGroupRow.swift */; };
 		8994C8664854716C9311CA9E /* AuroraSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */; };
 		89A677FD9979FA784AE0C17A /* ASWebAuthSessionPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE74DC5C8E5A6D70E4BDB9E /* ASWebAuthSessionPresenter.swift */; };
@@ -65,6 +66,7 @@
 		920A4CDCE15A91C7105AF525 /* TreemapCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 169861D77A35617E7FED9E0A /* TreemapCanvasView.swift */; };
 		9305D727F566D6C90DA549FF /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78116D60A7591C3E1D1E111 /* Theme.swift */; };
 		96A2FFBEDA9B53B465AEB41A /* JunkCleanerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575242D8CA34B18FD76DD4FE /* JunkCleanerView.swift */; };
+		970D8CDCD51CB84BCB45908B /* SmartCareViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B37C16388088187F3EF7131 /* SmartCareViewModelTests.swift */; };
 		9C256ECFD03A15A92272C000 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2212133287D5A40215D51B3F /* Assets.xcassets */; };
 		9F677E2B9ABC28418466526F /* BannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9BD42E1F51C8416E7A7986 /* BannerView.swift */; };
 		A292BD79FDE867EC711A8E5B /* SummaryCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F0AC3C62BF924A8FD115848 /* SummaryCardView.swift */; };
@@ -161,6 +163,7 @@
 		2212133287D5A40215D51B3F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		22EC34D67EBF39DAB19C31B7 /* SOSButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSButtonStyle.swift; sourceTree = "<group>"; };
 		25FCCD11654F615F38FBC7AE /* HealthDialView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDialView.swift; sourceTree = "<group>"; };
+		2B37C16388088187F3EF7131 /* SmartCareViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCareViewModelTests.swift; sourceTree = "<group>"; };
 		2D1B843A3B926BEFB774274F /* ModuleStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleStoreTests.swift; sourceTree = "<group>"; };
 		2FA392DDD5F3B0F081667B3F /* DoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoneView.swift; sourceTree = "<group>"; };
 		3067B6243BCE09A820E252F3 /* StatusStateView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusStateView.swift; sourceTree = "<group>"; };
@@ -191,6 +194,7 @@
 		73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevationModifier.swift; sourceTree = "<group>"; };
 		74AECFD5CAB894ECF247EFEB /* ModuleScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleScreen.swift; sourceTree = "<group>"; };
 		763ECBD32513F45F9539E313 /* DuplicateFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderView.swift; sourceTree = "<group>"; };
+		7945E248A4E3A0459F1AE7D7 /* SmartCareReviewBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCareReviewBuilder.swift; sourceTree = "<group>"; };
 		7B273DE218A656524EA73BAF /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
 		7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSCheckboxTests.swift; sourceTree = "<group>"; };
 		81C7D66DD1EE9A33BC0AC613 /* SOSCheckbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSCheckbox.swift; sourceTree = "<group>"; };
@@ -360,6 +364,7 @@
 		5ACBE6F3673FD3F93C36DFA0 /* SmartCare */ = {
 			isa = PBXGroup;
 			children = (
+				7945E248A4E3A0459F1AE7D7 /* SmartCareReviewBuilder.swift */,
 				19C39CA1766D163871E0E7CE /* SmartCareView.swift */,
 				E244407C254EC7244F5679A6 /* SmartCareViewModel.swift */,
 			);
@@ -376,6 +381,7 @@
 				5ED4E6A0687F607625C13448 /* ProgressiveCleanerTests.swift */,
 				1528BAB4676A01E77E6B9BB1 /* ShellTests.swift */,
 				00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */,
+				2B37C16388088187F3EF7131 /* SmartCareViewModelTests.swift */,
 				7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */,
 				971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */,
 				BFA193C1EA5BD96B19DE3B6D /* UITestHooksTests.swift */,
@@ -823,6 +829,7 @@
 				1D06AB7F38F03BC556400EB7 /* ScanProgressTracker.swift in Sources */,
 				E9FB817813BA5A37499ACEC9 /* ScanningView.swift in Sources */,
 				302D413F61D134A94F8799EF /* SidebarNavRow.swift in Sources */,
+				843A670F6C23BFB0C66E4056 /* SmartCareReviewBuilder.swift in Sources */,
 				0B8EB0370E309D0D95DC67B3 /* SmartCareView.swift in Sources */,
 				D4761BBD0776A6D89B63A73F /* SmartCareViewModel.swift in Sources */,
 				524602F1BD6F72FD380E92A0 /* SpaceLensView.swift in Sources */,
@@ -857,6 +864,7 @@
 				BBF734014F4FBA38476B323D /* SOSCheckboxTests.swift in Sources */,
 				FB08A993FC8FD667E6F92356 /* ShellTests.swift in Sources */,
 				27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */,
+				970D8CDCD51CB84BCB45908B /* SmartCareViewModelTests.swift in Sources */,
 				FA25CBA768BC9879F743EFDB /* ThemeContrastTests.swift in Sources */,
 				6F39304CD1EE0F2EEE12E060 /* UITestHooksTests.swift in Sources */,
 			);
