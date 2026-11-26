@@ -15,6 +15,8 @@
 #   -1        Downscale PNGs to 1x (points) instead of the display's native pixels
 #   -d DIR    Reuse this derived-data folder instead of a throwaway one (skips nothing: still builds)
 #   -n        Skip the contact sheet
+#   -e K=V    Extra SOSMAC_UITEST_ launch variable passed through on every open
+#             (repeatable; e.g. -e SOSMAC_UITEST_VIEW=type — PR 8's By Type captures)
 #   -h        Help
 #
 # Screen keys: dashboard smartcare junk duplicates spacelens cloud uninstaller updater performance protection
@@ -29,11 +31,12 @@ EXECUTABLE="SOSMac"
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NAME="" SPECS="" APPEARANCES="dark,light" SIZE="1200x760" ONE_X=0 DERIVED="" CONTACT=1
+EXTRA_ENV=()
 
 usage() { sed -n '2,/^set -euo/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'; }
 die() { echo "ui-snapshots: $*" >&2; exit 1; }
 
-while getopts "p:s:a:w:1d:nh" opt; do
+while getopts "p:s:a:w:1d:ne:h" opt; do
   case "$opt" in
     p) NAME="$OPTARG" ;;
     s) SPECS="$OPTARG" ;;
@@ -42,10 +45,16 @@ while getopts "p:s:a:w:1d:nh" opt; do
     1) ONE_X=1 ;;
     d) DERIVED="$OPTARG" ;;
     n) CONTACT=0 ;;
+    e) EXTRA_ENV+=("$OPTARG") ;;
     h) usage; exit 0 ;;
     *) usage >&2; exit 2 ;;
   esac
 done
+if [[ ${#EXTRA_ENV[@]} -gt 0 ]]; then
+  for pair in "${EXTRA_ENV[@]}"; do
+    [[ "$pair" =~ ^SOSMAC_UITEST_[A-Z_]+=[A-Za-z0-9._-]+$ ]] || die "bad -e pair (want SOSMAC_UITEST_KEY=value): $pair"
+  done
+fi
 [[ -n "$NAME" ]] || { usage >&2; exit 2; }
 if [[ -z "$SPECS" ]]; then
   # PR 5's default matrix: the eight Junk & Cache lifecycle states (start/scanning/
@@ -114,13 +123,20 @@ for appearance in ${APPEARANCES//,/ }; do
     # A leftover instance of THIS derived-data build would confuse pid lookup.
     if pgrep -f "$EXEC_PATH" > /dev/null; then die "another instance of $EXEC_PATH is already running"; fi
 
-    open -n -g -a "$APP" \
-      --env "SOSMAC_UITEST_SCREEN=$screen" \
-      --env "SOSMAC_UITEST_STATE=$state" \
-      --env "SOSMAC_UITEST_APPEARANCE=$appearance" \
-      --env "SOSMAC_UITEST_FIXTURES=1" \
-      --env "SOSMAC_UITEST_WINDOW_SIZE=$SIZE" \
+    open_args=(
+      --env "SOSMAC_UITEST_SCREEN=$screen"
+      --env "SOSMAC_UITEST_STATE=$state"
+      --env "SOSMAC_UITEST_APPEARANCE=$appearance"
+      --env "SOSMAC_UITEST_FIXTURES=1"
+      --env "SOSMAC_UITEST_WINDOW_SIZE=$SIZE"
       --env "SOSMAC_UITEST_OUTPUT_DIR=$OUT"
+    )
+    if [[ ${#EXTRA_ENV[@]} -gt 0 ]]; then
+      for pair in "${EXTRA_ENV[@]}"; do
+        open_args+=(--env "$pair")
+      done
+    fi
+    open -n -g -a "$APP" "${open_args[@]}"
 
     # Our pid: the process whose executable is the throwaway build.
     for _ in $(seq 1 100); do PID="$(pgrep -f "$EXEC_PATH" | head -n1 || true)"; [[ -n "$PID" ]] && break; sleep 0.1; done

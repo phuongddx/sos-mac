@@ -109,7 +109,9 @@ final class ModuleStore {
         case .duplicateFinder:
             return _duplicates?.phase == .scanning
         case .spaceLens:
-            return _spaceLens?.phase == .scanning || _spaceLens?.phase == .cleaning
+            // PR 8: `.cleaning` carries its selection count, so it needs the VM's
+            // guard — the same pattern PR 5 set for Junk & Cache.
+            return _spaceLens?.phase == .scanning || (_spaceLens?.isCleaning ?? false)
         case .uninstaller:
             return _uninstaller?.isInspectingAll == true
         case .updater:
