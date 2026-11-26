@@ -258,34 +258,40 @@ struct ComponentGalleryView: View {
 
     private var resultTiles: some View {
         VStack(spacing: 14) {
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 14) {
-                ResultTileView(
-                    hue: Theme.Hue.junk, ink: Theme.Hue.Ink.junk, symbol: "trash",
-                    label: "Junk & Cache", value: "3.4", unit: "GB",
-                    caption: "selected of 4.1 GB · 1,284 files in 3 locations"
-                ) {
-                    Button("Review Items") {}.sosButton(.default)
+            VStack(spacing: 14) {
+                HStack(alignment: .top, spacing: 14) {
+                    ResultTileView(
+                        hue: Theme.Hue.junk, ink: Theme.Hue.Ink.junk, symbol: "trash",
+                        label: "Junk & Cache", value: "3.4", unit: "GB",
+                        caption: "selected of 4.1 GB · 1,284 files in 3 locations"
+                    ) {
+                        Button("Review Items") {}.sosButton(.default)
+                    }
+                    ResultTileView(
+                        hue: Theme.Hue.duplicates, ink: Theme.Hue.Ink.duplicates, symbol: "doc.on.doc",
+                        label: "Duplicate files", value: "2.8", unit: "GB",
+                        caption: "selected · 6 sets, 8 extra copies",
+                        isSelected: true
+                    ) {
+                        BadgeView(text: "Newest copy kept", style: .keep)
+                    }
+                    .frame(maxWidth: .infinity)
                 }
-                ResultTileView(
-                    hue: Theme.Hue.duplicates, ink: Theme.Hue.Ink.duplicates, symbol: "doc.on.doc",
-                    label: "Duplicate files", value: "2.8", unit: "GB",
-                    caption: "selected · 6 sets, 8 extra copies",
-                    isSelected: true
-                ) {
-                    BadgeView(text: "Newest copy kept", style: .keep)
+                HStack(alignment: .top, spacing: 14) {
+                    ResultTileView(
+                        hue: Theme.Hue.duplicates, ink: Theme.Hue.Ink.duplicates, symbol: "doc.on.doc",
+                        label: "Duplicate files", value: "2.8", unit: "GB",
+                        caption: "Scan stopped", isSkipped: true
+                    ) {
+                        BadgeView(text: "Failed", style: .risky, systemImage: "xmark")
+                    }
+                    ResultTileView(
+                        hue: Theme.Hue.cloud, ink: Theme.Hue.Ink.cloud, symbol: "icloud",
+                        label: "Sets found", value: "6",
+                        caption: "14 files in total"
+                    )
+                    .frame(maxWidth: .infinity)
                 }
-                ResultTileView(
-                    hue: Theme.Hue.duplicates, ink: Theme.Hue.Ink.duplicates, symbol: "doc.on.doc",
-                    label: "Duplicate files", value: "2.8", unit: "GB",
-                    caption: "Scan stopped", isSkipped: true
-                ) {
-                    BadgeView(text: "Failed", style: .risky, systemImage: "xmark")
-                }
-                ResultTileView(
-                    hue: Theme.Hue.cloud, ink: Theme.Hue.Ink.cloud, symbol: "icloud",
-                    label: "Sets found", value: "6",
-                    caption: "14 files in total"
-                )
             }
             ResultTileView(
                 hue: Theme.Hue.performance, ink: Theme.Hue.Ink.performance, symbol: "gauge.with.dots.needle.50percent",
@@ -328,21 +334,35 @@ struct ComponentGalleryView: View {
     /// One shared identity for the PR 4b samples: Junk & Cache, with fictional values only.
     private static let junkModule = ModuleIdentity(module: .junkCleaner)
 
+    /// Fixed HStack/VStack rows, not a LazyVGrid: a lazy grid sizes itself against the
+    /// height proposal it receives, which inside a ScrollView depends on the window and made
+    /// snapshots irreproducible. Two states per row, natural row heights.
     private var lifecycleFrames: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: Theme.Spacing.s3), GridItem(.flexible(), spacing: Theme.Spacing.s3)],
-                  spacing: Theme.Spacing.s3) {
-            ForEach(LifecycleState.allCases) { state in
-                VStack(spacing: Theme.Spacing.s1) {
-                    frameSample(state)
-                        .frame(height: 360)
-                        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous)
-                            .strokeBorder(Theme.Derived.hairline, lineWidth: 1))
-                    Text(state.rawValue)
-                        .font(Theme.Font.eyebrow)
-                        .foregroundStyle(Theme.Color.textSecondary)
+        VStack(alignment: .leading, spacing: Theme.Spacing.s3) {
+            ForEach(lifecycleRows, id: \.self) { pair in
+                HStack(alignment: .top, spacing: Theme.Spacing.s3) {
+                    ForEach(pair) { state in
+                        VStack(spacing: Theme.Spacing.s1) {
+                            frameSample(state)
+                                .frame(height: 360)
+                                .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous))
+                                .overlay(RoundedRectangle(cornerRadius: Theme.Radius.md, style: .continuous)
+                                    .strokeBorder(Theme.Derived.hairline, lineWidth: 1))
+                            Text(state.rawValue)
+                                .font(Theme.Font.eyebrow)
+                                .foregroundStyle(Theme.Color.textSecondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                    }
                 }
             }
+        }
+    }
+
+    private var lifecycleRows: [[LifecycleState]] {
+        let states = LifecycleState.allCases
+        return stride(from: 0, to: states.count, by: 2).map {
+            Array(states[$0..<min($0 + 2, states.count)])
         }
     }
 
@@ -416,7 +436,7 @@ struct ComponentGalleryView: View {
                     hue: Theme.Hue.junk,
                     title: "1.18 GB of junk found",
                     sub: "1,284 files in 4 locations · 1.18 GB selected (safe files only)")
-                LazyVGrid(columns: [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)], spacing: 14) {
+                HStack(alignment: .top, spacing: 14) {
                     ResultTileView(
                         hue: Theme.Hue.junk, ink: Theme.Hue.Ink.junk, symbol: "trash",
                         label: "User App Caches", value: "9", unit: "files",
@@ -431,6 +451,7 @@ struct ComponentGalleryView: View {
                     ) {
                         BadgeView(text: "Needs approval", style: .neutral, systemImage: "key")
                     }
+                    .frame(maxWidth: .infinity)
                 }
                 .padding(.bottom, Theme.Spacing.s4)
                 BannerView(kind: .info, title: "3 files were skipped",
@@ -695,6 +716,7 @@ struct ComponentGalleryView: View {
             }
         }
     }
+
 
     private func confirmModel(_ variant: ConfirmSheet.Variant,
                               items: [ConfirmItem],
