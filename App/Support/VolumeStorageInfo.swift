@@ -53,3 +53,19 @@ struct VolumeStorageInfo {
         return name
     }
 }
+
+#if DEBUG
+extension VolumeStorageInfo {
+    /// Made-up numbers for UITest fixture runs (`SOSMAC_UITEST_FIXTURES=1`), so
+    /// snapshots never show the real disk. From `UITestFixtures.metrics`.
+    static var fixture: VolumeStorageInfo {
+        let m = UITestFixtures.metrics
+        return VolumeStorageInfo(
+            volumeName: m.volumeName,
+            usedBytes: m.usedBytes,
+            totalBytes: m.totalBytes,
+            freeBytes: m.totalBytes - m.usedBytes
+        )
+    }
+}
+#endif

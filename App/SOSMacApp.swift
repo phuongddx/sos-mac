@@ -246,6 +246,13 @@ private struct SidebarFooterView: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("sidebar-storage")
-        .onAppear { storage = VolumeStorageInfo.current() }
+        .onAppear { storage = Self.read() }
+    }
+
+    private static func read() -> VolumeStorageInfo? {
+        #if DEBUG
+        if UITestHooks.current.fixtures { return .fixture }
+        #endif
+        return VolumeStorageInfo.current()
     }
 }
