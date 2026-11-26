@@ -271,11 +271,14 @@ final class UpdaterViewModel {
                 : "None of the \(checkable.count) update feeds answered. \(reason)")
             return
         }
-        // "All apps are up to date" needs at least one real feed result, no newer version,
-        // no failed feed, and nothing left to open in the App Store.
+        // "All apps are up to date" needs every checkable row to carry a real verdict,
+        // at least one up-to-date result, no newer version, no failed feed, and
+        // nothing left to open in the App Store.
         let anyUpdate = rows.contains(where: isUpdateAvailable)
         let anyUpToDate = rows.contains { UpdaterGroups.status(of: $0) == .upToDate }
-        phase = (!anyUpdate && failures.isEmpty && anyUpToDate && appStoreCount == 0) ? .empty : .results
+        let fullyChecked = checkedCount == checkableCount
+        phase = (!anyUpdate && failures.isEmpty && anyUpToDate && appStoreCount == 0 && fullyChecked)
+            ? .empty : .results
     }
 
     // MARK: - Fixtures (Debug builds only)
