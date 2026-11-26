@@ -20,7 +20,7 @@ struct JunkCleanerView: View {
             }
         }
         .onDisappear { viewModel?.cancelScan() }
-        .navigationTitle("Junk & Cache Scanner")
+        .navigationTitle("Junk & Cache")
     }
 }
 
