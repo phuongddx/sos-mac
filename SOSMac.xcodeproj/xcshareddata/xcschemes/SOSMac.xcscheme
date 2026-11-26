@@ -29,6 +29,20 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DC2555E2A721C8CD296A66C0"
+               BuildableName = "SOSMacTests.xctest"
+               BlueprintName = "SOSMacTests"
+               ReferencedContainer = "container:SOSMac.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "DAAC64D4060DF2CB19ED3851"
                BuildableName = "SOSMacUITests.xctest"
                BlueprintName = "SOSMacUITests"
@@ -53,6 +67,17 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DC2555E2A721C8CD296A66C0"
+               BuildableName = "SOSMacTests.xctest"
+               BlueprintName = "SOSMacTests"
+               ReferencedContainer = "container:SOSMac.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
          <TestableReference
             skipped = "NO"
             parallelizable = "NO">
