@@ -9,6 +9,21 @@ struct ModuleOrbView: View {
         let glyphSide: CGFloat
         let glyphRadius: CGFloat
         let symbolSize: CGFloat
+        /// The thin ring's inset (spec §4.9 `.orb::after { inset: 34px }`; the Dashboard's
+        /// 112 pt orb uses `inset: 10px`, prototype `.dash-hero .l .orb::after`).
+        let ringInset: CGFloat
+
+        init(side: CGFloat, glyphSide: CGFloat, glyphRadius: CGFloat, symbolSize: CGFloat,
+             ringInset: CGFloat = Metrics.defaultRingInset) {
+            self.side = side
+            self.glyphSide = glyphSide
+            self.glyphRadius = glyphRadius
+            self.symbolSize = symbolSize
+            self.ringInset = ringInset
+        }
+
+        /// The ring inset every full-size orb (start, scanning, done) keeps.
+        static let defaultRingInset: CGFloat = 34
 
         static let start = Metrics(side: 260, glyphSide: 116, glyphRadius: 30, symbolSize: 56)
         static let scanning = Metrics(side: 240, glyphSide: 116, glyphRadius: 30, symbolSize: 56)
@@ -25,8 +40,6 @@ struct ModuleOrbView: View {
     private static let doneDarkBottom = Color(hex: "#1A2E05")
     /// The conic wash's indigo segment, `rgba(99,102,241,.12)` — Palette C's Junk hue.
     private static let indigo = Theme.Hue.junk
-    /// The ring's inset (spec §4.9 `::after { inset: 34px }`).
-    private static let ringInset: CGFloat = 34
     /// The scanning sweep's inset and rotation (spec §4.9, prototype `.orb.scanning::before`).
     private static let sweepInset: CGFloat = 18
     private static let sweepDuration: Double = Theme.Motion.pulseDuration
@@ -55,7 +68,7 @@ struct ModuleOrbView: View {
             orbBackground
             Circle()
                 .stroke(hue.opacity(0.35), lineWidth: 1)
-                .padding(Self.ringInset)
+                .padding(metrics.ringInset)
             if sweep { sweepLayer }
             glyphTile
         }
@@ -215,7 +228,7 @@ struct StartView: View {
                     .padding(.bottom, Theme.Spacing.s3 - 2)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text(lede)
-                    .font(.system(size: Theme.TextSize.sm))
+                    .font(.system(size: 14))
                     .lineSpacing(Self.ledeLineSpacing)
                     .foregroundStyle(Theme.Color.textSecondary)
                     .frame(maxWidth: Self.ledeWidth, alignment: .leading)
@@ -279,7 +292,7 @@ struct StartView: View {
         return ZStack {
             shape.fill(Theme.Color.card)
             Image(systemName: symbol)
-                .font(.system(size: Theme.TextSize.xs, weight: .medium))
+                .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(Theme.Color.textSecondary)
         }
         .frame(width: 28, height: 28)
@@ -291,7 +304,7 @@ struct StartView: View {
     private func noteRow(_ note: String) -> some View {
         HStack(alignment: .top, spacing: Theme.Spacing.s2) {
             Image(systemName: "info.circle")
-                .font(.system(size: Theme.TextSize.sm))
+                .font(.system(size: 14))
                 .foregroundStyle(Theme.Color.textSecondary)
                 .padding(.top, 1)
             Text(note)

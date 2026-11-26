@@ -33,7 +33,7 @@ struct PrimaryCTAView: View {
 
     /// 80 × 80 circle, 14 pt semibold label.
     static let side: CGFloat = 80
-    static let labelSize: CGFloat = Theme.TextSize.sm
+    static let labelSize: CGFloat = 14
     /// The ring sits 7 pt outside the button (prototype `.ring { inset: −7px }`, r 44, 3 pt).
     static let ringInset: CGFloat = 7
     static let ringWidth: CGFloat = 3

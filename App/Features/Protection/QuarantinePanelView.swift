@@ -88,7 +88,7 @@ struct QuarantinePanelView: View {
     private var header: some View {
         HStack(spacing: Theme.Spacing.s2) {
             Image(systemName: "lock")
-                .font(.system(size: Theme.TextSize.sm, weight: .medium))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(hue)
                 .accessibilityHidden(true)
             Text("Quarantine")
