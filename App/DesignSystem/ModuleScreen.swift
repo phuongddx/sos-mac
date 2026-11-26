@@ -22,11 +22,12 @@ struct ModuleScreen<Content: View>: View {
         var primary: (@MainActor () -> Void)?
         /// `scanning` — Stop (F2: the screen returns to `start` and discards partial results).
         var stop: (@MainActor () -> Void)?
-        /// `results` — "Review Items…" in the dock's leading slot.
+        /// `results` — the module's open-review verb (`module.dock.openReview`) in the dock's leading slot.
         var reviewItems: (@MainActor () -> Void)?
-        /// `results` (trailing), `done` and `empty` (the CTA) — Scan Again.
+        /// `results` (trailing), `done` and `empty` (the CTA) — the module's finish verb
+        /// (`module.dock`: Scan Again, Check Again, Measure Again, Back to Apps, Back to Map…).
         var scanAgain: (@MainActor () -> Void)?
-        /// `done` — Open Trash in the trailing slot.
+        /// `done` — Open Trash in the trailing slot (`module.dock.doneSecondary`; none for Protection).
         var openTrash: (@MainActor () -> Void)?
         /// `error` — the one relevant escape (Open System Settings, Choose Another Folder).
         var escape: Escape?
@@ -57,6 +58,12 @@ struct ModuleScreen<Content: View>: View {
         let count: Int
         /// VM-formatted size of the selection; `nil` when the module has no size yet.
         let sizeText: String?
+
+        /// A bold figure and the words after it.
+        struct Meta: Equatable, Sendable {
+            let bold: String?
+            let text: String
+        }
     }
 
     let module: ModuleIdentity
@@ -69,6 +76,9 @@ struct ModuleScreen<Content: View>: View {
     /// ring (spec §4.2, prototype `scanDock`).
     var progress: Double?
     var selection: SelectionSummary?
+    /// A real figure for the `results` dock meta that is not a selection ("**12** apps checked",
+    /// Updater §5.8). Wins over the selection summary and the module's fixed hint.
+    var resultsMeta: SelectionSummary.Meta?
     var overlay: Binding<ModuleOverlay?>?
     let content: Content
 
@@ -80,6 +90,7 @@ struct ModuleScreen<Content: View>: View {
          actions: Actions = Actions(),
          progress: Double? = nil,
          selection: SelectionSummary? = nil,
+         resultsMeta: SelectionSummary.Meta? = nil,
          overlay: Binding<ModuleOverlay?>? = nil,
          @ViewBuilder content: () -> Content) {
         self.module = module
@@ -90,6 +101,7 @@ struct ModuleScreen<Content: View>: View {
         self.actions = actions
         self.progress = progress
         self.selection = selection
+        self.resultsMeta = resultsMeta
         self.overlay = overlay
         self.content = content()
     }
@@ -163,7 +175,7 @@ struct ModuleScreen<Content: View>: View {
         case .scanning:
             PrimaryCTAView(label: "Stop", mode: .stop, ring: scanRing, action: actions.stop)
         case .results:
-            PrimaryCTAView(label: "Clean",
+            PrimaryCTAView(label: module.dock.resultsAction,
                            mode: actions.primary == nil ? .disabled : .active,
                            action: actions.primary)
         case .review:
@@ -175,7 +187,8 @@ struct ModuleScreen<Content: View>: View {
         case .cleaning:
             PrimaryCTAView(label: "Moving", mode: .moving, ring: .indeterminate)
         case .done, .empty:
-            PrimaryCTAView(label: "Scan Again", action: actions.scanAgain)
+            PrimaryCTAView(label: state == .done ? module.dock.doneAction : module.dock.emptyAction,
+                           action: actions.scanAgain)
         case .error:
             PrimaryCTAView(label: "Try Again", action: actions.primary)
         }
@@ -191,29 +204,46 @@ struct ModuleScreen<Content: View>: View {
     private var dockLeading: AnyView? {
         guard state == .results else { return nil }
         return AnyView(HStack(spacing: DockView.sideSpacing) {
-            Button {
-                actions.reviewItems?()
-            } label: {
-                Label("Review Items…", systemImage: "list")
+            if let openReview = module.dock.openReview {
+                Button {
+                    actions.reviewItems?()
+                } label: {
+                    Label(openReview, systemImage: "list")
+                }
+                .sosButton(.default)
+                .disabled(actions.reviewItems == nil)
             }
-            .sosButton(.default)
-            .disabled(actions.reviewItems == nil)
-            DockMetaView(bold: selection?.sizeText,
-                         text: (selection?.count ?? 0) > 0 ? "selected" : "Nothing selected")
+            resultsMetaView
         })
+    }
+
+    /// The `results` meta: a screen-supplied figure, else the module's fixed hint, else the
+    /// selection summary ("Nothing selected" when empty).
+    @ViewBuilder
+    private var resultsMetaView: some View {
+        if let resultsMeta {
+            DockMetaView(bold: resultsMeta.bold, text: resultsMeta.text)
+        } else if let hint = module.dock.resultsHint {
+            DockMetaView(bold: nil, text: hint)
+        } else {
+            DockMetaView(bold: selection?.sizeText,
+                         text: (selection?.count ?? 0) > 0 ? "selected" : module.dock.nothingSelectedMeta)
+        }
     }
 
     private var dockTrailing: AnyView? {
         switch state {
         case .results:
-            return AnyView(Button("Scan Again") { actions.scanAgain?() }
+            guard let finish = module.dock.resultsFinish else { return nil }
+            return AnyView(Button(finish) { actions.scanAgain?() }
                 .buttonStyle(.sosPlain)
                 .disabled(actions.scanAgain == nil))
         case .done:
+            guard let secondary = module.dock.doneSecondary else { return nil }
             return AnyView(Button {
                 actions.openTrash?()
             } label: {
-                Label("Open Trash", systemImage: "trash")
+                Label(secondary, systemImage: "trash")
             }
             .sosButton(.default)
             .disabled(actions.openTrash == nil))

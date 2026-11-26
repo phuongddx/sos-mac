@@ -394,14 +394,16 @@ private struct SpaceLensScreen: View {
                 }
                 actions.scanAgain = { viewModel.scanAgain() }
             } else {
-                actions.scanAgain = { viewModel.scanAgain() }
+                // Empty folder (§5.5): the CTA is "Choose Folder…".
+                actions.scanAgain = { viewModel.chooseFolder() }
             }
         case .review:
             break  // the cleanup-list sheet owns the confirm (S1); the bar behind is idle
         case .cleaning:
             break
         case .done:
-            actions.scanAgain = { viewModel.scanAgain() }
+            // §5.5 / N7: the CTA is "Back to Map"; Scan Again lives on the map's own dock.
+            actions.scanAgain = { viewModel.backToMap() }
             actions.openTrash = openTrash
         case .failed:
             actions.primary = { viewModel.scanAgain() }
