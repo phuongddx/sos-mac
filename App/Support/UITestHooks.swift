@@ -93,22 +93,6 @@ struct UITestHooks: Sendable, Equatable {
     }
 }
 
-private struct UITestReduceTransparencyKey: EnvironmentKey {
-    static let defaultValue = false
-}
-
-extension EnvironmentValues {
-    /// SwiftUI's `accessibilityReduceTransparency` is read-only, so the hook cannot
-    /// override it. Debug code that adapts to reduced transparency reads
-    /// `accessibilityReduceTransparency || uiTestReduceTransparency`. It is `false`
-    /// unless `SOSMAC_UITEST_REDUCE_TRANSPARENCY=1`, so it can only force the
-    /// reduced look on, never hide a real system setting.
-    var uiTestReduceTransparency: Bool {
-        get { self[UITestReduceTransparencyKey.self] }
-        set { self[UITestReduceTransparencyKey.self] = newValue }
-    }
-}
-
 extension SidebarDestination {
     /// Maps the prototype's screen keys (`docs/redesign/prototype/data.js`) to destinations.
     init?(uiTestKey key: String) {
