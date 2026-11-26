@@ -11,37 +11,17 @@ struct MenuBarHelperApp: App {
     @State private var monitor = MenuBarMetricsMonitor()
 
     var body: some Scene {
-        MenuBarExtra(monitor.labelText, systemImage: "gauge.with.dots.needle.50percent") {
-            MenuBarContentView(monitor: monitor)
+        MenuBarExtra {
+            MenuBarPopover(monitor: monitor)
+        } label: {
+            // View-based label (rather than the plain-string initializer) so the
+            // numeral field can carry `.monospacedDigit()` and stay fixed-width.
+            Label {
+                Text(monitor.labelText).monospacedDigit()
+            } icon: {
+                Image(systemName: "gauge.with.dots.needle.50percent")
+            }
         }
         .menuBarExtraStyle(.window)
-    }
-}
-
-struct MenuBarContentView: View {
-    let monitor: MenuBarMetricsMonitor
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("SOS Mac").font(.headline)
-
-            if let cpu = monitor.cpuPercent {
-                Text("CPU: \(String(format: "%.0f%%", cpu))")
-            } else {
-                Text("CPU: —")
-            }
-
-            if let used = monitor.memoryUsedBytes, let total = monitor.memoryTotalBytes {
-                Text("Memory: \(ByteFormatter.string(fromByteCount: Int64(used))) / \(ByteFormatter.string(fromByteCount: Int64(total)))")
-            }
-
-            Divider()
-
-            Button("Quit") {
-                NSApplication.shared.terminate(nil)
-            }
-        }
-        .padding()
-        .frame(width: 220)
     }
 }
