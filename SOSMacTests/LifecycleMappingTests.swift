@@ -151,13 +151,13 @@ struct DockCopyTests {
         #expect(dock == DockCopy())
     }
 
-    @Test("Space Lens: Review…, Back to Map, Choose Folder…")
+    @Test("Space Lens: Review…, Scan Again, Choose Folder…")
     func spaceLens() {
         let dock = ModuleIdentity(module: .spaceLens).dock
         #expect(dock.resultsAction == "Review…")
         #expect(dock.openReview == nil)
         #expect(dock.resultsFinish == "Scan Again")
-        #expect(dock.doneAction == "Back to Map")
+        #expect(dock.doneAction == "Scan Again")
         #expect(dock.doneSecondary == "Open Trash")
         #expect(dock.emptyAction == "Choose Folder…")
     }

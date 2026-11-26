@@ -402,8 +402,9 @@ private struct SpaceLensScreen: View {
         case .cleaning:
             break
         case .done:
-            // §5.5 / N7: the CTA is "Back to Map"; Scan Again lives on the map's own dock.
-            actions.scanAgain = { viewModel.backToMap() }
+            // §5.5 done row: the card's "Back to Map" is the prominent action (N7);
+            // the dock carries "Scan Again" plus the "Open Trash" trailing secondary.
+            actions.scanAgain = { viewModel.scanAgain() }
             actions.openTrash = openTrash
         case .failed:
             actions.primary = { viewModel.scanAgain() }
