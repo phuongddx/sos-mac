@@ -306,22 +306,6 @@ extension Theme {
         static let settings = Color.textSecondary
     }
 
-    /// One hue per `SidebarDestination`.
-    @available(*, deprecated, message: "Use the Palette C Theme.Hue tokens")
-    static func hue(for destination: SidebarDestination) -> SwiftUI.Color {
-        switch destination {
-        case .dashboard: return Hue.smartcare
-        case .smartCare: return Hue.smartcare
-        case .junkCleaner: return Hue.junk
-        case .uninstaller: return Hue.uninstaller
-        case .updater: return Hue.updater
-        case .spaceLens: return Hue.spacelens
-        case .duplicateFinder: return Hue.duplicates
-        case .performance: return Hue.performance
-        case .cloudCleanup: return Hue.cloud
-        case .protection: return Hue.protection
-        }
-    }
 }
 
 // MARK: - Helpers

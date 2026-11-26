@@ -11,6 +11,8 @@ struct ModuleCardView: View {
     let badgeText: String
     let badgeStyle: BadgeStyle
     let hue: Color
+    /// Ink drawn on the hue tile — `Theme.ink(for:)` keeps bright hues ≥ 3:1 (spec §2.5).
+    var ink: Color = .white
     let action: () -> Void
 
     var body: some View {
@@ -23,7 +25,7 @@ struct ModuleCardView: View {
                             .frame(width: 38, height: 38)
                             .shadow(color: hue.opacity(0.4), radius: 6, x: 0, y: 3)
                         Image(systemName: systemImage)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(ink)
                     }
                     VStack(alignment: .leading, spacing: 2) {
                         Text(title)
