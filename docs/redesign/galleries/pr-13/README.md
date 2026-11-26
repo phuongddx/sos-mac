@@ -71,5 +71,5 @@ xcodegen generate ·
 xcodebuild build -scheme SOSMac -configuration Debug ·
 cd Packages/CleanCore && swift test (115 tests / 28 suites) ·
 xcodebuild test -only-testing:SOSMacTests (137 tests / 22 suites, 20 new) ·
-Scripts/ui-snapshots.sh -p pr-13 (18 PNGs, 2400x1520)
+Scripts/ui-snapshots.sh -p pr-13 (18 per-appearance captures at 2400x1520; every committed state sheet pairs dark + light into one 4800x1520 image)
 ```
