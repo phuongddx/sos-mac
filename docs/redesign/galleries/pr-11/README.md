@@ -109,7 +109,7 @@ states (settled).
 ## Tests run
 - [x] xcodebuild build -scheme SOSMac -configuration Debug — 0 errors
 - [x] cd Packages/CleanCore && swift test — 115/115
-- [x] xcodebuild test -only-testing:SOSMacTests — 132/132 (117 base + 15 new)
+- [x] xcodebuild test -only-testing:SOSMacTests — 134/134 (117 base + 17 new)
 - [x] Scripts/ui-snapshots.sh -p pr-11 (this gallery, 12 states × dark/light)
 
 ## Differences from the prototype, and why

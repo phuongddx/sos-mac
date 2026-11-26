@@ -1,9 +1,10 @@
 import Foundation
 import Testing
-// @testable: the successful-delete tests construct `CloudDeleteResult`, whose
-// memberwise initializer is internal (CleanCore's own providers build the rows
-// in-module). Debug builds of the local package keep testability on; if that
-// ever changes, these tests fall back to the throwing-fake design.
+// @testable: the delete tests construct `CloudDeleteResult` and its
+// `CloudDeleteFailure` rows, whose memberwise initializers are internal
+// (CleanCore's own providers build the rows in-module). Debug builds of the
+// local package keep testability on; if that ever changes, the partial-
+// failure test falls back to the whole-call error design.
 @testable import CleanCore
 @testable import SOSMac
 
@@ -26,9 +27,9 @@ struct CloudCleanupViewModelTests {
 
     /// A fake API provider: the file list and the delete result are fixed by
     /// the test; every delete call is recorded. Nothing leaves the process.
-    /// `CloudDeleteFailure` has no public initializer (CleanCore builds rows
-    /// internally), so partial per-file failures cannot be fabricated here —
-    /// the failure tests cover the whole-call error and the iCloud leg.
+    /// `CloudDeleteResult`/`CloudDeleteFailure` have no public initializer
+    /// (CleanCore builds rows in-module); the partial-failure test builds
+    /// them through `@testable` (the file-head comment).
     private final class FakeCloudProvider: CloudProvider, @unchecked Sendable {
         let providerName: String
         var listFilesResult: CloudFilePage
@@ -373,6 +374,58 @@ struct CloudCleanupViewModelTests {
         #expect(failedCount == 2)
         #expect(viewModel.apiDeleteError[.oneDrive] == "Request failed (HTTP 503).")
         #expect(viewModel.apiSets.count == 3, "nothing was deleted, so every group stays")
+    }
+
+    @Test("a partial API delete reports only the confirmed bytes and recomputes the groups (S6/F4)")
+    func apiPartialDeleteFailure() async throws {
+        // The provider confirms drv-002 and drv-005 and fails drv-003.
+        let provider = FakeCloudProvider(
+            providerName: "Google Drive",
+            deleteResult: CloudDeleteResult(
+                succeededIDs: ["drv-002", "drv-005"],
+                failed: [CloudDeleteFailure(id: "drv-003", reason: "Request failed (HTTP 429).")]))
+        let viewModel = Self.makeViewModel(apiProviders: [.googleDrive: provider])
+        viewModel.loadFixtureAPIResults(.googleDrive, files: UITestFixtures.driveFiles)
+
+        // Three extras across two groups: the brand pair and the offsite backup.
+        viewModel.toggleSelection(key: "drv-002")
+        viewModel.toggleSelection(key: "drv-003")
+        viewModel.toggleSelection(key: "drv-005")
+        let attemptedBytes = viewModel.selectedFiles.reduce(0) { $0 + $1.size }
+        #expect(attemptedBytes == 2_687_050_000, "812.3 MB × 2 + 1_062.45 MB — the attempted total")
+
+        #expect(await viewModel.deleteFromAPI(.googleDrive))
+        // Done counts the **confirmed** bytes only — never the attempted total.
+        #expect(await waitForPhase(viewModel,
+                                   .done(movedBytes: 1_874_750_000, movedCount: 2, failedCount: 1),
+                                   for: .googleDrive))
+        #expect(viewModel.apiDeleteError[.googleDrive] == nil)
+        #expect(viewModel.apiDeleteFailures[.googleDrive]?.map(\.id) == ["drv-003"])
+
+        // The groups recompute from the files that remain: the offsite group
+        // is down to its keep and disappears; brand survives (its second
+        // extra failed) with the contract group untouched.
+        #expect(viewModel.apiSets.count == 2)
+        #expect(viewModel.apiSets.allSatisfy { $0.id != "fixture-hash-offsite" })
+        // The failed copy stays selected and in its set — nothing is invented.
+        #expect(viewModel.selectedFiles.map(\.id) == ["drv-003"])
+    }
+
+    // MARK: - Frame identity (§5.6/Appendix A: the danger CTA rule)
+
+    @Test("an API provider's review CTA renders danger; iCloud Drive's stays prominent (§5.6/Appendix A)")
+    func frameIdentityDangerRule() {
+        // The three server-side providers carry the danger style and the
+        // provider-named CTA label.
+        for provider in [CloudCleanupViewModel.Provider.googleDrive, .dropbox, .oneDrive] {
+            let identity = CloudCleanupView.frameIdentity(for: provider)
+            #expect(identity.isReviewCTADanger, "\(provider.rawValue)'s delete CTA renders .danger")
+            #expect(identity.reviewActionTitle == "Delete from \(provider.rawValue)…")
+        }
+        // iCloud Drive's local Trash path keeps the shared prominent style.
+        let iCloudIdentity = CloudCleanupView.frameIdentity(for: .iCloudDrive)
+        #expect(!iCloudIdentity.isReviewCTADanger)
+        #expect(iCloudIdentity.reviewActionTitle == "Move to Trash…")
     }
 
     // MARK: - API scan with a fake provider (the day-OAuth-lands path)
