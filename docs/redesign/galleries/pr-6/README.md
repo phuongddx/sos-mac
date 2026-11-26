@@ -32,6 +32,8 @@ sheets are the same picture.
 - **Similar mode pre-selects nothing (OD-a).** The prototype's "Today every copy except
   the newest is selected." line is dropped; Similar results show "0 KB" selected and a
   disabled Clean. The Similar banner uses the spec S3 text on Start, Results and Review.
+- **Similar review rows drop the prototype's "«size» each".** Similar copies differ in
+  size, so a shared per-row size would be invented; the set's totals (OD-b) stay.
 - **Scanning is honest about the listing pass.** Exact mode reports no progress while it
   lists files, so step 1 has no "files counted" meta; the bar, "k of N files" and the
   percentage appear only once hashing starts (before that: "Counting files in your Home
