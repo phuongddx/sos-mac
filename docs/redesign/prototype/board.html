@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOS Mac Redesign v1 — All screens</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { margin: 0; background: #07060d; color: var(--text-1); font: var(--f-body); }
+  header { position: sticky; top: 0; z-index: 5; display: flex; gap: 16px; align-items: center; padding: 14px 28px; background: rgba(7,6,13,.86); backdrop-filter: blur(16px); border-bottom: 1px solid var(--hairline); }
+  header h1 { font: var(--f-title2); margin: 0; }
+  header nav { margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; }
+  header a { color: var(--primary-bright); text-decoration: none; padding: 4px 8px; border-radius: 6px; font: var(--f-callout); }
+  header a:hover { background: var(--row-hover); }
+  main { padding: 8px 28px 60px; }
+  section { margin-top: 28px; }
+  h2 { font: var(--f-title2); margin: 0 0 4px; display: flex; gap: 10px; align-items: center; }
+  h2 i { width: 10px; height: 10px; border-radius: 3px; }
+  .sub { color: var(--text-2); font: var(--f-callout); margin: 0 0 12px; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  figure { margin: 0; width: 384px; }
+  .frame { width: 384px; height: 243.2px; overflow: hidden; border-radius: 8px; border: 1px solid var(--hairline-strong); position: relative; background: #0B0A14; }
+  .frame iframe { width: 1200px; height: 760px; border: 0; transform: scale(.32); transform-origin: 0 0; pointer-events: none; }
+  .frame.big { width: 600px; height: 380px; } .frame.big iframe { transform: scale(.5); }
+  figure.bigf { width: 600px; }
+  .frame.desk { width: 600px; height: 414px; } .frame.desk iframe { width: 1260px; height: 870px; transform: scale(.476); }
+  figcaption { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; font: var(--f-callout); color: var(--text-2); }
+  figcaption a { color: var(--primary-bright); text-decoration: none; }
+  figcaption b { color: var(--text-1); font-weight: 600; }
+  .note { margin-top: 8px; color: var(--text-2); font: var(--f-callout); max-width: 900px; }
+</style>
+</head>
+<body>
+<header><h1>SOS Mac Redesign v1 — Aurora Indigo · All screens</h1>
+  <nav><a href="index.html">Prototype</a><a href="#light-c">Palette C · Light</a><a href="#dialogs">Dialogs</a><a href="#light">Light · Palette A</a><a href="#menubar">Menu bar</a><a href="tokens.html">Tokens &amp; Components</a><a href="palettes.html">Palettes A/B/C</a><a href="needs-engine-work.html">Needs engine work</a></nav></header>
+<main id="board"></main>
+<script src="data.js"></script>
+<script>
+  const STATES = SOS.STATES, M = SOS.MODS, L = SOS.STATE_LABEL;
+  const fig = (label, q, o = {}) => `<figure class="${o.big ? 'bigf' : ''}"><div class="frame ${o.big ? 'big' : ''} ${o.desk ? 'desk' : ''}"><iframe loading="lazy" title="${label}" src="index.html?${q}${o.desk ? '' : '&chrome=0'}&freeze=1"></iframe></div><figcaption><b>${label}</b><a href="index.html?${q}&freeze=1" target="_blank">Open ↗</a></figcaption></figure>`;
+  const sec = (id, title, hue, sub, figs) => `<section id="${id}"><h2>${hue ? `<i style="background:${hue}"></i>` : ''}${title}</h2>${sub ? `<p class="sub">${sub}</p>` : ''}<div class="row">${figs}</div></section>`;
+  const NOTES = {
+    dashboard: 'No lifecycle: Dashboard is a launcher. Snapshot is read once when the page opens.',
+    updater: 'Read-only: no Review / Cleaning / Done because nothing is installed. Error state (failed check, D3) is on Needs engine work.',
+    performance: 'No scan lifecycle: live metrics plus two maintenance actions.',
+    cloud: 'Drive (target) needs a registered sign-in app; shown as a design target only.',
+    protection: 'Cleaning = quarantining. Quarantine list has Restore on every row.',
+    spacelens: 'Review = the cleanup-list sheet. Nothing is ever pre-selected.',
+  };
+  let html = sec('light-c', 'Palette C “Midnight Glass” · Light', '#4F46E5', 'Chosen palette, light appearance. Neon darkens: cyan #155E75, lime #3F6212, violet #6D28D9. Warning is #A14A06 (darker than the report’s #B45309 so 11 px badges and selected rows reach 4.5:1). Checked boxes fill primaryDeep; unchecked outlines use text-2. No glow.', [
+    fig('Smart Care Results · C light', 'screen=smartcare&state=results&palette=C&theme=light', { big: true }),
+    fig('Junk & Cache Review · C light', 'screen=junk&state=review&palette=C&theme=light', { big: true }),
+    fig('Uninstaller Review · C light', 'screen=uninstaller&state=review&palette=C&theme=light', { big: true }),
+  ].join(''));
+  for (const sc of Object.keys(STATES)) {
+    html += sec(sc, M[sc].label, M[sc].hue, NOTES[sc] || 'Start · Scanning · Results · Review · Cleaning · Done · Empty · Error',
+      STATES[sc].map(st => fig(L[st], `screen=${sc}&state=${st}`)).join(''));
+  }
+  html += sec('dialogs', 'Confirmation dialogs', '#F87171', 'Nothing leaves its place without one of these. Copy is always "Move to Trash"; Google Drive has its own server-side warning with a required acknowledgement.', [
+    fig('Move to Trash · Smart Care', 'screen=smartcare&state=results&dialog=trash', { big: true }),
+    fig('Move to Trash · Junk (with approval line)', 'screen=junk&state=review&dialog=trash', { big: true }),
+    fig('Delete from Google Drive · server-side', 'screen=cloud&state=drive&dialog=cloud', { big: true }),
+    fig('Uninstall · Slack', 'screen=uninstaller&state=review&dialog=uninstall', { big: true }),
+    fig('Quarantine · Protection', 'screen=protection&state=review&dialog=quarantine', { big: true }),
+    fig('Space Lens cleanup list', 'screen=spacelens&state=review', { big: true }),
+  ].join(''));
+  html += sec('light', 'Light mode · Palette A (reference)', '#F7F5FF', 'Palette A light, kept for comparison. Neon always darkens in light: cyan #0E7490, lime #4D7C0F, magenta #A21CAF. No glow.', [
+    fig('Dashboard · light', 'screen=dashboard&theme=light', { big: true }),
+    fig('Smart Care Results · light', 'screen=smartcare&state=results&theme=light', { big: true }),
+    fig('Junk & Cache Review · light', 'screen=junk&state=review&theme=light', { big: true }),
+  ].join(''));
+  html += sec('menubar', 'Menu bar widget + popover', '#2DD4BF', 'CPU % and memory used/total only (§4.1). Fixed-width CPU label so the menu bar does not jitter.', [
+    fig('Popover · dark', 'screen=performance&state=live&pop=1&devbar=0', { desk: true }),
+    fig('Popover · light', 'screen=performance&state=live&pop=1&devbar=0&theme=light', { desk: true }),
+  ].join(''));
+  document.getElementById('board').innerHTML = html;
+</script>
+</body>
+</html>
