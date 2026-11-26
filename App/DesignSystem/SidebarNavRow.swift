@@ -68,6 +68,8 @@ struct SidebarNavRow: View {
     let hue: Color
     let ink: Color
     let isActive: Bool
+    /// PR 3 (OD-3): a cyan dot while the module is scanning in the background.
+    var isScanning: Bool = false
 
     @State private var isHovering = false
 
@@ -85,6 +87,12 @@ struct SidebarNavRow: View {
                 .foregroundStyle(Theme.Color.textPrimary)
                 .lineLimit(1)
             Spacer(minLength: 0)
+            if isScanning {
+                Circle()
+                    .fill(Theme.Color.neonCyan)
+                    .frame(width: 6, height: 6)
+                    .accessibilityHidden(true)
+            }
         }
         .padding(.horizontal, Theme.Spacing.s2)
         .frame(height: 32)

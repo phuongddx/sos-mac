@@ -2,7 +2,8 @@ import SwiftUI
 import CleanCore
 
 struct SmartCareView: View {
-    @State private var viewModel = SmartCareViewModel()
+    @Environment(ModuleStore.self) private var store
+    private var viewModel: SmartCareViewModel { store.smartCare }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,7 +20,6 @@ struct SmartCareView: View {
         .background(Theme.background)
         .auroraBloom()
         .navigationTitle("Smart Care")
-        .onDisappear { viewModel.cancelScan() }
     }
 
     @ViewBuilder
@@ -73,6 +73,11 @@ struct SmartCareView: View {
                 ForEach([SmartCareViewModel.junkModuleName, SmartCareViewModel.duplicatesModuleName], id: \.self) { name in
                     stepRow(for: name, status: viewModel.moduleStatuses[name] ?? .pending)
                 }
+                // PR 3 (spec §6.6): the scan outlives this screen, so it needs an
+                // explicit Stop. Plain style now; PR 7 restyles it.
+                Button("Stop") { viewModel.cancelScan() }
+                    .buttonStyle(.bordered)
+                    .padding(.top, Theme.Spacing.lg)
             }
             .padding(Theme.Spacing.xxxl)
         }

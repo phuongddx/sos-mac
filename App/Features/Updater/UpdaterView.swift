@@ -8,7 +8,8 @@ import CleanCore
 /// detection/display (the "View in App Store" link is a pre-existing
 /// external deep-link, not an install action, so it stays).
 struct UpdaterView: View {
-    @State private var viewModel = UpdaterViewModel()
+    @Environment(ModuleStore.self) private var store
+    private var viewModel: UpdaterViewModel { store.updater }
 
     var body: some View {
         Group {
@@ -24,7 +25,7 @@ struct UpdaterView: View {
         .navigationTitle("Updater")
         .task {
             viewModel.loadApps()
-            await viewModel.checkAll()
+            await viewModel.autoCheckIfNeeded()
         }
     }
 

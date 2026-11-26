@@ -3,23 +3,11 @@ import SwiftData
 import CleanCore
 
 struct JunkCleanerView: View {
-    @Environment(\.modelContext) private var modelContext
-    @State private var viewModel: JunkCleanerViewModel?
+    @Environment(ModuleStore.self) private var store
+    private var viewModel: JunkCleanerViewModel { store.junkCleaner }
 
     var body: some View {
-        Group {
-            if let viewModel {
-                JunkCleanerContentView(viewModel: viewModel)
-            } else {
-                ProgressView()
-            }
-        }
-        .task {
-            if viewModel == nil {
-                viewModel = JunkCleanerViewModel(modelContext: modelContext)
-            }
-        }
-        .onDisappear { viewModel?.cancelScan() }
+        JunkCleanerContentView(viewModel: viewModel)
         .navigationTitle("Junk & Cache")
     }
 }
