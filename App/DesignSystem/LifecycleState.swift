@@ -38,15 +38,20 @@ struct ModuleIdentity: Hashable, Sendable {
     let startActionTitle: String
     /// The review bar CTA label (spec §4.1): "Move to Trash…"; Protection "Quarantine…".
     let reviewActionTitle: String
+    /// The review bar CTA renders in the danger style only for the
+    /// server-side cloud delete (spec §4.4) — Cloud Cleanup's API providers.
+    let isReviewCTADanger: Bool
 
     init(name: String, hue: Color, symbol: String,
          startActionTitle: String = "Scan",
-         reviewActionTitle: String = "Move to Trash…") {
+         reviewActionTitle: String = "Move to Trash…",
+         isReviewCTADanger: Bool = false) {
         self.name = name
         self.hue = hue
         self.symbol = symbol
         self.startActionTitle = startActionTitle
         self.reviewActionTitle = reviewActionTitle
+        self.isReviewCTADanger = isReviewCTADanger
     }
 
     init(module: SidebarDestination) {

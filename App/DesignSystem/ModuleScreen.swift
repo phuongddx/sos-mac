@@ -144,6 +144,7 @@ struct ModuleScreen<Content: View>: View {
             selectedSizeText: selection?.sizeText,
             ctaLabel: module.reviewActionTitle,
             isCTAEnabled: (selection?.count ?? 0) > 0 && actions.primary != nil,
+            isCTADanger: module.isReviewCTADanger,
             ctaAction: actions.primary
         )
     }
@@ -153,7 +154,12 @@ struct ModuleScreen<Content: View>: View {
     private var cta: PrimaryCTAView {
         switch state {
         case .start:
-            PrimaryCTAView(label: module.startActionTitle, action: actions.primary)
+            // F1: a missing action disables its control — a screen whose state
+            // has nothing to scan yet (Cloud Cleanup's not-configured
+            // providers) shows the truthfully unusable CTA.
+            PrimaryCTAView(label: module.startActionTitle,
+                           mode: actions.primary == nil ? .disabled : .active,
+                           action: actions.primary)
         case .scanning:
             PrimaryCTAView(label: "Stop", mode: .stop, ring: scanRing, action: actions.stop)
         case .results:
