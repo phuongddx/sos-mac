@@ -8,8 +8,10 @@ import AppKit
 /// `data-palette="c"`; light values confirmed by the Designer's final Palette C
 /// light block, 2026-11-26 — OD-1 closed: `warning` light `#A14A06`,
 /// `treemapText` light `#141A33`, light elevation ink `#141A33`; every other
-/// light value matched the table). Structure follows the Designer's
-/// `tokens/Theme.swift`.
+/// light value matched the table). The final source is the Designer's token
+/// file in the Open Design project `sos-mac-redesign-v1-aurora-indigo`
+/// (the in-repo `docs/redesign/prototype/tokens/Theme.swift` snapshot predates
+/// the final light block and keeps the proposal's Palette A lineage).
 ///
 /// Inside this type the names `Color`, `Gradient` and `Font` refer to the nested token
 /// namespaces, so SwiftUI's own types are always written `SwiftUI.Color` etc.
