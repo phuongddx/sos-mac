@@ -122,7 +122,7 @@ final class ModuleStore {
             guard let cloud = _cloudCleanup else { return false }
             return cloud.iCloudState.isLoading || cloud.apiStates.values.contains { $0.isLoading }
         case .protection:
-            return _protection?.phase == .scanning || _protection?.phase == .quarantining
+            return _protection?.isBusy == true
         }
     }
 }
