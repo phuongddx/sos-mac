@@ -250,14 +250,24 @@ private struct JunkCleanerScreen: View {
             isDeselectAllEnabled: !selected.isEmpty,
             selectAll: { viewModel.selectAllEligibleInCurrentGroup() },
             deselectAll: { viewModel.deselectAllInCurrentGroup() },
-            banner: location?.requiresPrivilegedHelper == true ? AnyView(helperBanner) : nil)
+            banner: AnyView(reviewBanners))
     }
 
-    /// S7: the helper is explained before it is used, on every helper location.
-    private var helperBanner: some View {
-        BannerView(kind: .info,
-                   title: "Needs your approval",
-                   text: "Moving these uses the SOS Mac helper. macOS asks for your password once.")
+    /// The banners under the list head: the S7 helper explanation on every helper
+    /// location, and — above it — an action error such as a failed ignore-list save
+    /// (N4: the error sits next to what caused it, never in a bare red line).
+    @ViewBuilder
+    private var reviewBanners: some View {
+        VStack(spacing: Theme.Spacing.s2) {
+            if let message = viewModel.actionErrorMessage {
+                BannerView(kind: .err, title: "Couldn't ignore this file", text: message)
+            }
+            if viewModel.currentLocation?.requiresPrivilegedHelper == true {
+                BannerView(kind: .info,
+                           title: "Needs your approval",
+                           text: "Moving these uses the SOS Mac helper. macOS asks for your password once.")
+            }
+        }
     }
 
     private var itemModels: [ReviewItemRow.Model] {
