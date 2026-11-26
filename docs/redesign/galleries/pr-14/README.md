@@ -3,8 +3,8 @@
 The migrated Dashboard in dark and light, captured from the real app running on fixture data
 only (`SOSMAC_UITEST_FIXTURES=1`: volume "Sample Disk", the sample storage figures, load 2.41,
 16 GB memory with 11.24 GB in use, thermal "Nominal" — nothing was read from the real Mac).
-`dashboard-default-sheet.png` places **dark on the left, light on the right** (4800×1520);
-`dashboard-contact-sheet.png` is the overview (1632×523).
+`dashboard-default-sheet.png` places **dark on the left, light on the right** (1840×583, regenerated in PR 16);
+`dashboard-contact-sheet.png` is the overview (904×291).
 
 Captured with `Scripts/ui-snapshots.sh -p pr-14 -s dashboard=default` — background-only window
 capture, 1200×760 pt, 2400×1520 px per appearance.
@@ -33,9 +33,9 @@ The Dashboard has no lifecycle (spec §5.1), so there is one state. What varies 
 - **Snapshot is read once**, when the page appears (the caption says so); no polling.
 - **Decimal separator and units follow the system** (`ByteFormatter`, Intl), so a machine set
   to a comma locale shows "11,24 GB"; the prototype hard-codes a dot.
-- **Orb ring.** The hero orb reuses `ModuleOrbView` with 112 pt metrics; its ring inset is fixed
-  at 34 pt for the 260 pt start orb, so on the small orb the ring sits behind the glyph and is
-  not visible (the prototype shows a thin ring at inset 10).
+- **Orb ring (fixed in PR 16).** The hero orb reuses `ModuleOrbView` with 112 pt metrics and a
+  ring inset of 10 pt (`Metrics.ringInset`), as in the prototype, so the thin ring is now
+  visible around the glyph; the full-size start orbs keep their 34 pt inset.
 - **Four across by `ViewThatFits`**, not CSS grid: below the width where each card keeps 200 pt
   the cards fall back to two by two.
 - **"Run Smart Care" mid-review.** If Smart Care is already in its review phase the button
@@ -50,6 +50,21 @@ The Dashboard has no lifecycle (spec §5.1), so there is one state. What varies 
   (no XCUITest by decision). The launch logic is covered by `DashboardViewModelTests`
   (Smart Care leaves `.idle` and navigation targets `.smartCare`); the visual check is manual.
 - A real Mac's memory and thermal readings (the gallery uses fixtures).
+
+## Regenerated in PR 16 (cleanup)
+
+Every sheet in this folder was re-captured from the final PR 16 build, fixture data only
+(`SOSMAC_UITEST_FIXTURES=1`, `open -g` background launch, `screencapture -l` window capture,
+no foreground, no permission prompt, no real scan). Each `<screen>-<state>-sheet.png` is the dark capture (left) and the light capture (right), each scaled to 920 px wide and joined side by side.
+
+```bash
+Scripts/ui-snapshots.sh -p pr-14 -d /tmp/sosmac-pr16-dd -s dashboard=default
+```
+
+- Captures: 2; every one is 2400×1520 px (the raw per-appearance files are generated into the
+  git-ignored `artifacts/ui-snapshots/` and are not committed); no capture is blank.
+- Sheets: 1 × 1840×583. Contact sheet: 904×291 (dark, light) (dark first, then light).
+- The Dashboard orb is the only visual change in this gallery from PR 16 (ring inset).
 
 ## PR-description skeleton
 
@@ -69,5 +84,5 @@ xcodegen generate ·
 xcodebuild build -scheme SOSMac -configuration Debug ·
 cd Packages/CleanCore && swift test (115 tests / 28 suites, unchanged) ·
 xcodebuild test -only-testing:SOSMacTests (189 tests, 13 new in DashboardViewModelTests) ·
-Scripts/ui-snapshots.sh -p pr-14 -s dashboard=default (2 captures at 2400x1520; one 4800x1520 dark|light sheet)
+Scripts/ui-snapshots.sh -p pr-14 -s dashboard=default (2 captures at 2400x1520; one 1840x583 dark|light sheet)
 ```

@@ -6,8 +6,8 @@ fictional `/Users/sample` paths — no real files were read, moved or trashed). 
 `junk-<state>-sheet.png` places **dark on the left, light on the right**;
 `junk-contact-sheet.png` is the whole 4×4 overview (top two rows dark, bottom two light).
 
-Captured with `Scripts/ui-snapshots.sh -p pr-5` (which now defaults to these eight
-junk states) — background-only window capture, 1200×760 pt.
+Captured with `Scripts/ui-snapshots.sh -p pr-5` (which defaults to these eight
+junk states) — background-only window capture, 1200×760 pt. Regenerated in PR 16 (see the last section).
 
 | State | Sheet | Prototype reference |
 |---|---|---|
@@ -31,6 +31,21 @@ junk states) — background-only window capture, 1200×760 pt.
   matrix — it is covered by `SOSMacTests/ConfirmSheetTests` and the manual run.
 - **Done keeps its actions in the dock** (F1: Open Trash trailing, Scan Again CTA)
   rather than repeating them inside the card as the prototype draws.
+
+## Regenerated in PR 16 (cleanup)
+
+Every sheet in this folder was re-captured from the final PR 16 build, fixture data only
+(`SOSMAC_UITEST_FIXTURES=1`, `open -g` background launch, `screencapture -l` window capture,
+no foreground, no permission prompt, no real scan). Each `<screen>-<state>-sheet.png` is the dark capture (left) and the light capture (right), each scaled to 920 px wide and joined side by side.
+
+```bash
+Scripts/ui-snapshots.sh -p pr-5 -d /tmp/sosmac-pr16-dd   # the eight junk states
+```
+
+- Captures: 16; every one is 2400×1520 px (the raw per-appearance files are generated into the
+  git-ignored `artifacts/ui-snapshots/` and are not committed); no capture is blank.
+- Sheets: 8 × 1840×583. Contact sheet: 1808×1164 (4×4) (dark first, then light).
+- Junk & Cache keeps the default dock labels (Review Items… / Scan Again / Open Trash), so nothing in these eight states changed with the PR 16 label work.
 
 ## PR-description skeleton
 

@@ -36,10 +36,11 @@ ViewModel's DEBUG launch hook).
   (not a `Cleaner`) and a SwiftData `QuarantineRecord`. A file that moved but could not be
   recorded counts as a failure and stays in the findings; a failed restore keeps its
   record and shows an error banner. No `FileManager.removeItem` in Protection.
-- **Frame CTAs are fixed.** The shared `ModuleScreen` hard-codes the results CTA "Clean"
-  (shown disabled) and the done dock "Open Trash" (shown disabled); the cards carry the
-  real actions ("Open Quarantine", "Scan Again"). Label overrides in `ModuleScreen` are a
-  recommended follow-up (outside this PR's write set).
+- **Dock labels follow Appendix A (PR 16).** Results with findings shows the CTA "Review"
+  (it enters the review screen, with "Review the finding, then quarantine it" on its left and
+  "Scan Again" trailing); the disabled "Clean" and the disabled done-dock "Open Trash" are
+  gone — Protection quarantines, it does not move to the Trash. Done shows "Scan Again" and
+  the card carries "Open Quarantine".
 - **Quarantine sub-screen sits outside `ModuleScreen`.** It has no lifecycle state, so it
   composes the aurora background and toolbar itself (back to "Protection").
 - **Scanning step is derived.** The engine reports no per-location progress, so the active
@@ -51,6 +52,20 @@ ViewModel's DEBUG launch hook).
   `SOSMacTests/ProtectionViewModelTests` (hermetic temp dirs, injected quarantine folder,
   in-memory SwiftData).
 - The doubled toolbar title is existing shared-frame behaviour (also visible in PR 5/9).
+
+## Regenerated in PR 16 (cleanup)
+
+Every sheet in this folder was re-captured from the final PR 16 build, fixture data only
+(`SOSMAC_UITEST_FIXTURES=1`, `open -g` background launch, `screencapture -l` window capture,
+no foreground, no permission prompt, no real scan). Each `<screen>-<state>-sheet.png` is the dark capture (left) and the light capture (right), each scaled to 920 px wide and joined side by side.
+
+```bash
+Scripts/ui-snapshots.sh -p pr-13 -d /tmp/sosmac-pr16-dd -s protection=start,…,protection=error,protection=quarantine
+```
+
+- Captures: 18; every one is 2400×1520 px (the raw per-appearance files are generated into the
+  git-ignored `artifacts/ui-snapshots/` and are not committed); no capture is blank.
+- Sheets: 9 × 1840×583. Contact sheet: 2260×1164 (5 per row, dark then light) (dark first, then light).
 
 ## PR-description skeleton
 
@@ -71,5 +86,5 @@ xcodegen generate ·
 xcodebuild build -scheme SOSMac -configuration Debug ·
 cd Packages/CleanCore && swift test (115 tests / 28 suites) ·
 xcodebuild test -only-testing:SOSMacTests (137 tests / 22 suites, 20 new) ·
-Scripts/ui-snapshots.sh -p pr-13 (18 per-appearance captures at 2400x1520; every committed state sheet pairs dark + light into one 4800x1520 image)
+Scripts/ui-snapshots.sh -p pr-13 (18 per-appearance captures at 2400x1520; every committed state sheet pairs dark + light into one 1840x583 image, regenerated in PR 16)
 ```
