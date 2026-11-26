@@ -86,17 +86,19 @@ private struct JunkCleanerScreen: View {
             module: module,
             title: "Clear caches and old logs",
             lede: "Apps rebuild these files on their own. You see every file before it moves, and everything goes to the Trash.",
-            bullets: Self.ruleBullets,
+            bullets: ruleBullets,
             note: "System Caches need your approval. They're never selected for you.")
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
-    /// One bullet per junk rule with its root path (spec §5.3 `start` row).
-    private static var ruleBullets: [StartView.Bullet] {
-        JunkRule.allowlist.map { rule in
-            StartView.Bullet(symbol: rule.requiresPrivilegedHelper ? "key" : "folder",
-                             title: rule.shortLabel,
-                             text: rule.displayRoot)
+    /// One bullet per junk rule with its root path (spec §5.3 `start` row). The
+    /// summaries come from the view model's injected rules, so the start screen
+    /// always describes the exact set a scan will walk.
+    private var ruleBullets: [StartView.Bullet] {
+        viewModel.ruleSummaries.map { summary in
+            StartView.Bullet(symbol: summary.requiresPrivilegedHelper ? "key" : "folder",
+                             title: summary.title,
+                             text: summary.root)
         }
     }
 
