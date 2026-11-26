@@ -106,6 +106,24 @@ struct RootView: View {
     }
 
     var body: some View {
+        Group {
+            #if DEBUG
+            if UITestHooks.current.showsGallery {
+                // Debug-only component gallery (PR 4a): `SOSMAC_UITEST_SCREEN=gallery`.
+                ComponentGalleryView()
+                    .frame(minWidth: 720, minHeight: 480)
+            } else {
+                appShell
+            }
+            #else
+            appShell
+            #endif
+        }
+        .uiTestHooks()
+    }
+
+    /// The sidebar and the selected screen.
+    private var appShell: some View {
         NavigationSplitView {
             SidebarView(selection: $selection)
                 .navigationSplitViewColumnWidth(min: 200, ideal: 240)
