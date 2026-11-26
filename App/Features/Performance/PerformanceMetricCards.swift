@@ -20,10 +20,11 @@ extension View {
 /// The metric grid (spec §5.9), on the prototype's three-column layout: CPU (1) + Memory
 /// (2), Thermal state (1) + Load average (2), the swap / architecture / uptime table (3).
 ///
-/// `showsUnavailable` renders every value as "—" — what the unavailable banner promises.
-/// Otherwise a read the engine didn't return shows "—" for that value only; the view never
-/// substitutes a guess. The thermal state is shown exactly once (C7): a dot and the state's
-/// own word, captioned "As reported by macOS".
+/// `showsUnavailable` renders every value as "—" — what the unavailable banner promises —
+/// on every card, the swap/architecture/uptime table included (review fix: the table was
+/// the one card that ignored it). Otherwise a read the engine didn't return shows "—" for
+/// that value only; the view never substitutes a guess. The thermal state is shown exactly
+/// once (C7): a dot and the state's own word, captioned "As reported by macOS".
 struct PerformanceMetricGrid: View {
     let sample: PerformanceViewModel.Sample?
     var showsUnavailable = false
@@ -320,17 +321,28 @@ struct PerformanceMetricGrid: View {
         var id: String { label }
     }
 
+    /// The table's three values for one sample — the testable core of the unavailable
+    /// gating (review fix): `showsUnavailable` dashes every row, exactly like the other
+    /// cards, and an engine read that never landed dashes just that row. Architecture
+    /// fails closed: a `nil` silicon read renders "—", never a guessed chip family.
+    static func systemTableValues(sample: PerformanceViewModel.Sample?,
+                                  showsUnavailable: Bool)
+        -> (swapUsed: String?, architecture: String?, runningSince: String?) {
+        guard !showsUnavailable, let sample else { return (nil, nil, nil) }
+        return (
+            swapUsed: sample.swap.map {
+                "\(ByteFormatter.string(fromByteCount: Int64($0.used))) of \(ByteFormatter.string(fromByteCount: Int64($0.total)))"
+            },
+            architecture: sample.isAppleSilicon.map { $0 ? "Apple Silicon" : "Intel" },
+            runningSince: sample.bootTime.map { $0.formatted(date: .abbreviated, time: .shortened) }
+        )
+    }
+
     private var tableRows: [TableRow] {
-        let swapText = sample?.swap.map {
-            "\(ByteFormatter.string(fromByteCount: Int64($0.used))) of \(ByteFormatter.string(fromByteCount: Int64($0.total)))"
-        }
-        let architecture: String? = sample.map { $0.isAppleSilicon ? "Apple Silicon" : "Intel" }
-        let runningSince: String? = sample?.bootTime.map {
-            $0.formatted(date: .abbreviated, time: .shortened)
-        }
-        return [TableRow(label: "Swap used", value: swapText),
-                TableRow(label: "Architecture", value: architecture),
-                TableRow(label: "Running since", value: runningSince)]
+        let values = Self.systemTableValues(sample: sample, showsUnavailable: showsUnavailable)
+        return [TableRow(label: "Swap used", value: values.swapUsed),
+                TableRow(label: "Architecture", value: values.architecture),
+                TableRow(label: "Running since", value: values.runningSince)]
     }
 
     private var tableCard: some View {

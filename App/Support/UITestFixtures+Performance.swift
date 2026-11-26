@@ -19,7 +19,11 @@ extension UITestFixtures {
                 compressed: UInt64(fixture.compressed),
                 inactive: UInt64(fixture.inactive),
                 free: UInt64(fixture.free),
-                total: 16_000_000_000),
+                total: 16_000_000_000,
+                // The engine's OD-11 figure for these made-up segments (2.84 + 5.61 +
+                // 2.79 GB = 11.24 GB of the 16 GB total) — the fixture states its own
+                // values, it re-derives nothing.
+                inUseBytes: 11_240_000_000),
             swap: PerformanceViewModel.SwapUsagePair(used: UInt64(fixture.swapUsed),
                                                      total: UInt64(fixture.swapTotal)),
             thermal: .nominal,
@@ -31,6 +35,17 @@ extension UITestFixtures {
             // concurrency-safe; a fixed epoch needs no formatter at all).
             bootTime: Date(timeIntervalSince1970: 1_795_511_640),
             isAppleSilicon: true)
+    }
+
+    /// The unavailable-state sample — what the real seams return when the engine's memory
+    /// read fails: a **non-nil partial sample** (no memory, and no CPU percentage — the
+    /// first tick after a baseline reset) with the remaining reads present. The screen's
+    /// own gating must handle this; a `nil` sample here would mask it.
+    static func performanceUnavailableSample() -> PerformanceViewModel.Sample {
+        var sample = performanceSample()
+        sample.cpuUsagePercent = nil
+        sample.memory = nil
+        return sample
     }
 
     /// The fixture launch agents, filed under the fictional home — a label and a path, like
