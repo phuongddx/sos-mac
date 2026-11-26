@@ -55,6 +55,7 @@
 		B8C5878B6778CB1B3A13E84F /* ProtectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A434E7961B33074CE62CB1F /* ProtectionView.swift */; };
 		BD71724FAF539B30C395699C /* EmptyStateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C25382720F5D7E946EA383D8 /* EmptyStateView.swift */; };
 		BFB9A6BD1B872593B8AE2E6E /* DuplicateFinderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */; };
+		C1D306350EF9CCE179379F36 /* ModuleToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5673E5EFA5B1CE9CA9DE9E43 /* ModuleToolbar.swift */; };
 		C525BF54959EB6033641B5C1 /* MenuBarMetricsMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E854DD88191E34B25816AF4E /* MenuBarMetricsMonitor.swift */; };
 		C5E85C60ADA4E920FB90650A /* UITestHooks.swift in Sources */ = {isa = PBXBuildFile; fileRef = C400BD0033715B73C6C5FE06 /* UITestHooks.swift */; };
 		D269A378D1225B726E086FE4 /* UITestFixtures.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE83684E6FDF6AB08F134234 /* UITestFixtures.swift */; };
@@ -67,6 +68,7 @@
 		EFDE7593D4F73BCC2E1BEAF7 /* MenuBarHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */; };
 		F2F2D9337CA182C9FD55FD7D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB67B89413B962973465246B /* main.swift */; };
 		FA25CBA768BC9879F743EFDB /* ThemeContrastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */; };
+		FB08A993FC8FD667E6F92356 /* ShellTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1528BAB4676A01E77E6B9BB1 /* ShellTests.swift */; };
 		FB8C8083C6100E2742DDB309 /* UninstallerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = C12B3FBB6D8691969DF7F3C4 /* UninstallerViewModel.swift */; };
 /* End PBXBuildFile section */
 
@@ -107,6 +109,7 @@
 		0A2A54290A0C90569DA0BE23 /* SOSMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SOSMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A434E7961B33074CE62CB1F /* ProtectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtectionView.swift; sourceTree = "<group>"; };
 		10DAA0AD06134B381646E567 /* UpdaterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterView.swift; sourceTree = "<group>"; };
+		1528BAB4676A01E77E6B9BB1 /* ShellTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellTests.swift; sourceTree = "<group>"; };
 		166E1A0591F7BDC42C0E7853 /* PrivilegedHelper */ = {isa = PBXFileReference; includeInIndex = 0; path = PrivilegedHelper; sourceTree = BUILT_PRODUCTS_DIR; };
 		169861D77A35617E7FED9E0A /* TreemapCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreemapCanvasView.swift; sourceTree = "<group>"; };
 		16FEC6E072C20E77D60A0C25 /* SpaceLensViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceLensViewModel.swift; sourceTree = "<group>"; };
@@ -123,6 +126,7 @@
 		556CD64042D3F9B34D459D96 /* SpaceLensView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceLensView.swift; sourceTree = "<group>"; };
 		55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarHelperApp.swift; sourceTree = "<group>"; };
 		565503C45E57F760D1ABCE61 /* IgnoredItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IgnoredItem.swift; sourceTree = "<group>"; };
+		5673E5EFA5B1CE9CA9DE9E43 /* ModuleToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleToolbar.swift; sourceTree = "<group>"; };
 		575242D8CA34B18FD76DD4FE /* JunkCleanerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JunkCleanerView.swift; sourceTree = "<group>"; };
 		5C3280BFF2C7337B3913B507 /* SOSMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SOSMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60925814F21D41B971FD4766 /* VolumeStorageInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeStorageInfo.swift; sourceTree = "<group>"; };
@@ -288,6 +292,7 @@
 		5FD202B260011B119848872E /* SOSMacTests */ = {
 			isa = PBXGroup;
 			children = (
+				1528BAB4676A01E77E6B9BB1 /* ShellTests.swift */,
 				00C5835DF1DF5296FEE0B7B3 /* SidebarDestinationTests.swift */,
 				971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */,
 				BFA193C1EA5BD96B19DE3B6D /* UITestHooksTests.swift */,
@@ -338,6 +343,7 @@
 				25FCCD11654F615F38FBC7AE /* HealthDialView.swift */,
 				EB1592F9B76A607BFA0C5D29 /* HeroPanelView.swift */,
 				FEDD20C09B7740A9A836FD75 /* ModuleCardView.swift */,
+				5673E5EFA5B1CE9CA9DE9E43 /* ModuleToolbar.swift */,
 				4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */,
 				4F5B55EEB5382ACCBAD08487 /* ScanProgressPanel.swift */,
 				BC67E979C262C1B384952044 /* ScanProgressTracker.swift */,
@@ -662,6 +668,7 @@
 				96A2FFBEDA9B53B465AEB41A /* JunkCleanerView.swift in Sources */,
 				8A7D4331AFFDCB5D68F6FE3C /* JunkCleanerViewModel.swift in Sources */,
 				5C3F87EDDE3FBF336E4F7040 /* ModuleCardView.swift in Sources */,
+				C1D306350EF9CCE179379F36 /* ModuleToolbar.swift in Sources */,
 				3E38F672530103701AC5A976 /* PerformanceView.swift in Sources */,
 				4E688FAFBD4C19198A4B7168 /* PerformanceViewModel.swift in Sources */,
 				6C83EF8ADCC68D145197246A /* PrivilegedHelperClient.swift in Sources */,
@@ -696,6 +703,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FB08A993FC8FD667E6F92356 /* ShellTests.swift in Sources */,
 				27D988358FC956E144120722 /* SidebarDestinationTests.swift in Sources */,
 				FA25CBA768BC9879F743EFDB /* ThemeContrastTests.swift in Sources */,
 				6F39304CD1EE0F2EEE12E060 /* UITestHooksTests.swift in Sources */,
