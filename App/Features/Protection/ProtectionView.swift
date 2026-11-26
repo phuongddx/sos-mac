@@ -121,7 +121,7 @@ private struct ProtectionScreen: View {
             ForEach(viewModel.locationSummaries) { location in
                 HStack(spacing: Theme.Spacing.s2) {
                     Image(systemName: "folder")
-                        .font(.system(size: Theme.TextSize.xs))
+                        .font(.system(size: 12))
                         .foregroundStyle(Theme.Color.textSecondary)
                     Text(location.label)
                         .font(Theme.Font.callout)
@@ -462,8 +462,8 @@ private struct ProtectionScreen: View {
             if viewModel.findings.isEmpty {
                 actions.scanAgain = { viewModel.startScan() }
             } else {
-                // "Clean" stays disabled: a finding is quarantined from its own review.
-                actions.reviewItems = { viewModel.enterReview() }
+                // §5.10: the results CTA is "Review" — a finding is quarantined from its own review.
+                actions.primary = { viewModel.enterReview() }
                 actions.scanAgain = { viewModel.startScan() }
             }
         case .review:

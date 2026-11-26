@@ -32,7 +32,9 @@ struct CloudCleanupView: View {
                                   symbol: "icloud",
                                   startActionTitle: "Scan",
                                   reviewActionTitle: "Delete from \(provider.rawValue)…",
-                                  isReviewCTADanger: true)
+                                  isReviewCTADanger: true,
+                                  // A server-side delete never goes through the local Trash.
+                                  dock: DockCopy(doneSecondary: nil))
         }
     }
 

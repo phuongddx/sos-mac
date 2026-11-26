@@ -37,7 +37,8 @@ private struct UpdaterScreen: View {
             state: viewModel.lifecycle,
             subtitle: toolbarSubtitle,
             actions: actions,
-            progress: scanFraction
+            progress: scanFraction,
+            resultsMeta: resultsMeta
         ) {
             AnyView(content)
         }
@@ -306,6 +307,12 @@ private struct UpdaterScreen: View {
 
     // MARK: - Frame wiring
 
+    /// §5.8 results dock meta: a real count — apps whose check returned a verdict.
+    private var resultsMeta: UpdaterFrame.SelectionSummary.Meta {
+        let count = viewModel.checkedCount
+        return .init(bold: "\(count)", text: count == 1 ? "app checked" : "apps checked")
+    }
+
     private var actions: UpdaterFrame.Actions {
         var actions = UpdaterFrame.Actions()
         switch viewModel.phase {
@@ -315,7 +322,8 @@ private struct UpdaterScreen: View {
         case .checking:
             actions.stop = { viewModel.stopCheck() }
         case .results:
-            // "Clean" stays disabled (deviation): nothing is cleaned here.
+            // Read-only (§5.8): nothing is cleaned here, so the results CTA is "Check Again".
+            actions.primary = { viewModel.startCheck() }
             actions.scanAgain = { viewModel.startCheck() }
         case .empty:
             actions.scanAgain = { viewModel.startCheck() }

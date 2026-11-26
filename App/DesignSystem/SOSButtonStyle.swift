@@ -82,7 +82,7 @@ struct SOSButtonStyle: ButtonStyle {
         var body: some View {
             let shape = RoundedRectangle(cornerRadius: isLarge ? SOSButtonStyle.largeRadius : SOSButtonStyle.radius, style: .continuous)
             configuration.label
-                .font(isLarge ? .system(size: Theme.TextSize.sm, weight: .medium) : Theme.Font.body.weight(.medium))
+                .font(isLarge ? .system(size: 14, weight: .medium) : Theme.Font.body.weight(.medium))
                 .foregroundStyle(labelColor)
                 .padding(.horizontal, isLarge ? SOSButtonStyle.largeHorizontalPadding : SOSButtonStyle.plainHorizontalPadding)
                 .frame(minHeight: isLarge ? SOSButtonStyle.largeHeight : SOSButtonStyle.defaultHeight)

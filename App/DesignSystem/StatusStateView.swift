@@ -53,7 +53,7 @@ struct StatusStateView: View {
                 .foregroundStyle(Theme.Color.textPrimary)
                 .padding(.top, Theme.Spacing.s4)
             Text(text)
-                .font(.system(size: Theme.TextSize.sm))
+                .font(.system(size: 14))
                 .lineSpacing(Self.textLineSpacing)
                 .foregroundStyle(Theme.Color.textSecondary)
                 .frame(maxWidth: Self.textWidth, alignment: .leading)

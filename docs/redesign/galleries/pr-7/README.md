@@ -9,7 +9,7 @@ overview (dark rows first, light rows after).
 
 Captured with `Scripts/ui-snapshots.sh -p pr-7 -s
 smartcare=start,smartcare=scanning,smartcare=results,smartcare=review,smartcare=cleaning,smartcare=done,smartcare=empty,smartcare=error,smartcare=partial`
-— background-only window capture, 1200×760 pt.
+— background-only window capture, 1200×760 pt (regenerated in PR 16, see the last section).
 
 | State | Sheet | Prototype reference |
 |---|---|---|
@@ -43,6 +43,21 @@ smartcare=start,smartcare=scanning,smartcare=results,smartcare=review,smartcare=
   CTA) rather than repeating them inside the card as the prototype draws.
 - **Stop is the dock CTA** (N6) with the aggregate ring, not the prototype's
   separate button; Stop returns to `start` and discards partial results (F2).
+
+## Regenerated in PR 16 (cleanup)
+
+Every sheet in this folder was re-captured from the final PR 16 build, fixture data only
+(`SOSMAC_UITEST_FIXTURES=1`, `open -g` background launch, `screencapture -l` window capture,
+no foreground, no permission prompt, no real scan). Each `<screen>-<state>-sheet.png` is the dark capture (left) and the light capture (right), each scaled to 920 px wide and joined side by side.
+
+```bash
+Scripts/ui-snapshots.sh -p pr-7 -d /tmp/sosmac-pr16-dd -s smartcare=start,…,smartcare=error,smartcare=partial
+```
+
+- Captures: 18; every one is 2400×1520 px (the raw per-appearance files are generated into the
+  git-ignored `artifacts/ui-snapshots/` and are not committed); no capture is blank.
+- Sheets: 9 × 1840×583. Contact sheet: 2260×1164 (5 per row, dark then light) (dark first, then light).
+- Smart Care keeps the default dock labels, so no label changed here.
 
 ## PR-description skeleton
 

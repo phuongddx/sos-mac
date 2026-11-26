@@ -22,11 +22,10 @@ capture, 1200×760 pt (2400×1520 px, verified for all 12 captures).
 
 ## Known differences from the prototype
 
-- **Frame CTAs are fixed.** The shared `ModuleScreen` hard-codes the results dock
-  ("Clean" and "Review Items…", both disabled — Updater never installs anything — and
-  "Scan Again") and the empty CTA "Scan Again". Honest "Check Again" / "Try Again" buttons
-  are in the content. Label overrides in `ModuleScreen` are a recommended follow-up
-  (outside this PR's write set).
+- **Dock labels follow Appendix A (PR 16).** Updater never installs anything, so results
+  has no disabled "Clean" / "Review Items…" any more: the CTA is "Check Again" (it re-runs
+  the check) with "5 apps checked" on its left; empty shows "Check Again" and error "Try
+  Again". "Check Again" and "Try Again" also stay in the content where they were.
 - **Two extra groups**: "Couldn't check" (OD-10) and "Not checked yet" (after Stop).
 - **No check on visit (OD-10).** The old auto-check is gone; `loadApps()` only lists apps.
 - **A failed or empty feed answer is never "Up to date" (D3).** It becomes a per-row
@@ -39,6 +38,20 @@ capture, 1200×760 pt (2400×1520 px, verified for all 12 captures).
 - **Not in the static matrix:** the "No update feed" group (below the fold in `results`),
   "Not checked yet" after Stop, and "View in App Store" — covered by
   `SOSMacTests/UpdaterViewModelTests` (Stop, retry, grouping) and not by a screenshot.
+
+## Regenerated in PR 16 (cleanup)
+
+Every sheet in this folder was re-captured from the final PR 16 build, fixture data only
+(`SOSMAC_UITEST_FIXTURES=1`, `open -g` background launch, `screencapture -l` window capture,
+no foreground, no permission prompt, no real scan). Each `<screen>-<state>-sheet.png` is the dark capture (left) and the light capture (right), each scaled to 920 px wide and joined side by side.
+
+```bash
+Scripts/ui-snapshots.sh -p pr-10 -d /tmp/sosmac-pr16-dd -s updater=start,updater=scanning,updater=results,updater=checkfailed,updater=empty,updater=error
+```
+
+- Captures: 12; every one is 2400×1520 px (the raw per-appearance files are generated into the
+  git-ignored `artifacts/ui-snapshots/` and are not committed); no capture is blank.
+- Sheets: 6 × 1840×583. Contact sheet: 1356×1164 (3 per row, dark then light) (dark first, then light).
 
 ## PR-description skeleton
 

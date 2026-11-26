@@ -3,7 +3,7 @@ import SwiftUI
 /// A progress bar (spec §4.9 "Progress"): a `hairlineStrong` track and a neon cyan fill with a
 /// cyan glow, 6 pt tall.
 ///
-/// Determinate only when a total is known — `ScanProgressPanel` decides that and is unchanged.
+/// Determinate only when a total is known — the caller decides that (`ScanningView`).
 /// `style` overrides the fill for the pre-redesign meters (Performance); `nil` is the scan fill,
 /// the only one that glows, because it is the only neon one (T1).
 struct ProgressBarView: View {
