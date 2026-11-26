@@ -23,20 +23,27 @@ struct ConfirmItemList: View {
         let shown = items.prefix(Self.previewLimit)
         let overflow = items.count - shown.count
         let shape = RoundedRectangle(cornerRadius: 8, style: .continuous)
-        VStack(spacing: 0) {
-            ForEach(Array(shown)) { item in
-                row(item)
+        // The prototype's `.alist` is `max-height: 132px; overflow: auto`: the rows scroll
+        // inside a clipped box, so the Total row (cleanup list) and the acknowledgement stay
+        // visible however many rows there are.
+        ScrollView {
+            VStack(spacing: 0) {
+                ForEach(Array(shown)) { item in
+                    row(item)
+                }
+                if overflow > 0 {
+                    overflowRow(count: overflow, bytes: items.dropFirst(Self.previewLimit).reduce(0) { $0 + $1.size })
+                }
+                if isSelectable {
+                    totalRow
+                }
             }
-            if overflow > 0 {
-                overflowRow(count: overflow, bytes: items.dropFirst(Self.previewLimit).reduce(0) { $0 + $1.size })
-            }
-            if isSelectable {
-                totalRow
-            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
+        .scrollBounceBehavior(.basedOnSize)
+        .frame(maxHeight: Self.listMaxHeight)
         .clipShape(shape)
         .overlay(shape.strokeBorder(Theme.Derived.hairline, lineWidth: 1))
-        .frame(maxHeight: Self.listMaxHeight, alignment: .top)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("confirm-item-list")
     }
