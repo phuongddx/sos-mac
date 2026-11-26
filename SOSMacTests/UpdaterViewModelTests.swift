@@ -278,6 +278,46 @@ struct UpdaterViewModelTests {
         await probe.release("alpha")
     }
 
+    @Test("a retry that never reached some rows never claims all apps are up to date")
+    func retryWithUncheckedRowsIsNotEmpty() async {
+        let probe = FeedProbe()
+        let failOnce = FailOnce()
+        let viewModel = Self.makeViewModel(
+            apps: [Self.app("Alpha"), Self.app("Bravo"), Self.app("Charlie")],
+            feed: { url, installed in
+                let name = Self.feedName(url)
+                await probe.record(name)
+                if name == "bravo", await failOnce.shouldFail() { throw FeedFailure() }
+                if name == "charlie" { await probe.hold("charlie") }
+                return installed
+            })
+        viewModel.startCheck()
+        // Alpha is up to date, Bravo's feed failed, Charlie's feed is held open.
+        #expect(await wait(until: true) { viewModel.rows.first { $0.app.name == "Charlie" }?.isChecking ?? false })
+        #expect(viewModel.rows.first { $0.app.name == "Bravo" }?.checkError != nil)
+
+        viewModel.stopCheck()
+        #expect(viewModel.phase == .results)
+
+        // Retry only reaches the failed row; Charlie was never checked.
+        #expect(viewModel.retryFailedChecks())
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        #expect(await probe.requested.sorted() == ["alpha", "bravo", "bravo", "charlie"])
+        #expect(!viewModel.hasCheckError)
+        #expect(viewModel.rows.first { $0.app.name == "Charlie" }.map(UpdaterGroups.status(of:)) == .notChecked)
+        #expect(viewModel.checkedCount == 2)
+        #expect(viewModel.checkableCount == 3)
+        // The never-reached row keeps the screen in results — not "All apps are up to date".
+        #expect(viewModel.phase == .results)
+        #expect(viewModel.lifecycle == .results)
+
+        // Releasing the held feed afterwards must not write into the stopped run.
+        await probe.release("charlie")
+        try? await Task.sleep(for: .milliseconds(100))
+        #expect(viewModel.rows.first { $0.app.name == "Charlie" }?.latestVersion == nil)
+        #expect(viewModel.phase == .results)
+    }
+
     @Test("a stopped run cannot change the phase of the run that replaced it")
     func supersededRunIsIgnored() async {
         let probe = FeedProbe()
