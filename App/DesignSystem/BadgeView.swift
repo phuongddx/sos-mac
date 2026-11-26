@@ -18,7 +18,7 @@ enum BadgeStyle: CaseIterable, Sendable {
     @available(*, deprecated, message: "Use .risky")
     static var risk: BadgeStyle { .risky }
 
-    /// The kind's colour: its tint, its symbol, and its label unless rule X4 applies.
+    /// The kind's colour: its tint, its symbol, and its label (rule T4).
     var color: Color {
         switch self {
         case .safe, .keep: Theme.Color.success
@@ -40,10 +40,10 @@ enum BadgeStyle: CaseIterable, Sendable {
     }
 
     /// Label colour. Rule T4: the 11 pt label must reach 4.5:1 on its own tinted background.
-    /// `warning` in light does not (X4, 4.32:1), so that label is `textPrimary` while its symbol
-    /// and dot stay `warning`.
+    /// With the Designer's final light value `#A14A06`, `warning` in light reaches 5.11:1 on its
+    /// 11 % tint, so X4 is withdrawn and every label uses the kind's own colour.
     func labelColor(isDark: Bool) -> Color {
-        self == .caution && !isDark ? Theme.Color.textPrimary : color
+        color
     }
 }
 
