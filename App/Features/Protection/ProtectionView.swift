@@ -176,7 +176,7 @@ private struct ProtectionContentView: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(Theme.accent)
+                .foregroundStyle(Theme.Color.primary)
             }
         }
         .padding(.vertical, Theme.Spacing.xs)
@@ -220,7 +220,7 @@ private struct ProtectionContentView: View {
                         Spacer()
                         Button("Restore") { viewModel.restore(record) }
                             .buttonStyle(.plain)
-                            .foregroundStyle(Theme.accent)
+                            .foregroundStyle(Theme.Color.primary)
                     }
                     .padding(.horizontal, Theme.Spacing.lg)
                     .padding(.vertical, Theme.Spacing.xs)

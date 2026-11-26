@@ -14,7 +14,7 @@ struct ProgressBarView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(Theme.border)
+                Capsule().fill(Theme.Derived.hairlineStrong)
                 Capsule()
                     .fill(style)
                     .frame(width: geo.size.width * min(max(progress, 0), 1))

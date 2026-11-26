@@ -11,7 +11,7 @@ enum BadgeStyle {
         case .attention: return Theme.warn
         case .risk: return Theme.danger
         case .neutral: return Theme.muted
-        case .accent: return Theme.accent
+        case .accent: return Theme.Color.primary
         }
     }
 }

@@ -189,7 +189,7 @@ struct SpaceLensView: View {
                 if index < viewModel.breadcrumbLabels.count - 1 {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 10))
-                        .foregroundStyle(Theme.border)
+                        .foregroundStyle(Theme.Color.textTertiary)
                 }
             }
             Spacer()
