@@ -197,12 +197,10 @@ final class CloudCleanupViewModel {
     private(set) var apiDeleteFailures: [Provider: [CloudDeleteFailure]] = [:]
     private(set) var apiDeleteError: [Provider: String] = [:]
 
-    /// Review navigation — per-row UI state, deliberately not part of
-    /// `Phase` (§6.6 keeps phase, results and selection; the focused row and
-    /// open dialogs reset).
-    var currentSetID: String?
-    var focusedItemKey: String?
-
+    /// Review navigation — deliberately not part of `Phase` (§6.6 keeps
+    /// phase, results and selection; the review lists draw all sets inline,
+    /// the prototype's cloud layout, so there is no focused set or row to
+    /// keep).
     /// The sheet `CloudCleanupView` presents; kept on the view model so a
     /// provider switch closes it. `nil` presents nothing.
     var overlayConfirmation: ConfirmSheet.Model?
@@ -354,48 +352,17 @@ final class CloudCleanupViewModel {
         return group.items.first.map { ($0.path as NSString).lastPathComponent } ?? group.id
     }
 
-    var currentSet: SetSnapshot<ScanItem>? {
-        guard selectedProvider == .iCloudDrive else { return nil }
-        let sets = sets
-        if let currentSetID, let found = sets.first(where: { $0.id == currentSetID }) {
-            return found
+    /// Files the listing saw — the "N files listed" figure (§6.4).
+    var listedFileCount: Int {
+        switch selectedProvider {
+        case .iCloudDrive: iCloudListedCount
+        default: apiListedCount[selectedProvider] ?? 0
         }
-        return sets.first
-    }
-
-    var currentAPISet: SetSnapshot<CloudFileMetadata>? {
-        guard selectedProvider != .iCloudDrive else { return nil }
-        let sets = apiSets
-        if let currentSetID, let found = sets.first(where: { $0.id == currentSetID }) {
-            return found
-        }
-        return sets.first
-    }
-
-    /// The copy whose detail the review frame shows: the focused row, or the
-    /// first row of the current set, or nothing.
-    var focusedItem: ScanItem? {
-        let items = currentSet?.items ?? []
-        if let focusedItemKey, let found = items.first(where: { $0.path == focusedItemKey }) {
-            return found
-        }
-        return items.first
-    }
-
-    var focusedAPIFile: CloudFileMetadata? {
-        let files = currentAPISet?.items ?? []
-        if let focusedItemKey, let found = files.first(where: { $0.id == focusedItemKey }) {
-            return found
-        }
-        return files.first
     }
 
     /// The one rule for "can this copy be selected": it is not a set's keep.
     func isKept(_ key: String) -> Bool {
-        switch selectedProvider {
-        case .iCloudDrive: currentSet?.keepKey == key || iCloudKeepPaths.contains(key)
-        default: apiKeepIDs[selectedProvider]?.contains(key) ?? false
-        }
+        iCloudKeepPaths.contains(key) || (apiKeepIDs[selectedProvider]?.contains(key) ?? false)
     }
 
     /// Paths that are some iCloud set's keep copy — rebuilt with the groups.
@@ -435,23 +402,6 @@ final class CloudCleanupViewModel {
         case .iCloudDrive: selectedItems.count
         default: selectedFiles.count
         }
-    }
-
-    /// Files the listing saw — the "N files listed" figure (§6.4).
-    var listedFileCount: Int {
-        switch selectedProvider {
-        case .iCloudDrive: iCloudListedCount
-        default: apiListedCount[selectedProvider] ?? 0
-        }
-    }
-
-    /// Selected copies in one set — never counts the keep copy.
-    func selectedCount(in set: SetSnapshot<ScanItem>) -> Int {
-        set.extraItems.count { selection.contains($0.path) }
-    }
-
-    func selectedAPICount(in set: SetSnapshot<CloudFileMetadata>) -> Int {
-        set.extraItems.count { selection.contains($0.id) }
     }
 
     /// Sets the selected provider currently shows.
@@ -494,8 +444,6 @@ final class CloudCleanupViewModel {
 
     private func resetScanState(for provider: Provider) {
         selectedPaths[provider] = []
-        currentSetID = nil
-        focusedItemKey = nil
         cleaningProgress = nil
         lastFailedItems = []
         apiDeleteFailures[provider] = []
@@ -612,8 +560,6 @@ final class CloudCleanupViewModel {
         iCloudGroups = newGroups
         iCloudSkippedCount = skippedCount
         selectedPaths[.iCloudDrive] = []
-        currentSetID = nil
-        focusedItemKey = nil
         setPhase(newGroups.isEmpty ? .empty : .results, for: .iCloudDrive)
     }
 
@@ -624,37 +570,22 @@ final class CloudCleanupViewModel {
         apiGroups[provider] = CloudDuplicateGrouper.findDuplicates(among: files)
         apiListedCount[provider] = files.count
         selectedPaths[provider] = []
-        currentSetID = nil
-        focusedItemKey = nil
         apiProgress[provider] = nil
         setPhase((apiGroups[provider] ?? []).isEmpty ? .empty : .results, for: provider)
     }
 
     // MARK: - Review
 
-    /// iCloud only: the tiles-and-dock results step into the review frame.
+    /// iCloud only: the tiles-and-dock results step into the review list.
     /// An API provider's results already are the review surface.
     func enterReview() {
         guard selectedProvider == .iCloudDrive, phase(of: .iCloudDrive) == .results, !sets.isEmpty else { return }
         setPhase(.review, for: .iCloudDrive)
-        if currentSetID == nil || !sets.contains(where: { $0.id == currentSetID }) {
-            currentSetID = sets.first?.id
-            focusedItemKey = nil
-        }
     }
 
     func backToResults() {
         guard selectedProvider == .iCloudDrive, phase(of: .iCloudDrive) == .review else { return }
         setPhase(.results, for: .iCloudDrive)
-    }
-
-    func selectSet(_ id: String) {
-        currentSetID = id
-        focusedItemKey = nil
-    }
-
-    func focusItem(key: String) {
-        focusedItemKey = key
     }
 
     /// The keep copy is never toggled — by click, by keyboard, or by any
@@ -670,27 +601,25 @@ final class CloudCleanupViewModel {
         setSelection(selection)
     }
 
-    /// Select All in the current set — every extra copy, never the kept one
-    /// (§4.6). Nothing is pre-selected on this screen (OD-7; the server
-    /// surface by design), so Select All is always an explicit user action.
-    func selectAllInCurrentSet() {
-        guard let set = selectedProvider == .iCloudDrive
-            ? currentSet.map({ set in Set(set.extraItems.map { $0.path }) })
-            : currentAPISet.map({ set in Set(set.extraItems.map { $0.id }) })
-        else { return }
+    /// Select All — every extra copy of every set, never a keep copy (§4.6).
+    /// Nothing is pre-selected on this screen (OD-7; the server surface by
+    /// design), so Select All is always an explicit user action. The review
+    /// lists draw all sets inline (the prototype's cloud layout), so the
+    /// bulk action spans them all.
+    func selectAllExtras() {
+        let extras: Set<String>
+        if selectedProvider == .iCloudDrive {
+            extras = Set(sets.flatMap { $0.extraItems.map(\.path) })
+        } else {
+            extras = Set(apiSets.flatMap { $0.extraItems.map(\.id) })
+        }
         var selection = selection
-        selection.formUnion(set)
+        selection.formUnion(extras)
         setSelection(selection)
     }
 
-    func deselectAllInCurrentSet() {
-        guard let keys = selectedProvider == .iCloudDrive
-            ? currentSet.map({ Set($0.items.map { $0.path }) })
-            : currentAPISet.map({ Set($0.items.map { $0.id }) })
-        else { return }
-        var selection = selection
-        selection.subtract(keys)
-        setSelection(selection)
+    func deselectAll() {
+        setSelection([])
     }
 
     // MARK: - Confirmations (S1/S2 — nothing leaves without one)
@@ -789,10 +718,6 @@ final class CloudCleanupViewModel {
         selection.subtract(succeededPaths)
         selection.formIntersection(Set(iCloudGroups.flatMap(\.items).map(\.path)))
         selectedPaths[provider] = selection
-        if let currentSetID, !iCloudGroups.contains(where: { $0.id == currentSetID }) {
-            self.currentSetID = nil
-            focusedItemKey = nil
-        }
         cleaningProgress = nil
         lastFailedItems = result.failed
         setPhase(.done(movedBytes: result.succeeded.reduce(0) { $0 + $1.size },
@@ -839,10 +764,6 @@ final class CloudCleanupViewModel {
         selection.subtract(succeeded)
         selection.formIntersection(Set(remainingFiles.map(\.id)))
         selectedPaths[provider] = selection
-        if let id = currentSetID, !(apiGroups[provider] ?? []).contains(where: { $0.id == id }) {
-            currentSetID = nil
-            focusedItemKey = nil
-        }
         apiDeleteFailures[provider] = result.failed
         setPhase(.done(movedBytes: deletedBytes,
                        movedCount: result.succeededIDs.count,
@@ -901,9 +822,6 @@ final class CloudCleanupViewModel {
         case .review:
             applyICloudFixtureResults()
             enterReview()
-            if let first = currentSet?.items.first?.path {
-                focusItem(key: first)
-            }
 
         case .cleaning:
             applyICloudFixtureResults()

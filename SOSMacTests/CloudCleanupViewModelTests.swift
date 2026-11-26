@@ -214,18 +214,18 @@ struct CloudCleanupViewModelTests {
         #expect(!viewModel.sets.isEmpty)
         #expect(viewModel.selectedItems.isEmpty, "OD-7: nothing pre-selected in iCloud Drive")
 
-        // Select All in the current set: every extra copy, never the keep.
-        viewModel.selectAllInCurrentSet()
-        let set = viewModel.currentSet
-        #expect(Set(viewModel.selectedItems.map(\.path)) == Set(set?.extraItems.map(\.path) ?? []))
+        // Select All: every extra copy of every set, never a keep.
+        viewModel.selectAllExtras()
+        let extras = viewModel.sets.flatMap(\.extraItems)
+        #expect(Set(viewModel.selectedItems.map(\.path)) == Set(extras.map(\.path)))
 
-        // The keep copy refuses a direct toggle.
-        if let keepPath = set?.keepKey {
+        // The keep copies refuse a direct toggle.
+        for keepPath in viewModel.sets.compactMap(\.keepKey) {
             viewModel.toggleSelection(key: keepPath)
             #expect(!viewModel.selectedItems.contains { $0.path == keepPath })
         }
 
-        viewModel.deselectAllInCurrentSet()
+        viewModel.deselectAll()
         #expect(viewModel.selectedItems.isEmpty)
     }
 
@@ -288,7 +288,7 @@ struct CloudCleanupViewModelTests {
         let viewModel = Self.makeViewModel()
         viewModel.loadFixtureResults([DuplicateGroup(id: "set", items: set.items)], listedCount: 2)
         #expect(viewModel.sets.count == 1)
-        viewModel.selectAllInCurrentSet()
+        viewModel.selectAllExtras()
         #expect(viewModel.selectedItems.count == 1, "only the extra copy")
 
         #expect(await viewModel.cleanICloud())
@@ -303,7 +303,7 @@ struct CloudCleanupViewModelTests {
         // extras are selected and fail.
         let missing = (0..<3).map(Self.missingItem)
         viewModel.loadFixtureResults([DuplicateGroup(id: "set", items: missing)], listedCount: 3)
-        viewModel.selectAllInCurrentSet()
+        viewModel.selectAllExtras()
         #expect(viewModel.selectedItems.count == 2)
 
         #expect(await viewModel.cleanICloud())
