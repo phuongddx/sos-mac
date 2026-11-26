@@ -45,11 +45,17 @@ final class JunkCleanerViewModel {
     /// them — used to render one `StepRowView` per rule while scanning.
     var ruleLabels: [String] { JunkRule.allowlist.map(\.label) }
 
-    func startScan() {
+    /// `false` when a scan or clean is already running (PR 3 re-entrancy guard).
+    @discardableResult
+    func startScan() -> Bool {
+        // PR 3: the scan outlives the screen, so a second tap must not restart
+        // it and throw away progress (re-entrancy guard, as Smart Care).
+        guard phase != .scanning, phase != .cleaning else { return false }
         scanTask?.cancel()
         scanTask = Task { [weak self] in
             await self?.performScan()
         }
+        return true
     }
 
     func cancelScan() {

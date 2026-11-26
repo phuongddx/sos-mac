@@ -13,7 +13,8 @@ import CleanCore
 /// `PrivilegedHelperClient` (Phase 8) — first use installs the helper and
 /// prompts for System Settings approval, which is expected, not an error.
 struct PerformanceView: View {
-    @State private var viewModel = PerformanceViewModel()
+    @Environment(ModuleStore.self) private var store
+    private var viewModel: PerformanceViewModel { store.performance }
 
     var body: some View {
         ScrollView {

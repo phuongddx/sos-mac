@@ -2,7 +2,8 @@ import SwiftUI
 import CleanCore
 
 struct SpaceLensView: View {
-    @State private var viewModel = SpaceLensViewModel()
+    @Environment(ModuleStore.self) private var store
+    private var viewModel: SpaceLensViewModel { store.spaceLens }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -19,7 +20,6 @@ struct SpaceLensView: View {
         .background(Theme.background)
         .auroraBloom()
         .navigationTitle("Space Lens")
-        .onDisappear { viewModel.cancelScan() }
         .sheet(isPresented: reviewPresented) {
             cleanupReview
         }
@@ -136,7 +136,8 @@ struct SpaceLensView: View {
     private var mappedContent: some View {
         VStack(spacing: 0) {
             breadcrumbBar
-            Picker("View Mode", selection: $viewModel.viewMode) {
+            // `viewModel` is store-owned (PR 3), so the binding is explicit.
+            Picker("View Mode", selection: Binding(get: { viewModel.viewMode }, set: { viewModel.viewMode = $0 })) {
                 ForEach(SpaceLensViewModel.ViewMode.allCases, id: \.self) { mode in
                     Text(mode.rawValue).tag(mode)
                 }

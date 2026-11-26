@@ -14,6 +14,10 @@ final class UpdaterViewModel {
 
     private(set) var rows: [AppUpdateRow] = []
     private(set) var isCheckingAll = false
+    /// PR 3 (spec §6.6): rows live in the store; `loadApps` is first-visit-only
+    /// and the auto-check runs once per session, not on every re-visit.
+    private(set) var hasLoadedApps = false
+    private(set) var hasAutoChecked = false
     let progressTracker = ScanProgressTracker()
     private let enumerator: InstalledAppsEnumerator
 
@@ -29,9 +33,20 @@ final class UpdaterViewModel {
     }
 
     func loadApps() {
+        guard !hasLoadedApps else { return }
+        hasLoadedApps = true
         rows = enumerator.enumerate()
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
             .map { AppUpdateRow(app: $0) }
+    }
+
+    /// The one automatic check per session (PR 3). Unstructured, like the other
+    /// modules' scans, so navigating away does not cancel it (OD-3); explicit
+    /// checks still go through `checkAll()` from the buttons.
+    func autoCheckIfNeeded() {
+        guard !hasAutoChecked else { return }
+        hasAutoChecked = true
+        Task { await checkAll() }
     }
 
     /// Reachable from three places (`.task`, the empty state's action, and
