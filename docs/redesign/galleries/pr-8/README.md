@@ -5,7 +5,8 @@ All eight lifecycle states of the migrated Space Lens screen, in **By Folder** a
 only (`SOSMAC_UITEST_FIXTURES=1`, the fictional `/Users/sample` tree — no real files
 were read, moved or trashed; the real external-volume list is suppressed in fixtures).
 Each folder holds one `<appearance>-spacelens-<state>.png` per capture plus a
-`contact-sheet.png` overview.
+`contact-sheet.png` overview. Since PR 16 the committed captures are downscaled to
+1200×760 px (1×, `-resize`) to keep the repository small; the contact sheets are 1808×1164.
 
 Captured with `Scripts/ui-snapshots.sh` (background-only window capture, 1200×760 pt):
 
@@ -32,13 +33,15 @@ Every state also exists in light (`light-spacelens-<state>.png`).
 
 ## Known differences from the prototype
 
-- **The dock keeps the shared frame's verbs** (F1/F6): `results` shows the frame's
-  "Clean" CTA and the frame's "Review Items…" leading button — both open the same
-  cleanup-list sheet, which is the prototype's single "Review…" bar action. The
-  toolbar segment (By Folder / By Type) and the subtitle "Scanned N items in «root»"
-  carry the review bar's remaining content.
-- **Done keeps its actions in the dock** (F1: Scan Again CTA, Open Trash trailing);
-  **Back to Map** (N7) is the prominent action inside the Done card.
+- **The dock uses Space Lens's own Appendix A labels (PR 16).** `results` shows a single
+  "Review…" CTA (disabled until something is in the cleanup list, with "Nothing selected" on
+  its left) that opens the cleanup-list sheet — the prototype's single "Review…" bar action;
+  the frame's separate "Review Items…" button and the "Clean" label are gone. "Scan Again"
+  is the trailing button. The toolbar segment (By Folder / By Type) and the subtitle
+  "Scanned N items in «root»" carry the review bar's remaining content.
+- **Done: CTA "Back to Map" (N7)**, the same action as the button inside the Done card;
+  "Open Trash" stays trailing. "Scan Again" is no longer in the Done dock (it is on the map's
+  own dock). **Empty:** the CTA reads "Choose Folder…" and opens the folder chooser.
 - **By Type cells use the treemap1…8 ramp in fixed category order**, not the spec's
   per-type hue mixed into `card` (§5.5): `Theme` carries no per-category hue token,
   and `Theme.swift` is outside this PR's write set. Legend swatches and map cells
@@ -70,3 +73,19 @@ Every state also exists in light (`light-spacelens-<state>.png`).
 - Fixture selections present as policy-eligible so the interactive inspector shows;
   the policy's writable check would otherwise read the real file system, which the
   fixture mode must never do.
+
+## Regenerated in PR 16 (cleanup)
+
+Every sheet in this folder was re-captured from the final PR 16 build, fixture data only
+(`SOSMAC_UITEST_FIXTURES=1`, `open -g` background launch, `screencapture -l` window capture,
+no foreground, no permission prompt, no real scan). Each `<screen>-<state>-sheet.png` is the dark capture (left) and the light capture (right), each scaled to 920 px wide and joined side by side.
+
+```bash
+Scripts/ui-snapshots.sh -p pr-8 -d /tmp/sosmac-pr16-dd -s spacelens=start,…,spacelens=error
+Scripts/ui-snapshots.sh -p pr-8-type -d /tmp/sosmac-pr16-dd -e SOSMAC_UITEST_VIEW=type -s spacelens=start,…,spacelens=error
+```
+
+- Captures: 32; every one is 2400×1520 px (the raw per-appearance files are generated into the
+  git-ignored `artifacts/ui-snapshots/` and are not committed); no capture is blank.
+- Sheets: no combined sheets here: 16 per-appearance PNGs in `by-folder/` and 16 in `by-type/`, each 1200×760. Contact sheet: `by-folder/contact-sheet.png` and `by-type/contact-sheet.png`, each 1808×1164 (4×4) (dark first, then light).
+- All eight states are captured for By Type as well (the earlier matrix had only start and results); the By Type captures differ from By Folder in scanning, results, review and cleaning; start, done, empty and error are byte-identical in both (they do not depend on the view).

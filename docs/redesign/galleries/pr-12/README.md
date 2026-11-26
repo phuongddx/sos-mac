@@ -6,7 +6,7 @@ fictional 16 GB memory with its five segments, swap 1.25 of 2.15 GB, thermal nom
 boot 24 Nov 2026 09:14 UTC, three `/Users/sample` launch agents — nothing was read from
 the machine, no helper ran, no System Settings panel opened). Each
 `performance-<state>-sheet.png` places **dark on the left, light on the right**;
-`performance-contact-sheet.png` is the overview.
+`performance-contact-sheet.png` is the overview (regenerated in PR 16, see the last section).
 
 Captured with `Scripts/ui-snapshots.sh -p pr-12 -w 1200x1040 -s performance=<state>` —
 background-only window capture. The window is **1200×1040 pt**, taller than the usual
@@ -65,6 +65,21 @@ dependency; at the OD-5 minimum (960×600) it simply scrolls.
   MenuBarHelper launch. Those stay on the manual-test list; the state transitions are
   covered by `SOSMacTests/PerformanceViewModelTests` (20 tests, injected seams only).
 
+## Regenerated in PR 16 (cleanup)
+
+Every sheet in this folder was re-captured from the final PR 16 build, fixture data only
+(`SOSMAC_UITEST_FIXTURES=1`, `open -g` background launch, `screencapture -l` window capture,
+no foreground, no permission prompt, no real scan). Each `<screen>-<state>-sheet.png` is the dark capture (left) and the light capture (right), each scaled to 920 px wide and joined side by side.
+
+```bash
+Scripts/ui-snapshots.sh -p pr-12 -d /tmp/sosmac-pr16-dd -w 1200x1040 -s performance=live,performance=running,performance=approval,performance=actiondone,performance=actionerror,performance=unavailable
+```
+
+- Captures: 12; every one is 2400×1520 px (the raw per-appearance files are generated into the
+  git-ignored `artifacts/ui-snapshots/` and are not committed); no capture is blank.
+- Sheets: 6 × 1840×797 (the window is 1200×1040 pt, so the raw captures are 2400×2080, not 2400×1520). Contact sheet: 1356×1572 (3 per row, dark then light) (dark first, then light).
+- Performance keeps the default dock labels in these states (a live page, no lifecycle swap).
+
 ## PR-description skeleton
 
 ```markdown
@@ -95,5 +110,5 @@ xcodebuild build -scheme SOSMac -configuration Debug (exit 0, 0 errors) ·
 cd Packages/CleanCore && swift test (115 tests / 28 suites) ·
 xcodebuild test -only-testing:SOSMacTests (196 tests / 25 suites, 20 new) ·
 Scripts/ui-snapshots.sh -p pr-12 -w 1200x1040 (12 captures at 2400x2080; every committed
-state sheet pairs dark + light into one 4800x2080 image)
+state sheet pairs dark + light into one 1840x797 image, regenerated in PR 16)
 ```
