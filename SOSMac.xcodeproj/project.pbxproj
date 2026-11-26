@@ -38,6 +38,7 @@
 		4E688FAFBD4C19198A4B7168 /* PerformanceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60AE4D0BE44E292519DD599 /* PerformanceViewModel.swift */; };
 		505D9B11A9E68A53E981C804 /* StickyFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8E6150D819C892387C01600 /* StickyFooterView.swift */; };
 		524602F1BD6F72FD380E92A0 /* SpaceLensView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556CD64042D3F9B34D459D96 /* SpaceLensView.swift */; };
+		56C180384E29FAD9CCFEA33C /* DuplicateSetDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7826241023B15C0AF05CAC88 /* DuplicateSetDetail.swift */; };
 		58C8A75DDFB23DEDE787D858 /* KeepBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 919E782D860AE64EAB29DC53 /* KeepBadge.swift */; };
 		5C3F87EDDE3FBF336E4F7040 /* ModuleCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEDD20C09B7740A9A836FD75 /* ModuleCardView.swift */; };
 		66484C003D1B5413F0E1FA0F /* ComponentGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46536D27681C822DDF6B6BA3 /* ComponentGalleryView.swift */; };
@@ -49,6 +50,7 @@
 		728C27220348DC8271916BB8 /* CloudCleanupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3378D6B53CDCB0474385C0B8 /* CloudCleanupView.swift */; };
 		74C7BE36C015752F317B82C5 /* UpdaterViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B273DE218A656524EA73BAF /* UpdaterViewModel.swift */; };
 		751DBBAC07B81E334E5C8F81 /* ProgressiveCleanerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5ED4E6A0687F607625C13448 /* ProgressiveCleanerTests.swift */; };
+		7740F765D2D14647854D0677 /* DuplicateFinderViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92D9A1BA882942CCECB2388D /* DuplicateFinderViewModelTests.swift */; };
 		77854C6493918A65D3F8873A /* CleanCore in Frameworks */ = {isa = PBXBuildFile; productRef = 89061E0DFCA37E66808CEF57 /* CleanCore */; };
 		77C50036ABEC8F54C3F86362 /* ProtectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E80C73390FD3C0119541F076 /* ProtectionViewModel.swift */; };
 		7812BF7A3831BCCE1307EA7E /* HelperXPCListenerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD7ECA1B33611E22001EF44C /* HelperXPCListenerDelegate.swift */; };
@@ -191,6 +193,7 @@
 		73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevationModifier.swift; sourceTree = "<group>"; };
 		74AECFD5CAB894ECF247EFEB /* ModuleScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleScreen.swift; sourceTree = "<group>"; };
 		763ECBD32513F45F9539E313 /* DuplicateFinderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderView.swift; sourceTree = "<group>"; };
+		7826241023B15C0AF05CAC88 /* DuplicateSetDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateSetDetail.swift; sourceTree = "<group>"; };
 		7B273DE218A656524EA73BAF /* UpdaterViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModel.swift; sourceTree = "<group>"; };
 		7B4332D2B92F07AF0D16B9FD /* SOSCheckboxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSCheckboxTests.swift; sourceTree = "<group>"; };
 		81C7D66DD1EE9A33BC0AC613 /* SOSCheckbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSCheckbox.swift; sourceTree = "<group>"; };
@@ -201,6 +204,7 @@
 		8F0AC3C62BF924A8FD115848 /* SummaryCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryCardView.swift; sourceTree = "<group>"; };
 		8F539336956B30E9C0DD53E7 /* ReviewBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewBarView.swift; sourceTree = "<group>"; };
 		919E782D860AE64EAB29DC53 /* KeepBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeepBadge.swift; sourceTree = "<group>"; };
+		92D9A1BA882942CCECB2388D /* DuplicateFinderViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderViewModelTests.swift; sourceTree = "<group>"; };
 		971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThemeContrastTests.swift; sourceTree = "<group>"; };
 		99909B8A48785AADED1E723A /* CareCardModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CareCardModifier.swift; sourceTree = "<group>"; };
 		9A34B85C63A2C70EA9CC995A /* PrivilegedHelperClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivilegedHelperClient.swift; sourceTree = "<group>"; };
@@ -370,6 +374,7 @@
 			isa = PBXGroup;
 			children = (
 				8D6532E86C417CF0E2E16125 /* ConfirmSheetTests.swift */,
+				92D9A1BA882942CCECB2388D /* DuplicateFinderViewModelTests.swift */,
 				186FF8423C720203B989511E /* JunkCleanerViewModelTests.swift */,
 				ADA1F979E19DFE78FF4F47D6 /* LifecycleMappingTests.swift */,
 				2D1B843A3B926BEFB774274F /* ModuleStoreTests.swift */,
@@ -402,6 +407,7 @@
 			children = (
 				763ECBD32513F45F9539E313 /* DuplicateFinderView.swift */,
 				3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */,
+				7826241023B15C0AF05CAC88 /* DuplicateSetDetail.swift */,
 			);
 			path = Duplicates;
 			sourceTree = "<group>";
@@ -785,6 +791,7 @@
 				124886BF5DF012D79DC1F2DE /* DoneView.swift in Sources */,
 				3EF1CD052576C9A843228DF1 /* DuplicateFinderView.swift in Sources */,
 				BFB9A6BD1B872593B8AE2E6E /* DuplicateFinderViewModel.swift in Sources */,
+				56C180384E29FAD9CCFEA33C /* DuplicateSetDetail.swift in Sources */,
 				38E490DE64DB1DC787E4D64D /* ElevationModifier.swift in Sources */,
 				BD71724FAF539B30C395699C /* EmptyStateView.swift in Sources */,
 				283D3A9E02E9DFF48AFB6210 /* HealthDialView.swift in Sources */,
@@ -850,6 +857,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A7A098CF2E0178C14495AB61 /* ConfirmSheetTests.swift in Sources */,
+				7740F765D2D14647854D0677 /* DuplicateFinderViewModelTests.swift in Sources */,
 				D98FF017AEDB981A91DC77F0 /* JunkCleanerViewModelTests.swift in Sources */,
 				E22EF2989C30ED7BC12EF4D0 /* LifecycleMappingTests.swift in Sources */,
 				1F40A560B91FC884CF786AB5 /* ModuleStoreTests.swift in Sources */,
