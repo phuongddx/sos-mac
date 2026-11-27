@@ -136,7 +136,7 @@ private struct UpdaterScreen: View {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ResultsHeaderView(
                     hue: module.hue,
-                    title: updates == 0 ? "No updates available" : UpdaterGroups.updatesText(updates),
+                    title: UpdaterGroups.resultsTitle(updates: updates, checked: viewModel.checkedCount),
                     sub: resultsSub,
                     eyebrow: "Checked") {
                     Button("Check Again") { viewModel.startCheck() }
@@ -158,20 +158,15 @@ private struct UpdaterScreen: View {
 
     private static let contentPadding: CGFloat = 40
 
-    private var resultsSub: String {
-        let checked = viewModel.checkedCount
-        return "\(checked) \(checked == 1 ? "app" : "apps") checked. Updates are installed in each app or in the App Store."
-    }
+    private var resultsSub: String { UpdaterGroups.resultsSub(checked: viewModel.checkedCount) }
 
     /// OD-10: one or more feeds failed — said plainly, with a retry for just those rows.
     private var failedBanner: some View {
-        let failed = viewModel.failedRows
+        let copy = UpdaterGroups.failedBanner(for: viewModel.failedRows)
         return BannerView(
             kind: .err,
-            title: failed.count == 1 ? "Couldn't check \(failed[0].app.name)" : "Couldn't check \(failed.count) apps",
-            text: failed.count == 1
-                ? (failed[0].checkError ?? "The update feed didn't answer.") + " It is not shown as up to date."
-                : "Their update feeds didn't answer. They are not shown as up to date.") {
+            title: copy.title,
+            text: copy.text) {
             Button("Try Again") { viewModel.retryFailedChecks() }
                 .sosButton(.default)
                 .accessibilityIdentifier("updater-retry-failed")
@@ -276,17 +271,11 @@ private struct UpdaterScreen: View {
     // MARK: Empty / Failed
 
     private var emptyContent: some View {
-        let checked = viewModel.checkedCount
-        var text = "\(checked) \(checked == 1 ? "app" : "apps") checked. None has a newer version in its update feed."
-        let noFeed = viewModel.noFeedCount
-        if noFeed > 0 {
-            text += " \(noFeed) \(noFeed == 1 ? "app has" : "apps have") no update feed and \(noFeed == 1 ? "wasn't" : "weren't") checked."
-        }
-        return StatusStateView(
+        StatusStateView(
             kind: .ok,
             symbol: "checkmark.circle",
             title: "All apps are up to date",
-            text: text) {
+            text: UpdaterGroups.emptyText(checked: viewModel.checkedCount)) {
             Button("Check Again") { viewModel.startCheck() }
                 .sosButton(.default)
                 .accessibilityIdentifier("updater-check-again-empty")
@@ -341,7 +330,7 @@ private struct UpdaterScreen: View {
         case .checking:
             checkingSubtitle
         case .results:
-            viewModel.updatesAvailableCount == 0 ? "No updates available" : UpdaterGroups.updatesText(viewModel.updatesAvailableCount)
+            UpdaterGroups.resultsTitle(updates: viewModel.updatesAvailableCount, checked: viewModel.checkedCount)
         case .empty:
             "No updates available"
         case .failed:

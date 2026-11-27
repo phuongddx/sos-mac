@@ -31,11 +31,12 @@ extension UITestFixtures {
         }
     }
 
-    /// The "all up to date" screen: every app with a feed reports its own version, one app has
-    /// no feed, and there is no App Store app (which would keep the results screen).
+    /// The "all up to date" screen: every app has a feed and reports its own version. There is
+    /// no App Store app and no app without a feed — either would keep the results screen,
+    /// because "all up to date" is only claimed when every app was checkable and checked.
     static var updaterEmptyApps: [InstalledApp] {
         apps.filter { !$0.isAppStore }.map { fixture in
-            updaterApp(fixture, version: fixture.version, hasFeed: fixture.id != "containers")
+            updaterApp(fixture, version: fixture.version, hasFeed: true)
         }
     }
 

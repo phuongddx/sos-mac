@@ -4,7 +4,11 @@ public struct InstalledApp: Sendable, Identifiable, Hashable {
     public let id: String
     public let name: String
     public let bundleIdentifier: String
+    /// `CFBundleShortVersionString` — the marketing version.
     public let version: String?
+    /// `CFBundleVersion` — the build number. Compared only against a feed's build number
+    /// (`sparkle:version`), never against a marketing version.
+    public let buildVersion: String?
     public let sparkleFeedURL: URL?
     public let bundlePath: String
     /// True when the bundle carries a Mac App Store receipt — there's no
@@ -18,12 +22,14 @@ public struct InstalledApp: Sendable, Identifiable, Hashable {
         version: String?,
         sparkleFeedURL: URL?,
         bundlePath: String,
-        isAppStoreDistributed: Bool
+        isAppStoreDistributed: Bool,
+        buildVersion: String? = nil
     ) {
         self.id = bundlePath
         self.name = name
         self.bundleIdentifier = bundleIdentifier
         self.version = version
+        self.buildVersion = buildVersion
         self.sparkleFeedURL = sparkleFeedURL
         self.bundlePath = bundlePath
         self.isAppStoreDistributed = isAppStoreDistributed
@@ -60,6 +66,7 @@ public struct InstalledAppsEnumerator: Sendable {
 
                 let name = (plist["CFBundleName"] as? String) ?? (entry as NSString).deletingPathExtension
                 let version = plist["CFBundleShortVersionString"] as? String
+                let buildVersion = plist["CFBundleVersion"] as? String
                 let feedURL = (plist["SUFeedURL"] as? String).flatMap(URL.init(string:))
                 let receiptPath = (bundlePath as NSString).appendingPathComponent("Contents/_MASReceipt/receipt")
                 let isAppStoreDistributed = fileManager.fileExists(atPath: receiptPath)
@@ -71,7 +78,8 @@ public struct InstalledAppsEnumerator: Sendable {
                         version: version,
                         sparkleFeedURL: feedURL,
                         bundlePath: bundlePath,
-                        isAppStoreDistributed: isAppStoreDistributed
+                        isAppStoreDistributed: isAppStoreDistributed,
+                        buildVersion: buildVersion
                     )
                 )
             }

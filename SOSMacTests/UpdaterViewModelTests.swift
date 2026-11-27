@@ -4,10 +4,12 @@ import CleanCore
 @testable import SOSMac
 
 /// Updater view-model tests (plan PR 10): the Phase → lifecycle mapping, a throwing feed
-/// (D3 / OD-10: `checkError`, never "Up to date"), Stop leaving the rows checked so far,
-/// the re-entrancy guard, "no check on visit" (OD-10) and the group builder. Hermetic: every
-/// feed is an injected closure (no network), every app is a made-up `InstalledApp` under a
-/// fictional `/Applications` (no real file system, no real app list).
+/// (D3 / OD-10: `checkError`, never "Up to date"), Stop discarding partial results (F2),
+/// the re-entrancy guard, "no check on visit" (OD-10), Check Again re-reading the installed
+/// apps, marketing-vs-build version pairs, the user-visible copy and the group builder.
+/// Hermetic: every feed is an injected closure (no network); apps are made-up `InstalledApp`s
+/// under a fictional `/Applications`, except the re-enumeration tests, which write throwaway
+/// bundles into a temporary directory.
 @Suite("UpdaterViewModel")
 @MainActor
 struct UpdaterViewModelTests {
@@ -21,24 +23,33 @@ struct UpdaterViewModelTests {
     private nonisolated static func app(_ name: String,
                                         version: String = "1.0",
                                         feed: Bool = true,
-                                        appStore: Bool = false) -> InstalledApp {
+                                        appStore: Bool = false,
+                                        build: String? = nil) -> InstalledApp {
         InstalledApp(name: name,
                      bundleIdentifier: "com.test.\(name.lowercased())",
                      version: version,
                      sparkleFeedURL: feed ? URL(string: "https://updates.example.invalid/\(name.lowercased())/appcast.xml") : nil,
                      bundlePath: "/Applications/\(name).app",
-                     isAppStoreDistributed: appStore)
+                     isAppStoreDistributed: appStore,
+                     buildVersion: build)
     }
 
+    /// A feed that names only a marketing version (`sparkle:shortVersionString`).
+    private nonisolated static func release(_ version: String) -> AppcastRelease {
+        AppcastRelease(shortVersion: version)
+    }
+
+    /// The enumerator seam returns `apps` on every full check, like a machine whose app list
+    /// has not changed; tests that need it to change use `UpdaterViewModel(enumerate:)`.
     private static func makeViewModel(
         apps: [InstalledApp],
-        feed: @escaping UpdaterViewModel.FeedFunction = { _, installed in installed }
+        feed: @escaping UpdaterViewModel.FeedFunction = { _, installed in Self.release(installed) }
     ) -> UpdaterViewModel {
         let viewModel = UpdaterViewModel(
-            enumerator: InstalledAppsEnumerator(searchDirectories: []),
+            enumerate: { apps },
             feed: feed,
             iconLoader: { _ in nil })
-        viewModel.loadFixtureApps(apps)
+        viewModel.loadApps()
         return viewModel
     }
 
@@ -86,7 +97,7 @@ struct UpdaterViewModelTests {
         let probe = FeedProbe()
         let held = Self.makeViewModel(apps: [Self.app("Alpha")], feed: { url, installed in
             await probe.hold(Self.feedName(url))
-            return installed
+            return Self.release(installed)
         })
         #expect(held.startCheck())
         #expect(held.phase == .checking)
@@ -96,7 +107,7 @@ struct UpdaterViewModelTests {
         #expect(await wait(until: true) { held.phase != .checking })
 
         // results → results (an update is available)
-        let results = Self.makeViewModel(apps: [Self.app("Alpha", version: "1.0")], feed: { _, _ in "2.0" })
+        let results = Self.makeViewModel(apps: [Self.app("Alpha", version: "1.0")], feed: { _, _ in Self.release("2.0") })
         results.startCheck()
         #expect(await wait(until: true) { results.phase != .checking })
         #expect(results.phase == .results)
@@ -125,7 +136,7 @@ struct UpdaterViewModelTests {
     func partialFailureStaysResults() async {
         let viewModel = Self.makeViewModel(apps: [Self.app("Alpha"), Self.app("Bravo")], feed: { url, installed in
             if Self.feedName(url) == "bravo" { throw FeedFailure() }
-            return installed
+            return Self.release(installed)
         })
         viewModel.startCheck()
         #expect(await wait(until: true) { viewModel.phase != .checking })
@@ -140,7 +151,7 @@ struct UpdaterViewModelTests {
     func throwingFeedNeverUpToDate() async {
         let viewModel = Self.makeViewModel(apps: [Self.app("Alpha"), Self.app("Bravo")], feed: { url, installed in
             if Self.feedName(url) == "bravo" { throw FeedFailure() }
-            return installed
+            return Self.release(installed)
         })
         viewModel.startCheck()
         #expect(await wait(until: true) { viewModel.phase != .checking })
@@ -163,7 +174,7 @@ struct UpdaterViewModelTests {
     @Test("a feed that answers without a version is a failure, not Up to date")
     func feedWithoutVersionIsAFailure() async {
         let viewModel = Self.makeViewModel(apps: [Self.app("Alpha"), Self.app("Bravo")], feed: { url, installed in
-            Self.feedName(url) == "alpha" ? nil : installed
+            Self.feedName(url) == "alpha" ? nil : Self.release(installed)
         })
         viewModel.startCheck()
         #expect(await wait(until: true) { viewModel.phase != .checking })
@@ -178,7 +189,7 @@ struct UpdaterViewModelTests {
         struct Specific: LocalizedError { var errorDescription: String? { "HTTP 503 from the feed." } }
         let viewModel = Self.makeViewModel(apps: [Self.app("Alpha"), Self.app("Bravo")], feed: { url, installed in
             if Self.feedName(url) == "alpha" { throw Specific() }
-            return installed
+            return Self.release(installed)
         })
         viewModel.startCheck()
         #expect(await wait(until: true) { viewModel.phase != .checking })
@@ -193,7 +204,7 @@ struct UpdaterViewModelTests {
             let name = Self.feedName(url)
             await probe.record(name)
             if name == "bravo", await failFirst.shouldFail() { throw FeedFailure() }
-            return name == "alpha" ? "9.0" : installed
+            return Self.release(name == "alpha" ? "9.0" : installed)
         })
         viewModel.startCheck()
         #expect(await wait(until: true) { viewModel.phase != .checking })
@@ -226,8 +237,8 @@ struct UpdaterViewModelTests {
 
     // MARK: - Stop
 
-    @Test("Stop leaves the rows checked so far and marks the rest Not checked")
-    func stopKeepsCheckedRows() async {
+    @Test("Stop discards partial results and returns to the start (spec F2)")
+    func stopDiscardsPartialResults() async {
         let probe = FeedProbe()
         let viewModel = Self.makeViewModel(
             apps: [Self.app("Alpha", version: "1.0"), Self.app("Bravo"), Self.app("Charlie")],
@@ -235,7 +246,7 @@ struct UpdaterViewModelTests {
                 let name = Self.feedName(url)
                 await probe.record(name)
                 if name == "bravo" { await probe.hold("bravo") }
-                return name == "alpha" ? "2.0" : installed
+                return Self.release(name == "alpha" ? "2.0" : installed)
             })
         viewModel.startCheck()
         // Alpha is done; Bravo's feed is held open.
@@ -243,23 +254,28 @@ struct UpdaterViewModelTests {
         #expect(viewModel.rows.first { $0.app.name == "Alpha" }?.latestVersion == "2.0")
 
         viewModel.stopCheck()
-        #expect(viewModel.phase == .results)
-        #expect(viewModel.lifecycle == .results)
+        #expect(viewModel.phase == .idle)
+        #expect(viewModel.lifecycle == .start)
         #expect(!viewModel.isCheckingAll)
-        // Alpha keeps its real result; nothing is spinning; the rest is not Up to date.
-        #expect(viewModel.rows.first { $0.app.name == "Alpha" }?.latestVersion == "2.0")
-        #expect(viewModel.rows.allSatisfy { !$0.isChecking })
-        #expect(viewModel.rows.first { $0.app.name == "Bravo" }.map(UpdaterGroups.status(of:)) == .notChecked)
-        #expect(viewModel.rows.first { $0.app.name == "Charlie" }.map(UpdaterGroups.status(of:)) == .notChecked)
+        #expect(viewModel.progressTracker.progress == nil)
+        // Alpha's partial result is gone too: nothing is kept, nothing spins, the list stays.
+        #expect(viewModel.rows.map(\.app.name) == ["Alpha", "Bravo", "Charlie"])
+        #expect(viewModel.rows.allSatisfy { $0.latestVersion == nil && $0.installedBasis == nil
+                                            && $0.checkError == nil && !$0.isChecking })
+        #expect(viewModel.groups.map(\.kind) == [.notChecked])
+        #expect(viewModel.checkedCount == 0)
+        #expect(viewModel.updatesAvailableCount == 0)
         #expect(viewModel.upToDateCount == 0)
-        #expect(viewModel.checkedCount == 1)
+        #expect(!viewModel.hasCheckError)
+        // Nothing failed, so there is nothing to retry.
+        #expect(!viewModel.retryFailedChecks())
 
         // Releasing the held feed afterwards must not write into the stopped run.
         await probe.release("bravo")
         try? await Task.sleep(for: .milliseconds(100))
         #expect(viewModel.rows.first { $0.app.name == "Bravo" }?.latestVersion == nil)
         #expect(await !probe.requested.contains("charlie"))
-        #expect(viewModel.phase == .results)
+        #expect(viewModel.phase == .idle)
     }
 
     @Test("Stop before any row finished returns to the start")
@@ -267,7 +283,7 @@ struct UpdaterViewModelTests {
         let probe = FeedProbe()
         let viewModel = Self.makeViewModel(apps: [Self.app("Alpha")], feed: { url, installed in
             await probe.hold(Self.feedName(url))
-            return installed
+            return Self.release(installed)
         })
         viewModel.startCheck()
         #expect(await wait(until: true) { viewModel.rows.first?.isChecking ?? false })
@@ -278,44 +294,38 @@ struct UpdaterViewModelTests {
         await probe.release("alpha")
     }
 
-    @Test("a retry that never reached some rows never claims all apps are up to date")
-    func retryWithUncheckedRowsIsNotEmpty() async {
+    @Test("Stop during a Try Again also discards every earlier result")
+    func stopDuringRetryDiscardsEverything() async {
         let probe = FeedProbe()
         let failOnce = FailOnce()
         let viewModel = Self.makeViewModel(
-            apps: [Self.app("Alpha"), Self.app("Bravo"), Self.app("Charlie")],
+            apps: [Self.app("Alpha"), Self.app("Bravo")],
             feed: { url, installed in
                 let name = Self.feedName(url)
-                await probe.record(name)
-                if name == "bravo", await failOnce.shouldFail() { throw FeedFailure() }
-                if name == "charlie" { await probe.hold("charlie") }
-                return installed
+                if name == "bravo" {
+                    if await failOnce.shouldFail() { throw FeedFailure() }
+                    await probe.hold("bravo")
+                }
+                return Self.release(name == "alpha" ? "9.0" : installed)
             })
         viewModel.startCheck()
-        // Alpha is up to date, Bravo's feed failed, Charlie's feed is held open.
-        #expect(await wait(until: true) { viewModel.rows.first { $0.app.name == "Charlie" }?.isChecking ?? false })
-        #expect(viewModel.rows.first { $0.app.name == "Bravo" }?.checkError != nil)
-
-        viewModel.stopCheck()
-        #expect(viewModel.phase == .results)
-
-        // Retry only reaches the failed row; Charlie was never checked.
-        #expect(viewModel.retryFailedChecks())
         #expect(await wait(until: true) { viewModel.phase != .checking })
-        #expect(await probe.requested.sorted() == ["alpha", "bravo", "bravo", "charlie"])
-        #expect(!viewModel.hasCheckError)
-        #expect(viewModel.rows.first { $0.app.name == "Charlie" }.map(UpdaterGroups.status(of:)) == .notChecked)
-        #expect(viewModel.checkedCount == 2)
-        #expect(viewModel.checkableCount == 3)
-        // The never-reached row keeps the screen in results — not "All apps are up to date".
-        #expect(viewModel.phase == .results)
-        #expect(viewModel.lifecycle == .results)
+        #expect(viewModel.failedRows.map(\.app.name) == ["Bravo"])
+        #expect(viewModel.rows.first { $0.app.name == "Alpha" }?.latestVersion == "9.0")
 
-        // Releasing the held feed afterwards must not write into the stopped run.
-        await probe.release("charlie")
+        // The retry's feed is held open; Stop discards the retry *and* Alpha's result.
+        #expect(viewModel.retryFailedChecks())
+        #expect(await wait(until: true) { viewModel.rows.first { $0.app.name == "Bravo" }?.isChecking ?? false })
+        viewModel.stopCheck()
+        #expect(viewModel.phase == .idle)
+        #expect(viewModel.rows.allSatisfy { $0.latestVersion == nil && $0.checkError == nil && !$0.isChecking })
+        #expect(viewModel.failedRows.isEmpty)
+        #expect(!viewModel.retryFailedChecks())
+
+        await probe.release("bravo")
         try? await Task.sleep(for: .milliseconds(100))
-        #expect(viewModel.rows.first { $0.app.name == "Charlie" }?.latestVersion == nil)
-        #expect(viewModel.phase == .results)
+        #expect(viewModel.rows.allSatisfy { $0.latestVersion == nil && $0.checkError == nil })
+        #expect(viewModel.phase == .idle)
     }
 
     @Test("a stopped run cannot change the phase of the run that replaced it")
@@ -325,7 +335,7 @@ struct UpdaterViewModelTests {
         let viewModel = Self.makeViewModel(apps: [Self.app("Alpha")], feed: { url, installed in
             let call = await counter.next()
             if call == 1 { await probe.hold(Self.feedName(url)) }
-            return call == 1 ? "7.0" : installed
+            return Self.release(call == 1 ? "7.0" : installed)
         })
         viewModel.startCheck()
         #expect(await wait(until: true) { viewModel.rows.first?.isChecking ?? false })
@@ -353,7 +363,7 @@ struct UpdaterViewModelTests {
         let viewModel = Self.makeViewModel(apps: [Self.app("Alpha")], feed: { url, installed in
             await probe.record(Self.feedName(url))
             await probe.hold(Self.feedName(url))
-            return installed
+            return Self.release(installed)
         })
         #expect(viewModel.startCheck())
         #expect(!viewModel.startCheck())
@@ -370,7 +380,7 @@ struct UpdaterViewModelTests {
             enumerator: InstalledAppsEnumerator(searchDirectories: []),
             feed: { url, installed in
                 await probe.record(Self.feedName(url))
-                return installed
+                return Self.release(installed)
             },
             iconLoader: { _ in nil })
         viewModel.loadApps()
@@ -394,7 +404,7 @@ struct UpdaterViewModelTests {
         let viewModel = Self.makeViewModel(apps: [Self.app("Alpha")], feed: { url, installed in
             if await probe.requested.count >= 1 { await probe.hold("second") }
             await probe.record(Self.feedName(url))
-            return installed
+            return Self.release(installed)
         })
         viewModel.startCheck()
         #expect(await wait(until: true) { viewModel.phase == .empty })
@@ -419,7 +429,7 @@ struct UpdaterViewModelTests {
             apps: [Self.app("Alpha"), Self.app("Bravo", feed: false), noVersion],
             feed: { url, installed in
                 await probe.record(Self.feedName(url))
-                return installed
+                return Self.release(installed)
             })
         viewModel.startCheck()
         #expect(await wait(until: true) { viewModel.phase != .checking })
@@ -428,8 +438,9 @@ struct UpdaterViewModelTests {
         #expect(viewModel.rows.first { $0.app.name == "Charlie" }.map(UpdaterGroups.status(of:)) == .noFeed)
         #expect(viewModel.upToDateCount == 1)
         #expect(viewModel.noFeedCount == 2)
-        // Cannot-check rows don't count as checked.
+        // Cannot-check rows don't count as checked, and they keep the results screen.
         #expect(viewModel.checkedCount == 1)
+        #expect(viewModel.phase == .results)
     }
 
     @Test("a check with nothing checkable lands in results, never in the all-up-to-date state")
@@ -456,9 +467,9 @@ struct UpdaterViewModelTests {
             apps: [Self.app("Alpha", version: "1.9"), Self.app("Bravo", version: "2.0"), Self.app("Charlie", version: "3.1")],
             feed: { url, _ in
                 switch Self.feedName(url) {
-                case "alpha": "1.10"      // numeric compare: 1.10 > 1.9
-                case "bravo": "2.0"
-                default: "3.0"            // older than installed
+                case "alpha": Self.release("1.10")      // numeric compare: 1.10 > 1.9
+                case "bravo": Self.release("2.0")
+                default: Self.release("3.0")            // older than installed
                 }
             })
         viewModel.startCheck()
@@ -469,6 +480,282 @@ struct UpdaterViewModelTests {
         #expect(viewModel.rows.first { $0.app.name == "Alpha" }.map(UpdaterGroups.status(of:))
                 == .updateAvailable(installed: "1.9", latest: "1.10"))
         #expect(viewModel.groups.first?.kind == .updates)
+    }
+
+    // MARK: - D2: Check Again re-reads the installed apps
+
+    /// Writes `<dir>/<name>.app/Contents/Info.plist` the way a real bundle carries it.
+    private static func writeApp(_ name: String, version: String, build: String? = nil, in dir: URL) throws {
+        let contents = dir.appendingPathComponent("\(name).app/Contents")
+        try FileManager.default.createDirectory(at: contents, withIntermediateDirectories: true)
+        var plist: [String: Any] = [
+            "CFBundleIdentifier": "com.test.\(name.lowercased())",
+            "CFBundleShortVersionString": version,
+            "SUFeedURL": "https://updates.example.invalid/\(name.lowercased())/appcast.xml",
+        ]
+        if let build { plist["CFBundleVersion"] = build }
+        try (plist as NSDictionary).write(to: contents.appendingPathComponent("Info.plist"))
+    }
+
+    private static func makeTempDirectory() throws -> URL {
+        let dir = FileManager.default.temporaryDirectory
+            .appendingPathComponent("updater-vm-tests-\(UUID().uuidString)", isDirectory: true)
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
+    @Test("Check Again re-reads the installed apps: an app updated elsewhere, a new app, a removed app")
+    func checkAgainReEnumerates() async throws {
+        let dir = try Self.makeTempDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try Self.writeApp("Alpha", version: "1.0", in: dir)
+        let viewModel = UpdaterViewModel(
+            enumerator: InstalledAppsEnumerator(searchDirectories: [dir.path]),
+            feed: { _, _ in Self.release("1.1") },
+            iconLoader: { _ in nil })
+        viewModel.loadApps()
+        #expect(viewModel.rows.map(\.app.name) == ["Alpha"])
+
+        viewModel.startCheck()
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        #expect(viewModel.phase == .results)
+        #expect(viewModel.rows.first.map(UpdaterGroups.status(of:)) == .updateAvailable(installed: "1.0", latest: "1.1"))
+
+        // Alpha is updated outside the app and Bravo is installed.
+        try Self.writeApp("Alpha", version: "1.1", in: dir)
+        try Self.writeApp("Bravo", version: "1.0", in: dir)
+        #expect(viewModel.startCheck())
+        // The rows are rebuilt before any feed answers, so a stale "1.0 → 1.1" can't show.
+        #expect(viewModel.rows.map(\.app.name) == ["Alpha", "Bravo"])
+        #expect(viewModel.rows.allSatisfy { $0.latestVersion == nil })
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        let alpha = viewModel.rows.first { $0.app.name == "Alpha" }
+        #expect(alpha?.app.version == "1.1")
+        #expect(alpha.map(UpdaterGroups.status(of:)) == .upToDate)
+        #expect(viewModel.rows.first { $0.app.name == "Bravo" }.map(UpdaterGroups.status(of:))
+                == .updateAvailable(installed: "1.0", latest: "1.1"))
+
+        // Bravo is uninstalled.
+        try FileManager.default.removeItem(at: dir.appendingPathComponent("Bravo.app"))
+        #expect(viewModel.startCheck())
+        #expect(viewModel.rows.map(\.app.name) == ["Alpha"])
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        #expect(viewModel.phase == .empty)
+    }
+
+    @Test("when every app is gone, Check Again returns to the start instead of an empty results screen")
+    func checkAgainWithNoAppsLeft() async throws {
+        let dir = try Self.makeTempDirectory()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try Self.writeApp("Alpha", version: "1.0", in: dir)
+        let viewModel = UpdaterViewModel(
+            enumerator: InstalledAppsEnumerator(searchDirectories: [dir.path]),
+            feed: { _, installed in Self.release(installed) },
+            iconLoader: { _ in nil })
+        viewModel.loadApps()
+        viewModel.startCheck()
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        try FileManager.default.removeItem(at: dir.appendingPathComponent("Alpha.app"))
+        #expect(!viewModel.startCheck())
+        #expect(viewModel.rows.isEmpty)
+        #expect(viewModel.phase == .idle)
+    }
+
+    @Test("loadApps reads once and Try Again never re-reads; only a full check does")
+    func onlyAFullCheckReEnumerates() async {
+        let reads = ReadCounter()
+        let failOnce = FailOnce()
+        let apps = [Self.app("Alpha"), Self.app("Bravo")]
+        let viewModel = UpdaterViewModel(
+            enumerate: { reads.count += 1; return apps },
+            feed: { url, installed in
+                if Self.feedName(url) == "bravo", await failOnce.shouldFail() { throw FeedFailure() }
+                return Self.release(installed)
+            },
+            iconLoader: { _ in nil })
+        viewModel.loadApps()
+        viewModel.loadApps()
+        #expect(reads.count == 1)
+        viewModel.startCheck()
+        #expect(reads.count == 2)
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        #expect(viewModel.hasCheckError)
+        #expect(viewModel.retryFailedChecks())
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        #expect(reads.count == 2)
+    }
+
+    private final class ReadCounter { var count = 0 }
+
+    // MARK: - D3: marketing vs marketing, build vs build
+
+    @Test("a build-only feed compares against the installed build number")
+    func buildOnlyFeedUsesInstalledBuild() async {
+        let viewModel = Self.makeViewModel(
+            apps: [Self.app("Alpha", version: "2.0", build: "1249"),
+                   Self.app("Bravo", version: "2.0", build: "1250")],
+            feed: { _, _ in AppcastRelease(buildVersion: "1250") })
+        viewModel.startCheck()
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        // 1250 > 1249 is an update — shown in build numbers, never mixed with "2.0".
+        #expect(viewModel.rows.first { $0.app.name == "Alpha" }.map(UpdaterGroups.status(of:))
+                == .updateAvailable(installed: "1249", latest: "1250"))
+        #expect(viewModel.rows.first { $0.app.name == "Bravo" }.map(UpdaterGroups.status(of:)) == .upToDate)
+        #expect(viewModel.phase == .results)
+    }
+
+    @Test("a build-only feed for an app without a build number is Couldn't check, never a verdict")
+    func buildOnlyFeedWithoutInstalledBuildFailsClosed() async {
+        let viewModel = Self.makeViewModel(
+            apps: [Self.app("Alpha", version: "2.0", build: "1249"), Self.app("Bravo", version: "2.0")],
+            feed: { _, _ in AppcastRelease(buildVersion: "1250") })
+        viewModel.startCheck()
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        let bravo = viewModel.rows.first { $0.app.name == "Bravo" }
+        #expect(bravo?.latestVersion == nil)
+        #expect(bravo?.checkError == "The update feed's version can't be compared with this app's.")
+        #expect(bravo.map(UpdaterGroups.status(of:))
+                == .checkFailed(message: "The update feed's version can't be compared with this app's."))
+        #expect(viewModel.failedRows.map(\.app.name) == ["Bravo"])
+        #expect(viewModel.phase == .results)
+    }
+
+    @Test("a feed with a marketing version ignores build numbers, and 1.0 equals 1.0.0")
+    func marketingVersionComparesAgainstMarketing() async {
+        let viewModel = Self.makeViewModel(
+            apps: [Self.app("Alpha", version: "1.0", build: "1"), Self.app("Bravo", version: "1.9", build: "5000")],
+            feed: { url, _ in
+                // Builds go the "wrong" way on purpose: they must not decide anything.
+                Self.feedName(url) == "alpha"
+                    ? AppcastRelease(shortVersion: "1.0.0", buildVersion: "9999")
+                    : AppcastRelease(shortVersion: "1.10", buildVersion: "2")
+            })
+        viewModel.startCheck()
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        #expect(viewModel.rows.first { $0.app.name == "Alpha" }.map(UpdaterGroups.status(of:)) == .upToDate)
+        #expect(viewModel.rows.first { $0.app.name == "Bravo" }.map(UpdaterGroups.status(of:))
+                == .updateAvailable(installed: "1.9", latest: "1.10"))
+    }
+
+    // MARK: - D4: the all-up-to-date gate and the copy
+
+    @Test("an app without a feed keeps the results screen: all-up-to-date needs every app checked")
+    func noFeedRowBlocksEmpty() async {
+        let viewModel = Self.makeViewModel(apps: [Self.app("Alpha"), Self.app("Bravo", feed: false)])
+        viewModel.startCheck()
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        #expect(viewModel.phase == .results)
+        #expect(viewModel.lifecycle == .results)
+        #expect(viewModel.groups.map(\.kind) == [.upToDate, .noFeed])
+    }
+
+    @Test("the results headline claims only what was checked")
+    func resultsTitleCopy() async {
+        #expect(UpdaterGroups.resultsTitle(updates: 1, checked: 4) == "1 update available")
+        #expect(UpdaterGroups.resultsTitle(updates: 3, checked: 4) == "3 updates available")
+        #expect(UpdaterGroups.resultsTitle(updates: 0, checked: 1) == "No newer versions found")
+        #expect(UpdaterGroups.resultsTitle(updates: 0, checked: 0) == "No apps could be checked")
+        for (updates, checked) in [(0, 0), (0, 1), (0, 7)] {
+            #expect(UpdaterGroups.resultsTitle(updates: updates, checked: checked) != "No updates available")
+        }
+
+        // Through the view model, the way the header and the toolbar subtitle read it.
+        let checkedSome = Self.makeViewModel(apps: [Self.app("Alpha"), Self.app("Bravo", feed: false)])
+        checkedSome.startCheck()
+        #expect(await wait(until: true) { checkedSome.phase != .checking })
+        #expect(UpdaterGroups.resultsTitle(updates: checkedSome.updatesAvailableCount, checked: checkedSome.checkedCount)
+                == "No newer versions found")
+
+        let checkedNone = Self.makeViewModel(apps: [Self.app("Bravo", feed: false), Self.app("Charlie", feed: false, appStore: true)])
+        checkedNone.startCheck()
+        #expect(await wait(until: true) { checkedNone.phase != .checking })
+        #expect(checkedNone.phase == .results)
+        #expect(UpdaterGroups.resultsTitle(updates: checkedNone.updatesAvailableCount, checked: checkedNone.checkedCount)
+                == "No apps could be checked")
+    }
+
+    @Test("the sub line, the empty text, the banner and the Not-checked note read as specified")
+    func supportingCopy() {
+        #expect(UpdaterGroups.checkedText(1) == "1 app checked")
+        #expect(UpdaterGroups.checkedText(5) == "5 apps checked")
+        #expect(UpdaterGroups.resultsSub(checked: 2) == "2 apps checked. Updates are installed in each app or in the App Store.")
+        #expect(UpdaterGroups.emptyText(checked: 1) == "1 app checked. None has a newer version in its update feed.")
+        #expect(UpdaterGroups.emptyText(checked: 3) == "3 apps checked. None has a newer version in its update feed.")
+        // The empty state is only reachable when every app was checked: no no-feed caveat.
+        #expect(!UpdaterGroups.emptyText(checked: 3).contains("no update feed"))
+
+        let one = UpdaterGroups.failedBanner(for: [.init(app: Self.app("Bravo"), checkError: "HTTP 503 from the feed.")])
+        #expect(one.title == "Couldn't check Bravo")
+        #expect(one.text == "HTTP 503 from the feed. It is not shown as up to date.")
+        let two = UpdaterGroups.failedBanner(for: [.init(app: Self.app("Bravo"), checkError: "x"),
+                                                   .init(app: Self.app("Charlie"), checkError: "y")])
+        #expect(two.title == "Couldn't check 2 apps")
+        #expect(two.text == "Their update feeds didn't answer. They are not shown as up to date.")
+
+        #expect(UpdaterGroup.Kind.notChecked.title == "Not checked yet")
+        #expect(UpdaterGroup.Kind.notChecked.note == "These apps haven't been checked yet.")
+        #expect(UpdaterGroup.Kind.couldntCheck.title == "Couldn't check")
+        #expect(UpdaterGroup.Kind.noFeed.title == "No update feed")
+    }
+
+    // MARK: - Several feeds failing, and recovery
+
+    @Test("two of three feeds failing is results with failed rows, never the whole-screen error")
+    func twoOfThreeFeedsFail() async {
+        let viewModel = Self.makeViewModel(apps: [Self.app("Alpha"), Self.app("Bravo"), Self.app("Charlie")], feed: { url, installed in
+            if Self.feedName(url) != "alpha" { throw FeedFailure() }
+            return Self.release(installed)
+        })
+        viewModel.startCheck()
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        #expect(viewModel.phase == .results)
+        #expect(viewModel.lifecycle == .results)
+        #expect(viewModel.failedRows.map(\.app.name) == ["Bravo", "Charlie"])
+        #expect(viewModel.groups.map(\.kind) == [.upToDate, .couldntCheck])
+        #expect(UpdaterGroups.failedBanner(for: viewModel.failedRows).title == "Couldn't check 2 apps")
+    }
+
+    @Test("every feed failing is the whole-check failure with the engine's reason")
+    func everyFeedFails() async {
+        let viewModel = Self.makeViewModel(apps: [Self.app("Alpha"), Self.app("Bravo"), Self.app("Charlie")],
+                                           feed: { _, _ in throw FeedFailure() })
+        viewModel.startCheck()
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        #expect(viewModel.phase == .failed(message: "None of the 3 update feeds answered. The network connection was lost."))
+        #expect(viewModel.lifecycle == .error)
+    }
+
+    @Test("Try Again: the failed feed answers on retry, its verdict lands, the banner goes, other rows are untouched")
+    func tryAgainRecovery() async {
+        let probe = FeedProbe()
+        let failBravo = FailOnce()
+        let viewModel = Self.makeViewModel(apps: [Self.app("Alpha"), Self.app("Bravo"), Self.app("Charlie")], feed: { url, installed in
+            let name = Self.feedName(url)
+            await probe.record(name)
+            if name == "bravo", await failBravo.shouldFail() { throw FeedFailure() }
+            return Self.release(name == "alpha" ? "9.0" : (name == "bravo" ? "1.5" : installed))
+        })
+        viewModel.startCheck()
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        #expect(viewModel.phase == .results)
+        #expect(viewModel.failedRows.map(\.app.name) == ["Bravo"])
+        #expect(UpdaterGroups.failedBanner(for: viewModel.failedRows).title == "Couldn't check Bravo")
+        #expect(viewModel.rows.first { $0.app.name == "Bravo" }.map(UpdaterGroups.status(of:))
+                == .checkFailed(message: "The network connection was lost."))
+
+        #expect(viewModel.retryFailedChecks())
+        #expect(await wait(until: true) { viewModel.phase != .checking })
+        // Only Bravo was asked again.
+        #expect(await probe.requested.sorted() == ["alpha", "bravo", "bravo", "charlie"])
+        // Its verdict landed, the banner is gone, the rest is exactly as it was.
+        #expect(viewModel.rows.first { $0.app.name == "Bravo" }.map(UpdaterGroups.status(of:))
+                == .updateAvailable(installed: "1.0", latest: "1.5"))
+        #expect(viewModel.failedRows.isEmpty)
+        #expect(!viewModel.hasCheckError)
+        #expect(viewModel.rows.first { $0.app.name == "Alpha" }?.latestVersion == "9.0")
+        #expect(viewModel.rows.first { $0.app.name == "Charlie" }.map(UpdaterGroups.status(of:)) == .upToDate)
+        #expect(viewModel.updatesAvailableCount == 2)
+        #expect(viewModel.phase == .results)
     }
 
     // MARK: - Groups
@@ -503,7 +790,7 @@ struct UpdaterViewModelTests {
         let probe = FeedProbe()
         let viewModel = Self.makeViewModel(apps: [], feed: { url, installed in
             await probe.record(Self.feedName(url))
-            return installed
+            return Self.release(installed)
         })
         let expected: [(String, UpdaterViewModel.Phase, LifecycleState)] = [
             ("start", .idle, .start),
@@ -520,6 +807,11 @@ struct UpdaterViewModelTests {
         viewModel.loadFixture(state: "error")
         #expect(viewModel.lifecycle == .error)
 
+        // The "empty" fixture obeys the real gate: every app has a feed, none is App Store.
+        viewModel.loadFixture(state: "empty")
+        #expect(viewModel.noFeedCount == 0)
+        #expect(viewModel.appStoreCount == 0)
+        #expect(viewModel.checkedCount == viewModel.checkableCount)
         viewModel.loadFixture(state: "checkfailed")
         #expect(viewModel.failedRows.count == 1)
         viewModel.loadFixture(state: "results")
