@@ -53,7 +53,9 @@ struct SmartCareReviewGroup: Identifiable, Equatable, Sendable {
 /// The pure grouping core of Smart Care's review (plan PR 7): junk grouped **by rule**
 /// (the item's `sourceLabel`) and duplicates grouped **by set** (`DuplicateGroup.id`),
 /// in first-appearance order. Also deduplicates by path — a file both modules found is
-/// listed once, under junk, and can never be trashed twice.
+/// listed once, under junk, and can never be trashed twice — except a set's
+/// recommended keep, which is reserved for its duplicate set so the path can never
+/// appear as a selectable junk row (S4: the keep copy is locked).
 ///
 /// Groups are prefix-named (`junk:`, `dup:`) so a rule label and a set id can never
 /// collide inside one `currentGroupID`.
@@ -72,6 +74,14 @@ struct SmartCareReviewBuilder {
                       junkModuleID: String,
                       duplicatesModuleID: String,
                       duplicateGroups: [DuplicateGroup]) -> Output {
+        // A set's recommended keep is reserved for the duplicates pass even when the
+        // junk leg also found the same path (e.g. a copy under ~/Library/Caches): if
+        // the junk pass claimed the row, it would carry `isRecommendedKeep: false` and
+        // Smart Care would preselect the "safe" junk copy and trash the one file the
+        // engine says to keep. Skipping the path here lets the duplicates pass list it
+        // exactly once, locked.
+        let keepPaths = Set(duplicateGroups.compactMap(\.recommendedKeepPath))
+
         var seenPaths: Set<String> = []
         var items: [SmartCareReviewItem] = []
 
@@ -81,6 +91,7 @@ struct SmartCareReviewBuilder {
         var junkBuckets: [(label: String, items: [SmartCareReviewItem])] = []
         var junkBucketIndex: [String: Int] = [:]
         for item in junkItems {
+            guard !keepPaths.contains(item.path) else { continue }
             guard seenPaths.insert(item.path).inserted else { continue }
             let label = item.sourceLabel ?? "Other"
             let reviewItem = SmartCareReviewItem(sourceModule: junkModuleID,

@@ -515,6 +515,88 @@ struct SmartCareViewModelTests {
                 "the keep copy must survive the clean")
     }
 
+    @Test("a duplicate keep the junk scan also found stays locked and is never trashed")
+    func junkHitKeepStaysLockedAndSurvivesTheClean() async throws {
+        let fileManager = FileManager.default
+        let root = fileManager.temporaryDirectory
+            .appendingPathComponent("smartcare-keeplock-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: root) }
+
+        // The P2 setup: the duplicate pair's keep (newest by modified date) sits inside
+        // the junk rule's folder, so BOTH legs report the same path. The builder must
+        // reserve it for the duplicate set — if junk claimed the row, Smart Care would
+        // preselect the "safe" junk copy and Clean would trash every copy of the file.
+        let cacheDir = root.appendingPathComponent("Cache", isDirectory: true)
+        try fileManager.createDirectory(at: cacheDir, withIntermediateDirectories: true)
+        let keepName = "smartcare-keep-\(UUID().uuidString).dat"
+        let olderName = "smartcare-keep-old-\(UUID().uuidString).dat"
+        let junkName = "smartcare-keeplock-junk-\(UUID().uuidString).db"
+        let payload = Data("smartcare keep-lock duplicate payload".utf8)
+        try payload.write(to: cacheDir.appendingPathComponent(keepName))
+        try payload.write(to: root.appendingPathComponent(olderName))
+        try Data("smartcare keep-lock junk payload".utf8)
+            .write(to: cacheDir.appendingPathComponent(junkName))
+        // The newest copy by modified date is the keep (engine rule) — set it explicitly.
+        let newerDate = Date(timeIntervalSince1970: 1_795_600_000) // 2026-11-24
+        let olderDate = Date(timeIntervalSince1970: 1_794_700_000) // 2026-11-23
+        try fileManager.setAttributes([.modificationDate: newerDate],
+                                      ofItemAtPath: cacheDir.appendingPathComponent(keepName).path)
+        try fileManager.setAttributes([.modificationDate: olderDate],
+                                      ofItemAtPath: root.appendingPathComponent(olderName).path)
+
+        let trash = try fileManager.url(for: .trashDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        defer {
+            for name in [junkName, olderName, keepName] {
+                try? fileManager.removeItem(at: trash.appendingPathComponent(name))
+            }
+        }
+
+        let rule = JunkRule(id: "test-keeplock",
+                            label: "Test Caches",
+                            kind: .directPath(cacheDir.path),
+                            defaultSeverity: .safe)
+        let viewModel = Self.makeViewModel(
+            rootPath: root.path,
+            orchestrator: SmartCareOrchestrator(scanners: [
+                .init(name: SmartCareViewModel.junkModuleName, scanner: JunkScanner(rules: [rule]))
+            ]))
+
+        viewModel.startScan()
+        #expect(await waitForPhase(viewModel, .results))
+
+        #expect(viewModel.duplicateSetCount == 1)
+        #expect(viewModel.junkItemsCount == 1, "only the unrelated cache file counts as junk — never the keep")
+        guard let keep = viewModel.reviewItems.first(where: { $0.isRecommendedKeep }) else {
+            Issue.record("the junk-hit duplicate keep is missing from the review")
+            return
+        }
+        #expect(keep.item.path == cacheDir.appendingPathComponent(keepName).path,
+                "the newest copy by modified date is the keep, even though junk also found it")
+        #expect(keep.sourceModule == SmartCareViewModel.duplicatesModuleName,
+                "the keep belongs to its duplicate set, not to the junk section")
+        #expect(!viewModel.selectedPaths.contains(keep.id),
+                "pre-selection must never include the keep")
+        #expect(viewModel.selectedPaths.count == 2, "the unrelated junk file + the older copy, never the keep")
+        let expectedBytes = viewModel.totalSelectedBytes
+
+        let accepted = await viewModel.clean()
+
+        #expect(accepted)
+        guard case .done(let movedBytes, let movedCount, let failedCount) = viewModel.phase else {
+            Issue.record("phase should be .done, got \(viewModel.phase)")
+            return
+        }
+        #expect(movedCount == 2)
+        #expect(movedBytes == expectedBytes)
+        #expect(failedCount == 0)
+        #expect(viewModel.reviewItems.count == 1, "only the keep remains listed")
+        #expect(fileManager.fileExists(atPath: cacheDir.appendingPathComponent(keepName).path),
+                "the keep copy must survive the clean")
+        #expect(!fileManager.fileExists(atPath: root.appendingPathComponent(olderName).path))
+        #expect(!fileManager.fileExists(atPath: cacheDir.appendingPathComponent(junkName).path))
+    }
+
     // MARK: - Builder (pure grouping)
 
     @Test("builder: junk groups by rule in first-appearance order, duplicates by set")
@@ -558,6 +640,9 @@ struct SmartCareViewModelTests {
 
     @Test("builder: a file both modules found is listed once, under junk")
     func builderDeduplicatesByPath() throws {
+        // shared.db is deliberately NOT this set's keep (twin.db is newer), so it stays
+        // a single junk row. A set's keep is reserved for the duplicates pass — see
+        // builderReservesAJunkHitKeepForItsDuplicateSet below.
         let shared = ScanItem(path: "/tmp/x/shared.db", size: 7, kind: .file, severity: .safe,
                               sourceLabel: "User App Caches")
         let set = DuplicateGroup(id: "s", items: [
@@ -574,6 +659,47 @@ struct SmartCareViewModelTests {
         #expect(output.junkGroups[0].items.map(\.id) == [shared.path])
         #expect(output.duplicateGroups[0].items.map(\.id) == ["/tmp/x/twin.db"],
                 "the duplicate section keeps only the paths junk didn't claim")
+    }
+
+    @Test("builder: a set's keep that junk also found is the locked keep of its set, never a junk row")
+    func builderReservesAJunkHitKeepForItsDuplicateSet() throws {
+        // The keep copy also matched a junk rule (e.g. a copy under ~/Library/Caches).
+        // The junk pass must leave that path to the duplicates pass, which lists it
+        // exactly once, locked — never as a selectable safe-junk row.
+        let keep = ScanItem(path: "/tmp/x/keep.db", size: 7, kind: .file,
+                            lastModified: Date(timeIntervalSince1970: 100),
+                            severity: .safe, sourceLabel: "User App Caches")
+        let older = ScanItem(path: "/tmp/x/twin.db", size: 7, kind: .file,
+                             lastModified: Date(timeIntervalSince1970: 10))
+        let unrelatedJunk = ScanItem(path: "/tmp/x/other.db", size: 11, kind: .file,
+                                     severity: .safe, sourceLabel: "User App Caches")
+        let set = DuplicateGroup(id: "s", items: [keep, older])
+
+        let output = SmartCareReviewBuilder.build(junkItems: [keep, unrelatedJunk],
+                                                  junkModuleID: "Junk & Cache",
+                                                  duplicatesModuleID: "Duplicate files",
+                                                  duplicateGroups: [set])
+
+        // The keep path still appears exactly once — under its duplicate set, locked.
+        #expect(output.items.filter { $0.id == keep.path }.count == 1)
+        let keepRow = output.items.first { $0.id == keep.path }
+        #expect(keepRow?.sourceModule == "Duplicate files")
+        #expect(keepRow?.groupID == "dup:s")
+        #expect(keepRow?.isRecommendedKeep == true)
+        #expect(!output.junkGroups.flatMap(\.items).contains { $0.id == keep.path },
+                "the keep must never be listed as a junk row")
+
+        // Junk keeps only the paths that are not a set's keep.
+        #expect(output.junkGroups.flatMap(\.items).map(\.id) == ["/tmp/x/other.db"])
+
+        // The set still lists every copy, keep flag on the newest only.
+        #expect(output.duplicateGroups[0].items.map(\.id) == [keep.path, "/tmp/x/twin.db"])
+        #expect(output.duplicateGroups[0].items.map(\.isRecommendedKeep) == [true, false])
+
+        // Every unique path still lands exactly once, in group order.
+        #expect(output.items.map(\.id) ==
+                output.junkGroups.flatMap(\.items).map(\.id) +
+                output.duplicateGroups.flatMap(\.items).map(\.id))
     }
 
     // MARK: - Lifecycle mapping (the frame's contract)
