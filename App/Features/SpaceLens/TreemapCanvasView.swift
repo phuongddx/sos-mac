@@ -33,6 +33,25 @@ struct TreemapCanvasView: View {
         Theme.Color.treemap5, Theme.Color.treemap6, Theme.Color.treemap7, Theme.Color.treemap8,
     ]
 
+    /// D9 (review F): the By Type hue per category — the prototype's `data.js` values.
+    /// The fixture has no Video or Other, so those two are derived in the same family and
+    /// pinned here. One hue per type, so the map and the legend always agree.
+    static let categoryHues: [FileCategory: SwiftUI.Color] = [
+        .documents: SwiftUI.Color(hex: "#3B82F6"),
+        .images: SwiftUI.Color(hex: "#E879F9"),
+        .video: SwiftUI.Color(hex: "#FB7185"),
+        .audio: SwiftUI.Color(hex: "#2DD4BF"),
+        .code: SwiftUI.Color(hex: "#6366F1"),
+        .archives: SwiftUI.Color(hex: "#38BDF8"),
+        .applications: SwiftUI.Color(hex: "#A78BFA"),
+        .other: SwiftUI.Color(hex: "#94A3B8"),
+    ]
+
+    /// A category's hue; `treemap8` is a never-shown fallback (every case is pinned).
+    static func categoryHue(for category: FileCategory) -> SwiftUI.Color {
+        categoryHues[category] ?? ramp[7]
+    }
+
     /// The spec's own cell radius (§5.5 "radius 3") — `Theme.Radius` has no 3 pt step,
     /// so the constant is pinned here with its source, like StartView's glyph ink.
     private static let cellRadius: CGFloat = 3
@@ -82,7 +101,13 @@ struct TreemapCanvasView: View {
 
     private func drawCell(_ item: Cell, into context: inout GraphicsContext) {
         let shape = Path(roundedRect: item.rect, cornerRadius: Self.cellRadius)
-        context.fill(shape, with: .color(Self.fill(for: item)))
+        context.fill(shape, with: .color(Self.baseFill(for: item)))
+        if item.isCategory {
+            // D9: the By Type fill is the type's hue, then the treemapMix overlay (dark:
+            // card at 42 %, light: 24 %) — the exact equivalent of the prototype's
+            // color-mix(in srgb, hue 42 %, var(--tm-mix)), via the existing token.
+            context.fill(shape, with: .color(Theme.Derived.treemapMix))
+        }
         // The 1 pt bgBase line between neighbours (§5.5) is the cell's own border.
         context.stroke(shape, with: .color(Theme.Color.bgBase), lineWidth: 1)
 
@@ -114,10 +139,11 @@ struct TreemapCanvasView: View {
     }
 
     /// By Folder cells take the ramp by their size-order position; the "N smaller
-    /// items" cell always sits on `treemap8` (§5.5); By Type cells keep their
-    /// category's fixed ramp slot so legend and map agree.
-    private static func fill(for item: Cell) -> SwiftUI.Color {
+    /// items" cell always sits on `treemap8` (§5.5); a By Type cell takes its
+    /// category's fixed hue (D9 — the mix overlay is drawn on top in `drawCell`).
+    private static func baseFill(for item: Cell) -> SwiftUI.Color {
         guard !item.isSmallerBucket else { return ramp[7] }
+        if let category = item.category { return categoryHue(for: category) }
         return ramp[abs(item.rampIndex) % ramp.count]
     }
 

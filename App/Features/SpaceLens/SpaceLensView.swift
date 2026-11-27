@@ -128,15 +128,7 @@ private struct SpaceLensScreen: View {
                            action: @escaping @MainActor () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: Theme.Spacing.s3) {
-                let tile = RoundedRectangle(cornerRadius: Theme.Radius.sm, style: .continuous)
-                ZStack {
-                    tile.fill(hue)
-                    Image(systemName: symbol)
-                        .font(Theme.Font.subheadline.weight(.medium))
-                        .foregroundStyle(ink)
-                }
-                .frame(width: 28, height: 28)
-                .clipShape(tile)
+                ModuleTileView(hue: hue, ink: ink, symbol: symbol, size: .card)
                 VStack(alignment: .leading, spacing: 1) {
                     Text(title)
                         .font(Theme.Font.body)
@@ -272,14 +264,18 @@ private struct SpaceLensScreen: View {
             }
             .accessibilityElement(children: .combine)
         case .category:
-            // One row per type: the map's own ramp slot, the type's name and its real
+            // One row per type: the cell's own hue (D9 — the same mixed fill the map
+            // draws, with a 1 pt border in the pure hue), the type's name and its real
             // total — legend and map can never disagree.
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), alignment: .leading)], spacing: Theme.Spacing.s1) {
                 ForEach(viewModel.categoryLegend, id: \.category) { entry in
                     HStack(spacing: Theme.Spacing.s2) {
                         RoundedRectangle(cornerRadius: Theme.Radius.xs, style: .continuous)
-                            .fill(TreemapCanvasView.ramp[
-                                (FileCategory.allCases.firstIndex(of: entry.category) ?? 0) % TreemapCanvasView.ramp.count])
+                            .fill(TreemapCanvasView.categoryHue(for: entry.category))
+                            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.xs, style: .continuous)
+                                .fill(Theme.Derived.treemapMix))
+                            .overlay(RoundedRectangle(cornerRadius: Theme.Radius.xs, style: .continuous)
+                                .strokeBorder(TreemapCanvasView.categoryHue(for: entry.category), lineWidth: 1))
                             .frame(width: 10, height: 10)
                         Text(entry.category.rawValue)
                             .font(Theme.Font.callout)
@@ -317,8 +313,12 @@ private struct SpaceLensScreen: View {
     private func doneContent(movedBytes: Int64, movedCount: Int, failedCount: Int) -> some View {
         DoneView(
             hue: module.hue,
-            title: "\(ByteFormatter.string(fromByteCount: movedBytes)) moved to the Trash",
-            sub: "From \(viewModel.rootName).",
+            // D6: all-failed leads with the failure, never "0 bytes moved to the Trash";
+            // the per-item reasons render below (failureBanners, F4).
+            title: SpaceLensViewModel.doneTitle(
+                movedBytes: movedBytes, movedCount: movedCount, failedCount: failedCount),
+            sub: SpaceLensViewModel.doneSub(
+                movedCount: movedCount, failedCount: failedCount, rootName: viewModel.rootName),
             stats: [
                 .init(label: "Moved to Trash", value: ByteFormatter.string(fromByteCount: movedBytes), isBytes: true),
                 .init(label: "Items", value: "\(movedCount)"),
@@ -351,11 +351,14 @@ private struct SpaceLensScreen: View {
     }
 
     private var emptyContent: some View {
-        StatusStateView(
+        // D5: cleaned-empty is not scanned-empty — the scan found items; this session
+        // moved them. The copy never claims the scan found nothing.
+        let cleanedEmpty = viewModel.isCleanedEmpty
+        return StatusStateView(
             kind: .ok,
-            symbol: "folder",
-            title: "This folder is empty",
-            text: "“\(viewModel.rootPath)” has no files in it.")
+            symbol: cleanedEmpty ? "checkmark.circle" : "folder",
+            title: SpaceLensViewModel.emptyTitle(isCleanedEmpty: cleanedEmpty, rootName: viewModel.rootName),
+            text: SpaceLensViewModel.emptyText(isCleanedEmpty: cleanedEmpty, rootPath: viewModel.rootPath))
         {
             Button("Choose Folder…") { viewModel.chooseFolder() }
                 .sosButton(.default)
@@ -394,8 +397,15 @@ private struct SpaceLensScreen: View {
                 }
                 actions.scanAgain = { viewModel.scanAgain() }
             } else {
-                // Empty folder (§5.5): the CTA is "Choose Folder…".
-                actions.scanAgain = { viewModel.chooseFolder() }
+                // Empty folder (§5.5): scanned-empty keeps "Choose Folder…" as the CTA;
+                // a session-emptied folder offers "Scan Again" (D5) — the map can be
+                // re-read to show the folder really is empty now.
+                if viewModel.isCleanedEmpty {
+                    actions.emptyCTATitle = "Scan Again"
+                    actions.scanAgain = { viewModel.scanAgain() }
+                } else {
+                    actions.scanAgain = { viewModel.chooseFolder() }
+                }
             }
         case .review:
             break  // the cleanup-list sheet owns the confirm (S1); the bar behind is idle
@@ -435,7 +445,11 @@ private struct SpaceLensScreen: View {
         case .scanning:
             return scanCountLine
         case .results:
-            guard viewModel.lifecycle == .results else { return nil }
+            guard viewModel.lifecycle == .results else {
+                // D5: the state's default word ("Nothing found") would claim the scan
+                // found nothing; a session-emptied folder gets its own honest word.
+                return viewModel.isCleanedEmpty ? "You moved everything out" : nil
+            }
             let count = viewModel.scannedItemCount
             return "Scanned \(count) item\(count == 1 ? "" : "s") in “\(viewModel.rootName)”"
         case .cleaning(let selectedCount):

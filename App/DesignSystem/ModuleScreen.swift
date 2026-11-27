@@ -29,6 +29,11 @@ struct ModuleScreen<Content: View>: View {
         var scanAgain: (@MainActor () -> Void)?
         /// `done` — Open Trash in the trailing slot (`module.dock.doneSecondary`; none for Protection).
         var openTrash: (@MainActor () -> Void)?
+        /// `empty` — an optional override of the module's fixed `dock.emptyAction` CTA label,
+        /// for a screen whose empty state has two honest variants (Space Lens D5: a
+        /// session-emptied folder offers "Scan Again"; a scanned-empty folder keeps
+        /// "Choose Folder…"). `nil` keeps the module's own label.
+        var emptyCTATitle: String?
         /// `error` — the one relevant escape (Open System Settings, Choose Another Folder).
         var escape: Escape?
 
@@ -42,12 +47,14 @@ struct ModuleScreen<Content: View>: View {
              reviewItems: (@MainActor () -> Void)? = nil,
              scanAgain: (@MainActor () -> Void)? = nil,
              openTrash: (@MainActor () -> Void)? = nil,
+             emptyCTATitle: String? = nil,
              escape: Escape? = nil) {
             self.primary = primary
             self.stop = stop
             self.reviewItems = reviewItems
             self.scanAgain = scanAgain
             self.openTrash = openTrash
+            self.emptyCTATitle = emptyCTATitle
             self.escape = escape
         }
     }
@@ -187,7 +194,9 @@ struct ModuleScreen<Content: View>: View {
         case .cleaning:
             PrimaryCTAView(label: "Moving", mode: .moving, ring: .indeterminate)
         case .done, .empty:
-            PrimaryCTAView(label: state == .done ? module.dock.doneAction : module.dock.emptyAction,
+            PrimaryCTAView(label: state == .done
+                            ? module.dock.doneAction
+                            : (actions.emptyCTATitle ?? module.dock.emptyAction),
                            action: actions.scanAgain)
         case .error:
             PrimaryCTAView(label: "Try Again", action: actions.primary)

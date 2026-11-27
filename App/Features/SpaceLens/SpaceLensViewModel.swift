@@ -22,7 +22,7 @@ import TreemapKit
 /// | `start` | `idle` | "See what fills your disk" · source list: Home, Choose Folder…, external volumes · **Scan** |
 /// | `scanning` | `scanning` | "Mapping «folder»…" · "The total isn't known until the scan ends, so there's no percentage." · "Scanned N items…" · **Stop** |
 /// | `results` | `results` (items found) | Breadcrumb · segment By Folder / By Type · treemap · legend · inspector · review bar |
-/// | `empty` | `results` (empty folder) | "This folder is empty — «path» has no files in it." · Choose Folder… |
+/// | `empty` | `results` (empty folder) | scanned-empty: "This folder is empty — «path» has no files in it." · Choose Folder… · cleaned-empty (D5): "You moved everything out of «name»" · Scan Again / Choose Folder… |
 /// | `review` | `review` | The **cleanup list** sheet with checkboxes and a Total row (§4.8) |
 /// | `cleaning` | `cleaning(selectedCount:)` | "Moving n of N items to the Trash…" + the current path (N5) |
 /// | `done` | `done(movedBytes:movedCount:failedCount:)` | stats · **Back to Map** (N7) · Open Trash · Scan Again |
@@ -87,6 +87,9 @@ final class SpaceLensViewModel {
         var isSmallerBucket: Bool = false
         /// A By Type aggregate — no path, so never cleanable either.
         var isCategory: Bool = false
+        /// The By Type cell's category — it fixes the cell's hue (D9); `nil` for By Folder
+        /// cells and the smaller-items bucket.
+        var category: FileCategory?
     }
 
     /// Spec §5.5: items below 0.4 % of the scanned total merge into one cell.
@@ -106,6 +109,10 @@ final class SpaceLensViewModel {
     private(set) var selectedItem: DisplayItem?
     /// Per-item failures of the last clean, surfaced on Done (F4) — never dropped.
     private(set) var lastFailedItems: [CleanResult.FailedItem] = []
+    /// Whether the completed scan found anything (D5). A results-over-empty state after a
+    /// clean means *this session* emptied the folder — a different truth from a folder that
+    /// scanned empty, and the copy must not conflate them.
+    private(set) var scanFoundItems = false
     /// Real per-item moving progress (N5, §6.5); `nil` outside `cleaning`.
     private(set) var cleaningProgress: CleaningProgress?
 
@@ -178,6 +185,12 @@ final class SpaceLensViewModel {
     /// The scanned root's folder name, as the copy quotes it.
     var rootName: String { (rootPath as NSString).lastPathComponent }
 
+    /// D5: `.empty` because everything the scan found was moved this session. The state
+    /// looks like a scanned-empty folder, but the scan did find items — the copy says so.
+    var isCleanedEmpty: Bool {
+        phase == .results && flatItems.isEmpty && scanFoundItems
+    }
+
     var isHomeRoot: Bool {
         rootPath == (NSHomeDirectory() as NSString).standardizingPath
     }
@@ -192,12 +205,21 @@ final class SpaceLensViewModel {
         if showsFixtureVolumesOnly { return [] }
         #endif
         return FileManager.default.mountedVolumeURLs(
-            includingResourceValuesForKeys: [.volumeNameKey, .volumeIsRemovableKey],
+            includingResourceValuesForKeys: [
+                .volumeNameKey, .volumeIsLocalKey, .volumeIsRemovableKey, .volumeIsInternalKey,
+            ],
             options: [.skipHiddenVolumes]
         )?
         .compactMap { url in
-            let values = try? url.resourceValues(forKeys: [.volumeNameKey, .volumeIsRemovableKey])
-            guard values?.volumeIsRemovable == true else { return nil }
+            let values = try? url.resourceValues(
+                forKeys: [.volumeNameKey, .volumeIsLocalKey, .volumeIsRemovableKey, .volumeIsInternalKey])
+            // D8: local && (removable || !internal) — the filter owns the rule; a missing
+            // flag excludes the volume (fail closed).
+            let flags = ExternalVolumeFilter.Flags(
+                isLocal: values?.volumeIsLocal,
+                isRemovable: values?.volumeIsRemovable,
+                isInternal: values?.volumeIsInternal)
+            guard ExternalVolumeFilter.includes(flags) else { return nil }
             return ScanLocation(url: url, name: values?.volumeName ?? url.lastPathComponent)
         }
         .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending } ?? []
@@ -345,6 +367,38 @@ final class SpaceLensViewModel {
         } else {
             selectedItemsByPath[item.path] = nil
         }
+    }
+
+    // MARK: - Empty and Done copy (D5 / D6 — honest in every state)
+
+    /// D5: two different empty stories. A folder that scanned empty "has no files in it";
+    /// a folder this session emptied says so — F3: the empty copy claims only what the
+    /// scan found, never a coincidence of what the user just moved.
+    static func emptyTitle(isCleanedEmpty: Bool, rootName: String) -> String {
+        isCleanedEmpty ? "You moved everything out of “\(rootName)”" : "This folder is empty"
+    }
+
+    /// The empty state's supporting text, matched to `emptyTitle(isCleanedEmpty:rootName:)`.
+    static func emptyText(isCleanedEmpty: Bool, rootPath: String) -> String {
+        isCleanedEmpty
+            ? "Nothing is left of what the scan found. Items you moved are in the Trash until you empty it."
+            : "“\(rootPath)” has no files in it."
+    }
+
+    /// D6: when every move failed, the Done headline is the failure — "0 bytes moved to
+    /// the Trash" is retired as a headline. The stat row keeps the honest 0 below it.
+    static func doneTitle(movedBytes: Int64, movedCount: Int, failedCount: Int) -> String {
+        movedCount == 0 && failedCount > 0
+            ? "Nothing could be moved to the Trash"
+            : "\(ByteFormatter.string(fromByteCount: movedBytes)) moved to the Trash"
+    }
+
+    /// The Done card's supporting line: all-failed says the items are still where they
+    /// were (with each failure's reason below, F4); every other mix keeps the origin.
+    static func doneSub(movedCount: Int, failedCount: Int, rootName: String) -> String {
+        movedCount == 0 && failedCount > 0
+            ? "The items are still where they were."
+            : "From \(rootName)."
     }
 
     // MARK: - Review and confirmation (S1: nothing moves without one)
@@ -525,7 +579,8 @@ final class SpaceLensViewModel {
                     descendantCount: 0,
                     lastModified: nil,
                     rampIndex: FileCategory.allCases.firstIndex(of: pair.category) ?? offset,
-                    isCategory: true)
+                    isCategory: true,
+                    category: pair.category)
             }
         }
     }
@@ -583,6 +638,7 @@ final class SpaceLensViewModel {
         layoutCacheKey = nil
         layoutCacheResult = []
         lastFailedItems = []
+        scanFoundItems = false
         cleaningProgress = nil
         progressTracker.reset()
         phase = .idle
@@ -610,6 +666,7 @@ final class SpaceLensViewModel {
 
         tree = result.tree
         flatItems = result.items
+        scanFoundItems = !result.items.isEmpty
         removedRoots = []
         var modifiedDates: [String: Date] = [:]
         for item in result.items {
@@ -769,6 +826,7 @@ extension SpaceLensViewModel {
 
         self.tree = tree
         flatItems = items
+        scanFoundItems = !items.isEmpty
         currentRootIndex = rootIndex
         breadcrumb = [rootIndex]
         categoryTotals = Self.categoryTotals(from: items)
