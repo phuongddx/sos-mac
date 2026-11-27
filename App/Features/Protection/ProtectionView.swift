@@ -7,14 +7,19 @@ import CleanCore
 /// into `ModuleScreen` (toolbar, aurora canvas, dock, sheet).
 ///
 /// Documented deviations from the prototype (also in the PR 13 gallery README):
-/// - `results` keeps the frame's hard-coded "Clean" CTA, disabled: a finding is quarantined
-///   from its own review, never in bulk. `done` keeps the frame's "Open Trash" dock button,
-///   disabled: quarantine is not the Trash. The frame has no label overrides and
-///   `ModuleScreen` is outside this PR's write set.
+/// - Dock wording comes from `ModuleIdentity.dock` (§5.10), not from this view: `results` has
+///   one round CTA "Review" plus a fixed hint ("Review the finding, then quarantine it") in
+///   place of a selection meta and a separate "Review Items…" button, and "Scan Again" as
+///   the trailing button; `done` has no "Open Trash" secondary, because quarantine is not
+///   the Trash (the Done card's own "Open Quarantine" button leads instead).
+/// - The review bar's CTA is "Quarantine…" and it is only offered once the user has checked a
+///   finding — nothing is ever pre-selected, and a finding is quarantined from its own
+///   review, never in bulk from `results`. Every quarantine opens the confirmation first.
 /// - The Quarantine sub-screen has no lifecycle state, so it composes the aurora canvas and
 ///   toolbar itself (back button "Protection") instead of using the dock.
-/// - Review is nothing-pre-selected: the review bar's "Quarantine…" stays disabled until the
-///   user checks a finding (spec: never auto-select a quarantine target).
+/// - Locations the engine could not read are named in a banner on `results` and `empty`
+///   (D10; §6.3 engine reasons only) — the prototype's "4 of 6 locations were checked" copy
+///   is now backed by the engine's own report of unreadable roots.
 /// - "Check VirusTotal" is removed (OD-15).
 struct ProtectionView: View {
     @Environment(ModuleStore.self) private var store
