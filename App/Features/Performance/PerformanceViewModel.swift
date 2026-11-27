@@ -185,7 +185,16 @@ final class PerformanceViewModel {
                 resetCPUBaseline: { baseline.previousTicks = nil },
                 purgeRAM: { try await sharedHelperClient.purgeMemory() },
                 flushDNS: { try await sharedHelperClient.flushDNSCache() },
-                registerHelper: { try sharedHelperClient.register() },
+                registerHelper: {
+                    try sharedHelperClient.register()
+                    // `SMAppService.h` requires re-registering when the
+                    // daemon's executable or plist changes; the launch-time
+                    // guard (`PrivilegedHelperRegistration`) compares against
+                    // the fingerprint stored here, so a manual register right
+                    // after an update doesn't trigger a spurious repair cycle
+                    // on the next launch.
+                    PrivilegedHelperRegistration.recordSuccessfulRegistration()
+                },
                 openLoginItemsSettings: { SMAppService.openSystemSettingsLoginItems() },
                 loginItems: { LoginItemsManager.listInstalledAgents() },
                 loginStatus: { LoginItemsManager.mainAppLoginItemStatus() },
