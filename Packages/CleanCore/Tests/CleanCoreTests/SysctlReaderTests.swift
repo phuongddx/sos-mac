@@ -39,9 +39,11 @@ struct SysctlReaderTests {
 
     @Test func isAppleSiliconMatchesArchitecture() {
         #if arch(arm64)
-        #expect(SysctlReader.isAppleSilicon())
+        #expect(SysctlReader.isAppleSilicon() == true)
         #elseif arch(x86_64)
-        #expect(!SysctlReader.isAppleSilicon())
+        // The `hw.optional.arm64` key does not exist on Intel, so the read fails and the
+        // API fails closed: `nil` (unknown), never a guessed "Intel".
+        #expect(SysctlReader.isAppleSilicon() == nil)
         #endif
     }
 }

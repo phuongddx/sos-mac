@@ -213,6 +213,172 @@ struct SmartCareViewModelTests {
         #expect(viewModel.moduleStatuses.isEmpty)
     }
 
+    // MARK: - Generation guard (stale progress hops)
+
+    /// Drives the duplicate leg's progress from the test side: one scripted queue per
+    /// scan generation, so a test can fire hops from any generation — including ones
+    /// whose scan was already cancelled, the exact race the generation guard exists
+    /// for. `@unchecked Sendable` with a lock: the seam is a `@Sendable` closure.
+    private final class ProgressScriptBox: @unchecked Sendable {
+        private let lock = NSLock()
+        private var queues: [[ScanProgress]] = []
+        private var finishedGenerations: Set<Int> = []
+
+        var count: Int {
+            lock.lock()
+            defer { lock.unlock() }
+            return queues.count
+        }
+
+        /// Registers this generation's queue; called once per scan, from the closure.
+        func register() -> Int {
+            lock.lock()
+            defer { lock.unlock() }
+            queues.append([])
+            return queues.count - 1
+        }
+
+        /// Queue a value for generation `index`'s closure to forward to its handler.
+        func fire(from index: Int, _ progress: ScanProgress) {
+            lock.lock()
+            defer { lock.unlock() }
+            guard queues.indices.contains(index) else { return }
+            queues[index].append(progress)
+        }
+
+        /// The scan closure's wait — cancellation-IMMUNE on purpose (`Task.yield`
+        /// never throws), so a generation that was already cancelled still forwards
+        /// late values to its handler, like an engine leg whose in-flight callback
+        /// lands after Stop.
+        func next(_ index: Int) async -> ScanProgress? {
+            while true {
+                if let value = pop(index) { return value }
+                if isFinished(index) { return nil }
+                await Task.yield()
+            }
+        }
+
+        // `NSLock` is unavailable from async contexts, so the state access lives in
+        // these synchronous helpers.
+        private func pop(_ index: Int) -> ScanProgress? {
+            lock.lock()
+            defer { lock.unlock() }
+            guard !queues[index].isEmpty else { return nil }
+            return queues[index].removeFirst()
+        }
+
+        private func isFinished(_ index: Int) -> Bool {
+            lock.lock()
+            defer { lock.unlock() }
+            return finishedGenerations.contains(index)
+        }
+
+        /// Ends every generation's loop (test teardown).
+        func finishAll() {
+            lock.lock()
+            defer { lock.unlock() }
+            finishedGenerations = Set(queues.indices)
+        }
+    }
+
+    /// A duplicate leg that forwards scripted values to its progress handler and
+    /// deliberately keeps waiting after task cancellation — emulating the engine legs
+    /// whose late callbacks the generation guard must drop.
+    private static func scriptedDuplicates(_ box: ProgressScriptBox)
+        -> SmartCareViewModel.DuplicateScanSource {
+        .custom { handler in
+            let index = box.register()
+            while let progress = await box.next(index) {
+                handler(progress)
+            }
+            throw CancellationError()
+        }
+    }
+
+    private func waitForScript(_ box: ProgressScriptBox, count: Int, timeout: TimeInterval = 5) async -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if box.count == count { return true }
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+        return box.count == count
+    }
+
+    private func waitForDuplicateProgress(_ viewModel: SmartCareViewModel,
+                                          itemsProcessed expected: Int,
+                                          timeout: TimeInterval = 5) async -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if viewModel.moduleProgress[SmartCareViewModel.duplicatesModuleName]?.itemsProcessed == expected {
+                return true
+            }
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+        return viewModel.moduleProgress[SmartCareViewModel.duplicatesModuleName]?.itemsProcessed == expected
+    }
+
+    @Test("a cancelled scan's late progress hops are dropped, not written into the reset state")
+    func staleProgressFromCancelledScanIsDropped() async throws {
+        let box = ProgressScriptBox()
+        defer { box.finishAll() }
+        let viewModel = SmartCareViewModelTests.makeViewModel(
+            orchestrator: SmartCareOrchestrator(scanners: [
+                .init(name: SmartCareViewModel.junkModuleName, scanner: EmptyScanner())
+            ]),
+            duplicateScan: Self.scriptedDuplicates(box))
+
+        #expect(viewModel.startScan())
+        #expect(await waitForPhase(viewModel, .scanning))
+        #expect(await waitForScript(box, count: 1))
+
+        // A hop from the live generation lands (the guard must not drop current work).
+        box.fire(from: 0, ScanProgress(itemsProcessed: 1, totalItems: 10))
+        #expect(await waitForDuplicateProgress(viewModel, itemsProcessed: 1))
+
+        // A hop enqueued by the cancelled generation — e.g. already in flight when Stop
+        // was tapped — must be dropped by the generation guard, not written into the
+        // reset state.
+        viewModel.cancelScan()
+        #expect(viewModel.phase == .idle)
+        #expect(viewModel.moduleProgress.isEmpty)
+        box.fire(from: 0, ScanProgress(itemsProcessed: 5, totalItems: 10))
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(viewModel.moduleProgress.isEmpty)
+
+        viewModel.cancelScan()
+    }
+
+    @Test("an old generation's hop cannot clobber the new scan's progress")
+    func staleProgressCannotClobberARestart() async throws {
+        let box = ProgressScriptBox()
+        defer { box.finishAll() }
+        let viewModel = SmartCareViewModelTests.makeViewModel(
+            orchestrator: SmartCareOrchestrator(scanners: [
+                .init(name: SmartCareViewModel.junkModuleName, scanner: EmptyScanner())
+            ]),
+            duplicateScan: Self.scriptedDuplicates(box))
+
+        #expect(viewModel.startScan())
+        #expect(await waitForPhase(viewModel, .scanning))
+        #expect(await waitForScript(box, count: 1))
+        viewModel.cancelScan()
+
+        #expect(viewModel.startScan())
+        #expect(await waitForPhase(viewModel, .scanning))
+        #expect(await waitForScript(box, count: 2))
+
+        // The old generation's hop is dropped even though a (new) scan is running…
+        box.fire(from: 0, ScanProgress(itemsProcessed: 7, totalItems: 10))
+        try await Task.sleep(for: .milliseconds(300))
+        #expect(viewModel.moduleProgress[SmartCareViewModel.duplicatesModuleName] == nil)
+
+        // …while the new generation's hop lands.
+        box.fire(from: 1, ScanProgress(itemsProcessed: 3, totalItems: 10))
+        #expect(await waitForDuplicateProgress(viewModel, itemsProcessed: 3))
+
+        viewModel.cancelScan()
+    }
+
     // MARK: - Clean
 
     @Test("cleaning refuses a second call while files are moving")

@@ -3,6 +3,13 @@ options:
   bundleIdPrefix: com.nextlabs
   deploymentTarget:
     macOS: "14.0"
+settings:
+  base:
+    # arm64-only, every target and configuration. Homebrew's libyara bottle (linked by
+    # CYara in Packages/CleanCore) is arm64-only, so the default ARCHS_STANDARD universal
+    # Release build fails to link the x86_64 slice. Intel would need a vendored universal
+    # libyara — see docs/superpowers/specs/2026-11-27-release-followups-a-f-design.md (B).
+    EXCLUDED_ARCHS: x86_64
 
 packages:
   CleanCore:
