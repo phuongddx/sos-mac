@@ -1,6 +1,12 @@
 import Foundation
 import CleanCore
 
+// Merge-gate smoke mode (`GateSmokeMode`): exit before binding the XPC
+// listener — nothing is registered with launchd. dyld has already loaded
+// every linked library, so a load-time failure aborts the process first and
+// the gate sees the non-zero exit.
+if GateSmokeMode.isEnabled { exit(0) }
+
 // Entry point for the `com.nextlabs.sosmac.privilegedhelper` daemon,
 // registered via `SMAppService.daemon(plistName:)` (never the deprecated
 // `SMJobBless`). Binds to the Mach service name declared in this daemon's

@@ -8,6 +8,13 @@ import CleanCore
 /// macOS 14+.
 @main
 struct MenuBarHelperApp: App {
+    /// Merge-gate smoke mode (`GateSmokeMode`): exits before the status item
+    /// exists. dyld has already loaded every linked library, so a load-time
+    /// failure aborts the process first and the gate sees the non-zero exit.
+    init() {
+        if GateSmokeMode.isEnabled { exit(0) }
+    }
+
     @State private var monitor = MenuBarMetricsMonitor()
 
     var body: some Scene {

@@ -1,8 +1,17 @@
 import SwiftUI
 import SwiftData
+import CleanCore
 
 @main
 struct SOSMacApp: App {
+    /// Merge-gate smoke mode (`GateSmokeMode`): exits before any scene, window,
+    /// or permission prompt exists. dyld has already loaded every linked library
+    /// by the time this initializer runs, so a load-time failure aborts the
+    /// process first and the gate sees the non-zero exit.
+    init() {
+        if GateSmokeMode.isEnabled { exit(0) }
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

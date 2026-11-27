@@ -31,6 +31,10 @@ open SOSMac.xcodeproj
 ```
 
 `libyara` (Protection module's pattern-matching engine) must be installed to build: `brew install yara`.
+The build statically links yara together with its Homebrew static dependencies
+(`openssl@3`, `libmagic`, `jansson` — installed automatically by `brew install yara`),
+so shipped binaries never load Homebrew dylibs at launch; step 4 of
+`Scripts/verify-gate.sh` smoke-launches every shipped executable to verify exactly that.
 
 ## Architecture
 
