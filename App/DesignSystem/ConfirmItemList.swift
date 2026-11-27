@@ -4,8 +4,9 @@ import SwiftUI
 /// "and **N** more items" with their combined size. Both numbers are real — every item
 /// carries its byte count, and the combined size is the sum of the overflow.
 ///
-/// The cleanup-list variant (Space Lens) draws each row with a checkbox and a path, plus a
-/// Total row that follows the checked items.
+/// The cleanup-list variant (Space Lens) draws **every** row with a checkbox and a path,
+/// plus a Total row that follows the checked items (D7, review F): a row the user must be
+/// able to uncheck is never hidden behind "and N more".
 struct ConfirmItemList: View {
     static let previewLimit = 5
     static let rowHorizontalPadding: CGFloat = 10
@@ -20,19 +21,19 @@ struct ConfirmItemList: View {
     var onToggle: (String) -> Void = { _ in }
 
     var body: some View {
-        let shown = items.prefix(Self.previewLimit)
-        let overflow = items.count - shown.count
+        let drawn = Self.drawnRows(for: items, isSelectable: isSelectable)
         let shape = RoundedRectangle(cornerRadius: 8, style: .continuous)
         // The prototype's `.alist` is `max-height: 132px; overflow: auto`: the rows scroll
         // inside a clipped box, so the Total row (cleanup list) and the acknowledgement stay
         // visible however many rows there are.
         ScrollView {
             VStack(spacing: 0) {
-                ForEach(Array(shown)) { item in
+                ForEach(drawn.rows) { item in
                     row(item)
                 }
-                if overflow > 0 {
-                    overflowRow(count: overflow, bytes: items.dropFirst(Self.previewLimit).reduce(0) { $0 + $1.size })
+                if !isSelectable, drawn.overflowCount > 0 {
+                    overflowRow(count: drawn.overflowCount,
+                                bytes: items.dropFirst(Self.previewLimit).reduce(0) { $0 + $1.size })
                 }
                 if isSelectable {
                     totalRow
@@ -46,6 +47,16 @@ struct ConfirmItemList: View {
         .overlay(shape.strokeBorder(Theme.Derived.hairline, lineWidth: 1))
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier("confirm-item-list")
+    }
+
+    /// D7 (review F): the rows the list draws. The cleanup list draws every row — each one
+    /// checkable inside the 132 pt scroll box, so title, list and Total row follow the same
+    /// rows; the read-only variants keep the spec §4.8 first-5 preview with "and N more".
+    /// Pure, so the rule is unit-testable.
+    static func drawnRows(for items: [ConfirmItem],
+                          isSelectable: Bool) -> (rows: [ConfirmItem], overflowCount: Int) {
+        let rows = isSelectable ? items : Array(items.prefix(previewLimit))
+        return (rows, items.count - rows.count)
     }
 
     /// The shared byte formatter, so the list and the title always show the same numbers
