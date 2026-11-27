@@ -159,9 +159,8 @@ final class PerformanceViewModel {
             // read them once per polling start, so the first successful read is cached for
             // the VM's lifetime (review fix: they were re-read on every 2 s poll). Fail
             // closed: until a read lands the value stays `nil` and renders "—" — never a
-            // guess. Note: the engine's `isAppleSilicon()` is non-optional today, so a
-            // failed read collapses to `false` at the CleanCore boundary; making that API
-            // optional is a follow-up for the engine, not this screen.
+            // guess. An unreadable `hw.optional.arm64` read retries on the next poll —
+            // the cache below only latches successful reads.
             var cachedBootTime: Date?
             var cachedIsAppleSilicon: Bool?
             return Seams(
@@ -210,6 +209,14 @@ final class PerformanceViewModel {
                 })
         }
 
+        /// The live seams' CPU tick baseline — same `@MainActor`-box pattern as
+        /// `FixtureLoginState`: the sample and reset closures share the box, not a
+        /// mutable local.
+        @MainActor
+        private final class BaselineBox {
+            var previousTicks: CPUTicks?
+        }
+
 #if DEBUG
         /// Fixture adapters: no system read, no helper, no System Settings — made-up values
         /// from `UITestFixtures`, an in-memory toggle, recording-free no-ops.
@@ -234,14 +241,6 @@ final class PerformanceViewModel {
         private final class FixtureLoginState {
             var enabled = true
             var status: SMAppService.Status { enabled ? .enabled : .notRegistered }
-        }
-
-        /// The live seams' CPU tick baseline — same `@MainActor`-box pattern as
-        /// `FixtureLoginState`: the sample and reset closures share the box, not a
-        /// mutable local.
-        @MainActor
-        private final class BaselineBox {
-            var previousTicks: CPUTicks?
         }
 #endif
     }

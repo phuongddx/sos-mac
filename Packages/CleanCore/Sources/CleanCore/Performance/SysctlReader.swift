@@ -32,8 +32,11 @@ public enum SysctlReader {
         return String(decoding: buffer[..<nullTerminatorIndex].map { UInt8(bitPattern: $0) }, as: UTF8.self)
     }
 
-    public static func isAppleSilicon() -> Bool {
-        (read("hw.optional.arm64") as Int32?) == 1
+    /// `nil` when the sysctl cannot be read — the caller fails closed ("unknown"),
+    /// never a guessed chip family. A successful read of `hw.optional.arm64` is the
+    /// documented way to tell Apple Silicon (1) from Intel (0).
+    public static func isAppleSilicon() -> Bool? {
+        (read("hw.optional.arm64") as Int32?).map { $0 == 1 }
     }
 
     public static func physicalMemoryBytes() -> UInt64? {
