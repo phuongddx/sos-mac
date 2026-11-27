@@ -394,9 +394,92 @@ final class ConfirmSheetState {
 
 extension ModuleOverlay {
     /// Presents a `ConfirmSheet` for the given model (spec §4.8, OD-4).
+    /// `ModuleSheetDismissal` wires the exit, so Escape and every other
+    /// system-initiated close take the same path as Cancel.
+    @MainActor
     static func confirmation(_ model: ConfirmSheet.Model) -> ModuleOverlay {
-        ModuleOverlay(id: model.id) {
-            ConfirmSheet(model: model)
+        let exit = ModuleSheetDismissal.wrap(model)
+        return ModuleOverlay(id: exit.model.id, onSystemDismiss: exit.onSystemDismiss) {
+            ConfirmSheet(model: exit.model)
         }
     }
+}
+
+/// The sheet dismissal rule (spec §4.8, OD-4 / CF-1): every way a macOS sheet can close
+/// takes the same exit as Cancel, exactly once. The Cancel and Confirm buttons run their
+/// closure and then dismiss; a system-initiated close (Escape, `performCancel`) only
+/// clears the overlay binding — so the factory marks the sheet acted-on the moment any
+/// button closure runs, and the routed binding replays the cancel closure for exactly
+/// the system-initiated case. Space Lens depends on it: its review state *is* the
+/// cleanup-list sheet, so a silent dismissal would strand the phase in `.review`.
+@MainActor
+enum ModuleSheetDismissal {
+
+    /// Wraps a confirm model so the first button closure to run (confirm, cancel or
+    /// review-items) marks the sheet acted-on; `onSystemDismiss` then stays silent —
+    /// the cancel closure runs at most once per sheet.
+    static func wrap(_ model: ConfirmSheet.Model)
+        -> (model: ConfirmSheet.Model, onSystemDismiss: @MainActor () -> Void) {
+        let acted = SheetActedFlag()
+        let confirm = model.confirm
+        let cancel = model.cancel
+        let reviewItems = model.reviewItems
+        let wrappedConfirm: @MainActor (ConfirmSelection) -> Void = { selection in
+            acted.value = true
+            confirm(selection)
+        }
+        let wrappedCancel: @MainActor () -> Void = {
+            acted.value = true
+            cancel()
+        }
+        var wrappedReviewItems: (@MainActor () -> Void)?
+        if let reviewItems {
+            wrappedReviewItems = {
+                acted.value = true
+                reviewItems()
+            }
+        }
+        let wrapped = ConfirmSheet.Model(
+            variant: model.variant,
+            count: model.count,
+            sizeText: model.sizeText,
+            appName: model.appName,
+            includesSystemCaches: model.includesSystemCaches,
+            isFromResults: model.isFromResults,
+            appStoreNote: model.appStoreNote,
+            items: model.items,
+            hue: model.hue,
+            providerName: model.providerName,
+            confirm: wrappedConfirm,
+            cancel: wrappedCancel,
+            reviewItems: wrappedReviewItems)
+        return (wrapped, {
+            guard !acted.value else { return }
+            acted.value = true
+            cancel()
+        })
+    }
+
+    /// Routes every nil-write of the overlay binding — any dismissal, from any cause —
+    /// through the overlay's system-dismiss exit. SwiftUI writes `nil` here when a
+    /// sheet closes, including when neither button ran.
+    static func binding(_ overlay: Binding<ModuleOverlay?>) -> Binding<ModuleOverlay?> {
+        Binding(
+            get: { overlay.wrappedValue },
+            set: { @MainActor newValue in
+                let presented = overlay.wrappedValue
+                overlay.wrappedValue = newValue
+                if newValue == nil {
+                    presented?.onSystemDismiss?()
+                }
+            })
+    }
+}
+
+/// Mutable "a button already acted" state shared by a wrapped model's closures.
+@MainActor
+private final class SheetActedFlag: @unchecked Sendable {
+    /// Main-actor-confined by construction (`ModuleSheetDismissal` is `@MainActor`);
+    /// `@unchecked Sendable` only satisfies the closure-capture checking.
+    var value = false
 }

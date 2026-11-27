@@ -263,7 +263,10 @@ private struct ModuleSheetPresentation: ViewModifier {
 
     func body(content: Content) -> some View {
         if let overlay {
-            content.sheet(item: overlay) { moduleOverlay in
+            // OD-4/CF-1: SwiftUI clears the item binding on every dismissal —
+            // including Escape, which never touches the Cancel button. The routed
+            // binding sends those dismissals through the same exit as Cancel.
+            content.sheet(item: ModuleSheetDismissal.binding(overlay)) { moduleOverlay in
                 moduleOverlay.content
             }
         } else {
