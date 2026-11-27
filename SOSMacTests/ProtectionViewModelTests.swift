@@ -57,17 +57,41 @@ struct ProtectionViewModelTests {
             ProtectionLocation(id: "test-downloads", label: "Test Downloads", kind: .directPath(scanRoot.path))
         }
 
+        /// A sibling folder the test user cannot open (mode 000). `nil` when running as root,
+        /// where permissions do not block reads and the premise cannot be set up.
+        func makeLockedLocation(id: String = "locked", label: String = "Locked") throws -> ProtectionLocation? {
+            guard geteuid() != 0 else { return nil }
+            let locked = root.appendingPathComponent(label, isDirectory: true)
+            try FileManager.default.createDirectory(at: locked, withIntermediateDirectories: true)
+            try Data("hidden".utf8).write(to: locked.appendingPathComponent("hidden.txt"))
+            try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: locked.path)
+            return ProtectionLocation(id: id, label: label, kind: .directPath(locked.path))
+        }
+
         func cleanUp() {
+            // A mode-000 folder cannot be removed until it is readable again.
+            if let children = try? FileManager.default.contentsOfDirectory(atPath: root.path) {
+                for child in children {
+                    try? FileManager.default.setAttributes([.posixPermissions: 0o755],
+                                                           ofItemAtPath: root.appendingPathComponent(child).path)
+                }
+            }
             try? FileManager.default.removeItem(at: root)
         }
     }
 
-    static func makeViewModel(sandbox: Sandbox, context: ModelContext? = nil) throws -> ProtectionViewModel {
+    static func makeViewModel(
+        sandbox: Sandbox,
+        context: ModelContext? = nil,
+        extraLocations: [ProtectionLocation] = [],
+        persistQuarantine: (@MainActor (QuarantinedFile) throws -> Void)? = nil
+    ) throws -> ProtectionViewModel {
         ProtectionViewModel(
             modelContext: try context ?? makeContext(),
-            locations: [sandbox.location],
+            locations: [sandbox.location] + extraLocations,
             signatureDatabase: sandbox.signatureDatabase,
-            quarantineManager: QuarantineManager(quarantineDirectory: sandbox.quarantineRoot))
+            quarantineManager: QuarantineManager(quarantineDirectory: sandbox.quarantineRoot),
+            persistQuarantine: persistQuarantine)
     }
 
     static func makeFixtureViewModel() throws -> ProtectionViewModel {
@@ -434,4 +458,256 @@ struct ProtectionViewModelTests {
             #expect(viewModel.findings.count == 1)
         }
     }
+
+    // MARK: - Unreadable locations (review F, D10)
+
+    @Suite("unreadable locations")
+    @MainActor
+    struct UnreadableLocations {
+        @Test("an unreadable location is named with the engine's reason; the readable one still reports its findings")
+        func mixedLocations() async throws {
+            let sandbox = try Sandbox()
+            defer { sandbox.cleanUp() }
+            guard let locked = try sandbox.makeLockedLocation() else { return }
+            let viewModel = try ProtectionViewModelTests.makeViewModel(sandbox: sandbox, extraLocations: [locked])
+
+            viewModel.startScan()
+            try await ProtectionViewModelTests.waitForScan(viewModel)
+
+            #expect(viewModel.phase == .results)
+            #expect(viewModel.lifecycle == .results)
+            #expect(viewModel.findings.map { ($0.path as NSString).lastPathComponent } == ["marker.bin"])
+            #expect(viewModel.unreadableLocations.map(\.label) == ["Locked"])
+            #expect(viewModel.unreadableLocations.first?.reasons.allSatisfy { !$0.isEmpty } == true)
+            #expect(viewModel.locationCount == 2)
+            #expect(viewModel.checkedLocationCount == 1)
+            // The engine's count covers only the folder it could read.
+            #expect(viewModel.checkedFileCount == 2)
+        }
+
+        @Test("a clean tree with an unreadable location is empty, but not a full all-clear")
+        func emptyWithUnreadable() async throws {
+            let sandbox = try Sandbox()
+            defer { sandbox.cleanUp() }
+            guard let locked = try sandbox.makeLockedLocation() else { return }
+            try FileManager.default.removeItem(at: sandbox.badFile)
+            let viewModel = try ProtectionViewModelTests.makeViewModel(sandbox: sandbox, extraLocations: [locked])
+
+            viewModel.startScan()
+            try await ProtectionViewModelTests.waitForScan(viewModel)
+
+            #expect(viewModel.lifecycle == .empty)
+            #expect(viewModel.unreadableLocations.map(\.id) == ["locked"])
+            #expect(viewModel.checkedLocationCount == 1)
+        }
+
+        @Test("every location readable (or simply missing) leaves no unchecked location")
+        func allReadable() async throws {
+            let sandbox = try Sandbox()
+            defer { sandbox.cleanUp() }
+            let missing = ProtectionLocation(
+                id: "missing", label: "Missing",
+                kind: .directPath(sandbox.root.appendingPathComponent("does-not-exist").path))
+            let viewModel = try ProtectionViewModelTests.makeViewModel(sandbox: sandbox, extraLocations: [missing])
+
+            viewModel.startScan()
+            try await ProtectionViewModelTests.waitForScan(viewModel)
+
+            #expect(viewModel.phase == .results)
+            #expect(viewModel.unreadableLocations.isEmpty)
+            #expect(viewModel.checkedLocationCount == viewModel.locationCount)
+            #expect(viewModel.locationCount == 2)
+        }
+
+        @Test("when no location can be read the scan fails instead of reading as an all-clear")
+        func nothingReadable() async throws {
+            let sandbox = try Sandbox()
+            defer { sandbox.cleanUp() }
+            guard let locked = try sandbox.makeLockedLocation() else { return }
+            let viewModel = ProtectionViewModel(
+                modelContext: try ProtectionViewModelTests.makeContext(),
+                locations: [locked],
+                signatureDatabase: sandbox.signatureDatabase,
+                quarantineManager: QuarantineManager(quarantineDirectory: sandbox.quarantineRoot))
+
+            viewModel.startScan()
+            try await ProtectionViewModelTests.waitForScan(viewModel)
+
+            guard case .failed(let message) = viewModel.phase else {
+                Issue.record("expected .failed, got \(viewModel.phase)")
+                return
+            }
+            #expect(message.hasPrefix("None of the locations could be read."))
+            #expect(viewModel.lifecycle == .error)
+            #expect(viewModel.lifecycle != .empty)
+        }
+
+        @Test("a second scan forgets the previous scan's unreadable locations")
+        func rescanClearsUnreadable() async throws {
+            let sandbox = try Sandbox()
+            defer { sandbox.cleanUp() }
+            guard let locked = try sandbox.makeLockedLocation() else { return }
+            let viewModel = try ProtectionViewModelTests.makeViewModel(sandbox: sandbox, extraLocations: [locked])
+            viewModel.startScan()
+            try await ProtectionViewModelTests.waitForScan(viewModel)
+            #expect(!viewModel.unreadableLocations.isEmpty)
+
+            try FileManager.default.setAttributes([.posixPermissions: 0o755],
+                                                  ofItemAtPath: sandbox.root.appendingPathComponent("Locked").path)
+            viewModel.startScan()
+            try await ProtectionViewModelTests.waitForScan(viewModel)
+
+            #expect(viewModel.unreadableLocations.isEmpty)
+            #expect(viewModel.checkedLocationCount == 2)
+        }
+
+        @Test("unreadable roots are grouped under their location, in scan order, and a stray root is kept")
+        func groupingHelper() {
+            let locations = [
+                ProtectionViewModel.LocationSummary(id: "downloads", label: "Downloads", roots: ["/Users/sample/Downloads"]),
+                ProtectionViewModel.LocationSummary(id: "firefox", label: "Firefox Extensions",
+                                                    roots: ["/Users/sample/ff/a/extensions", "/Users/sample/ff/b/extensions"]),
+            ]
+            let roots = [
+                UnreadableRoot(path: "/Users/sample/ff/b/extensions", reason: "no permission (b)"),
+                UnreadableRoot(path: "/Users/sample/ff/a/extensions", reason: "no permission (a)"),
+                UnreadableRoot(path: "/Users/sample/Downloads", reason: "no permission (d)"),
+                UnreadableRoot(path: "/stray/root", reason: "stray"),
+            ]
+            let result = ProtectionViewModel.unreadableLocations(from: roots, locations: locations)
+
+            #expect(result.map(\.id) == ["downloads", "firefox", "/stray/root"])
+            #expect(result[1].reasons == ["no permission (b)", "no permission (a)"])
+            #expect(ProtectionViewModel.unreadableLocations(from: [], locations: locations).isEmpty)
+        }
+    }
+
+    // MARK: - Quarantine edge cases and cancellation (review F gaps)
+
+    @Suite("quarantine edge cases")
+    @MainActor
+    struct QuarantineEdgeCases {
+        /// Two files with the injected signature, both found by a real scan.
+        private static func scannedViewModel(sandbox: Sandbox) async throws -> (ProtectionViewModel, URL) {
+            let second = sandbox.scanRoot.appendingPathComponent("marker2.bin")
+            try sandbox.badContent.write(to: second)
+            let viewModel = try ProtectionViewModelTests.makeViewModel(sandbox: sandbox)
+            viewModel.startScan()
+            try await ProtectionViewModelTests.waitForScan(viewModel)
+            #expect(viewModel.findings.count == 2)
+            return (viewModel, second)
+        }
+
+        @Test("a mixed batch quarantines one, fails one, and only the moved one leaves the findings")
+        func mixedSuccessAndFailure() async throws {
+            let sandbox = try Sandbox()
+            defer { sandbox.cleanUp() }
+            let (viewModel, second) = try await Self.scannedViewModel(sandbox: sandbox)
+            viewModel.selectAllInCurrentGroup()
+            #expect(viewModel.selectedPaths.count == 2)
+            // The second file vanishes between selection and the move.
+            try FileManager.default.removeItem(at: second)
+
+            #expect(await viewModel.quarantineSelected())
+
+            #expect(viewModel.phase == .done(quarantinedCount: 1, failedCount: 1))
+            #expect(viewModel.lastFailures.map(\.name) == ["marker2.bin"])
+            #expect(viewModel.lastFailures.first?.reason == "The file is no longer at its original location.")
+            #expect(viewModel.findings.map(\.path) == [second.path])
+            #expect(viewModel.selectedPaths == [second.path])
+            #expect(viewModel.quarantinedRecords.count == 1)
+            #expect(!FileManager.default.fileExists(atPath: sandbox.badFile.path))
+            let record = try #require(viewModel.quarantinedRecords.first)
+            #expect(FileManager.default.fileExists(atPath: record.quarantinePath))
+        }
+
+        private struct SaveFailure: LocalizedError {
+            var errorDescription: String? { "disk full" }
+        }
+
+        @Test("a file that moved but whose record could not be saved is a failure and leaves the findings")
+        func movedButRecordFailed() async throws {
+            let sandbox = try Sandbox()
+            defer { sandbox.cleanUp() }
+            let attempts = AttemptCounter()
+            let viewModel = try ProtectionViewModelTests.makeViewModel(sandbox: sandbox) { _ in
+                attempts.count += 1
+                throw SaveFailure()
+            }
+            viewModel.startScan()
+            try await ProtectionViewModelTests.waitForScan(viewModel)
+            viewModel.toggleSelection(for: try #require(viewModel.findings.first?.path))
+
+            #expect(await viewModel.quarantineSelected())
+
+            #expect(attempts.count == 1)
+            #expect(viewModel.phase == .done(quarantinedCount: 0, failedCount: 1))
+            let failure = try #require(viewModel.lastFailures.first)
+            #expect(failure.name == "marker.bin")
+            #expect(failure.reason == "Moved to quarantine, but SOS Mac couldn't save it for restore. Find it in the Quarantine folder.")
+            // It really moved: gone from its original path, present in the quarantine folder.
+            #expect(!FileManager.default.fileExists(atPath: sandbox.badFile.path))
+            let enumerator = FileManager.default.enumerator(atPath: sandbox.quarantineRoot.path)
+            let moved = (enumerator?.allObjects as? [String] ?? []).filter { $0.hasSuffix("marker.bin") }
+            #expect(moved.count == 1)
+            // It is no longer where the scan found it, so it leaves the findings; nothing is recorded.
+            #expect(viewModel.findings.isEmpty)
+            #expect(viewModel.selectedPaths.isEmpty)
+            #expect(viewModel.quarantinedRecords.isEmpty)
+        }
+
+        @Test("Stop mid-scan returns to start with nothing kept, and a late result cannot revive it")
+        func realCancellation() async throws {
+            let sandbox = try Sandbox()
+            defer { sandbox.cleanUp() }
+            for index in 0..<400 {
+                try Data("filler-\(index)".utf8).write(to: sandbox.scanRoot.appendingPathComponent("f\(index).txt"))
+            }
+            let viewModel = try ProtectionViewModelTests.makeViewModel(sandbox: sandbox)
+
+            #expect(viewModel.startScan())
+            viewModel.cancelScan()
+
+            #expect(viewModel.phase == .idle)
+            #expect(viewModel.lifecycle == .start)
+            #expect(viewModel.findings.isEmpty)
+            #expect(viewModel.checkedFileCount == 0)
+            #expect(viewModel.progressTracker.progress == nil)
+
+            // Give the cancelled engine task time to unwind; it must not publish a result.
+            try await Task.sleep(for: .milliseconds(500))
+            #expect(viewModel.phase == .idle)
+            #expect(viewModel.findings.isEmpty)
+            #expect(viewModel.unreadableLocations.isEmpty)
+            #expect(viewModel.progressTracker.progress == nil)
+        }
+
+        @Test("Stop when nothing is scanning changes nothing")
+        func cancelWhenNotScanning() async throws {
+            let sandbox = try Sandbox()
+            defer { sandbox.cleanUp() }
+            let viewModel = try ProtectionViewModelTests.makeViewModel(sandbox: sandbox)
+
+            viewModel.cancelScan()
+            #expect(viewModel.phase == .idle)
+
+            viewModel.startScan()
+            try await ProtectionViewModelTests.waitForScan(viewModel)
+            #expect(viewModel.phase == .results)
+            let findings = viewModel.findings
+            let checked = viewModel.checkedFileCount
+
+            viewModel.cancelScan()
+
+            #expect(viewModel.phase == .results)
+            #expect(viewModel.findings == findings)
+            #expect(viewModel.checkedFileCount == checked)
+        }
+    }
+}
+
+/// Counts calls from a `@MainActor` closure the test hands to the view model.
+@MainActor
+private final class AttemptCounter {
+    var count = 0
 }
