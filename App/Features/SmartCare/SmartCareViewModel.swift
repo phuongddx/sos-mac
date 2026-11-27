@@ -115,6 +115,14 @@ final class SmartCareViewModel {
     private let cleaner: any Cleaner
     private let progressiveCleaner = ProgressiveCleaner()
     private var scanTask: Task<Void, Never>?
+    /// Bumped by every `startScan()` and `cancelScan()`. The `Task { @MainActor … }`
+    /// hops that carry engine progress into this view model are unstructured — not
+    /// children of the scan task — so cancelling does not stop them, and after a
+    /// cancel-then-restart (or Stop alone) hops from the old scan can still land and
+    /// clobber reset state or the new scan's progress. Every hop captures the
+    /// generation its scan was launched with and drops writes from any other — the
+    /// same guard `ScanProgressTracker` uses.
+    private var scanGeneration = 0
 
     init(rootPath: String = NSHomeDirectory(),
          orchestrator: SmartCareOrchestrator? = nil,
@@ -291,8 +299,10 @@ final class SmartCareViewModel {
     func startScan() -> Bool {
         guard phase != .scanning, !isCleaning else { return false }
         scanTask?.cancel()
+        scanGeneration += 1
+        let generation = scanGeneration
         scanTask = Task { [weak self] in
-            await self?.performScan()
+            await self?.performScan(generation: generation)
         }
         return true
     }
@@ -305,6 +315,9 @@ final class SmartCareViewModel {
     func cancelScan() {
         scanTask?.cancel()
         scanTask = nil
+        // Drop any progress hops still in flight from the cancelled scan, so they cannot
+        // write into the state reset below.
+        scanGeneration += 1
         guard phase == .scanning else { return }
         resetScanState()
         phase = .idle
@@ -326,7 +339,7 @@ final class SmartCareViewModel {
         performanceSnapshot = nil
     }
 
-    private func performScan() async {
+    private func performScan(generation: Int) async {
         phase = .scanning
         lastFailedItems = []
         junkErrorMessage = nil
@@ -337,16 +350,25 @@ final class SmartCareViewModel {
 
         async let junkReport = orchestrator.run(
             onModuleStart: { [weak self] name in
-                Task { @MainActor in self?.moduleStatuses[name] = .scanning }
+                Task { @MainActor in
+                    guard let self, self.scanGeneration == generation else { return }
+                    self.moduleStatuses[name] = .scanning
+                }
             },
             onItemProgress: { [weak self] name, progress in
-                Task { @MainActor in self?.moduleProgress[name] = progress }
+                Task { @MainActor in
+                    guard let self, self.scanGeneration == generation else { return }
+                    self.moduleProgress[name] = progress
+                }
             }
         )
 
         moduleStatuses[Self.duplicatesModuleName] = .scanning
         let duplicateProgressHandler: @Sendable (ScanProgress) -> Void = { [weak self] progress in
-            Task { @MainActor in self?.moduleProgress[Self.duplicatesModuleName] = progress }
+            Task { @MainActor in
+                guard let self, self.scanGeneration == generation else { return }
+                self.moduleProgress[Self.duplicatesModuleName] = progress
+            }
         }
         var duplicates: DuplicateScanResult?
         do {
@@ -364,7 +386,7 @@ final class SmartCareViewModel {
         }
 
         let junkResult = await junkReport
-        guard !Task.isCancelled else { return }
+        guard !Task.isCancelled, generation == scanGeneration else { return }
 
         // Reconciled directly from the awaited result rather than trusted to a
         // fire-and-forget onModuleFinish callback (no ordering guarantee relative to
