@@ -84,6 +84,19 @@ struct SpaceLensViewModelTests {
         viewModel.layoutRects(in: CGRect(x: 0, y: 0, width: 1000, height: 800))
     }
 
+    /// A tree whose every item is a top-level cell above the 0.4 % threshold, so the whole
+    /// folder can be emptied through the cart (the D5/D6 tests).
+    private func makeEmptyableTree() throws -> URL {
+        let root = fileManager.temporaryDirectory
+            .appendingPathComponent("spacelens-empty-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: root, withIntermediateDirectories: true)
+        for index in 0..<2 {
+            try Data(repeating: 0x61, count: 100_000 + index)
+                .write(to: root.appendingPathComponent("only-\(index).dat"))
+        }
+        return root
+    }
+
     private func cell(_ viewModel: SpaceLensViewModel, named label: String) -> SpaceLensViewModel.DisplayItem? {
         cells(viewModel).first { $0.label == label }
     }
@@ -437,6 +450,117 @@ struct SpaceLensViewModelTests {
         #expect(viewModel.lastFailedItems.first?.item.path == big.path)
         #expect(!viewModel.lastFailedItems.first!.reason.isEmpty)
         #expect(viewModel.selectedPaths.contains(big.path))  // failures stay in the cart
+    }
+
+    @Test("a session-emptied folder is not a scanned-empty folder")
+    func cleanedEmptyIsNotScannedEmpty() async throws {
+        let root = try makeEmptyableTree()
+        defer { try? fileManager.removeItem(at: root) }
+        let viewModel = makeViewModel(root: root)
+        viewModel.startScan()
+        guard await waitForResults(viewModel) else {
+            Issue.record("scan did not reach .results; phase is \(viewModel.phase)")
+            return
+        }
+
+        select(viewModel, named: "only-0.dat")
+        select(viewModel, named: "only-1.dat")
+        let cart = viewModel.cleanupItems
+        #expect(cart.count == 2)
+        defer {
+            // Trash cleanup for the moved test files.
+            if let trash = try? fileManager.url(for: .trashDirectory, in: .userDomainMask,
+                                                appropriateFor: nil, create: false) {
+                for item in cart {
+                    try? fileManager.removeItem(at: trash.appendingPathComponent(
+                        (item.path as NSString).lastPathComponent))
+                }
+            }
+        }
+
+        let accepted = await viewModel.clean(checkedIDs: Set(cart.map(\.path)))
+        #expect(accepted)
+        guard case .done(let movedBytes, let movedCount, let failedCount) = viewModel.phase else {
+            Issue.record("phase should be .done, got \(viewModel.phase)")
+            return
+        }
+        #expect(movedBytes == cart.reduce(0) { $0 + $1.size })
+        #expect(movedCount == 2)
+        #expect(failedCount == 0)
+
+        viewModel.backToMap()
+        // F3: results over an empty folder is the empty state — but the scan did find
+        // items (D5): this session emptied it, a different truth from scanned-empty.
+        #expect(viewModel.phase == .results)
+        #expect(viewModel.lifecycle == .empty)
+        #expect(viewModel.isCleanedEmpty)
+        #expect(SpaceLensViewModel.emptyTitle(isCleanedEmpty: true, rootName: viewModel.rootName)
+                == "You moved everything out of “\(viewModel.rootName)”")
+        #expect(SpaceLensViewModel.emptyTitle(isCleanedEmpty: false, rootName: viewModel.rootName)
+                == "This folder is empty")
+    }
+
+    @Test("a folder that really scanned empty keeps the scanned-empty story")
+    func scannedEmptyKeepsItsStory() async throws {
+        let root = fileManager.temporaryDirectory
+            .appendingPathComponent("spacelens-gone-\(UUID().uuidString)", isDirectory: true)
+        try fileManager.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? fileManager.removeItem(at: root) }
+        let viewModel = makeViewModel(root: root)
+        viewModel.startScan()
+        guard await waitForResults(viewModel) else {
+            Issue.record("scan did not reach .results; phase is \(viewModel.phase)")
+            return
+        }
+
+        #expect(viewModel.lifecycle == .empty)
+        #expect(!viewModel.isCleanedEmpty)
+        #expect(SpaceLensViewModel.emptyTitle(isCleanedEmpty: false, rootName: viewModel.rootName)
+                == "This folder is empty")
+    }
+
+    @Test("Done with every move failed leads with the failure, never 0 bytes")
+    func doneAllFailedLeadsWithTheFailure() async throws {
+        let root = try makeEmptyableTree()
+        defer { try? fileManager.removeItem(at: root) }
+        let viewModel = makeViewModel(root: root)
+        viewModel.startScan()
+        guard await waitForResults(viewModel) else {
+            Issue.record("scan did not reach .results; phase is \(viewModel.phase)")
+            return
+        }
+
+        select(viewModel, named: "only-0.dat")
+        select(viewModel, named: "only-1.dat")
+        let cart = viewModel.cleanupItems
+        #expect(cart.count == 2)
+
+        // The files disappear before the clean runs (test fixture management only): the
+        // real Cleaner fails on both, and the Done state must lead with the failure (D6).
+        for item in cart {
+            try fileManager.removeItem(atPath: item.path)
+        }
+
+        let accepted = await viewModel.clean(checkedIDs: Set(cart.map(\.path)))
+        #expect(accepted)
+        guard case .done(let movedBytes, let movedCount, let failedCount) = viewModel.phase else {
+            Issue.record("phase should be .done, got \(viewModel.phase)")
+            return
+        }
+        #expect(movedBytes == 0)
+        #expect(movedCount == 0)
+        #expect(failedCount == 2)
+        #expect(viewModel.lastFailedItems.count == 2)  // F4: the reasons render below the headline
+
+        #expect(SpaceLensViewModel.doneTitle(movedBytes: 0, movedCount: 0, failedCount: 2)
+                == "Nothing could be moved to the Trash")
+        #expect(SpaceLensViewModel.doneSub(movedCount: 0, failedCount: 2, rootName: viewModel.rootName)
+                == "The items are still where they were.")
+        // The mixed and all-success cases keep their copy.
+        #expect(SpaceLensViewModel.doneTitle(movedBytes: 30_000, movedCount: 1, failedCount: 0)
+                == "30 KB moved to the Trash")
+        #expect(SpaceLensViewModel.doneSub(movedCount: 1, failedCount: 0, rootName: "Downloads")
+                == "From Downloads.")
     }
 
     @Test("clean with nothing checked does nothing")
