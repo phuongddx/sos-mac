@@ -26,17 +26,17 @@ capture, 1200×760 pt (2400×1520 px, verified for all 12 captures).
   has no disabled "Clean" / "Review Items…" any more: the CTA is "Check Again" (it re-runs
   the check) with "5 apps checked" on its left; empty shows "Check Again" and error "Try
   Again". "Check Again" and "Try Again" also stay in the content where they were.
-- **Two extra groups**: "Couldn't check" (OD-10) and "Not checked yet" (after Stop).
+- **Two extra groups**: "Couldn't check" (OD-10) and "Not checked yet" (a pre-check state only: Stop discards partial results and returns to the start).
 - **No check on visit (OD-10).** The old auto-check is gone; `loadApps()` only lists apps.
 - **A failed or empty feed answer is never "Up to date" (D3).** It becomes a per-row
-  `checkError`. "All apps are up to date" needs ≥ 1 real feed answer, no failures and no
-  App Store rows.
+  `checkError`. "All apps are up to date" needs ≥ 1 real feed answer, no failures, no
+  App Store rows and no app without an update feed.
 - **Gallery has 6 states** (plan listed 4 + error): `checkfailed` and `error` are extra.
 - **Letter-tile icons** — real icons (OD-12) appear only when the bundle is on disk.
 - The doubled toolbar title and the "Stopped" toolbar subtitle in the error state are
   existing shared-frame behaviour.
 - **Not in the static matrix:** the "No update feed" group (below the fold in `results`),
-  "Not checked yet" after Stop, and "View in App Store" — covered by
+  "Not checked yet" before a check, and "View in App Store" — covered by
   `SOSMacTests/UpdaterViewModelTests` (Stop, retry, grouping) and not by a screenshot.
 
 ## Regenerated in PR 16 (cleanup)
