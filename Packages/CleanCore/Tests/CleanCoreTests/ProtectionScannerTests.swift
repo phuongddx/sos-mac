@@ -116,6 +116,25 @@ struct ProtectionScannerTests {
 
         #expect(outcome.unreadableRoots.isEmpty)
     }
+
+    /// A cancelled scan throws `CancellationError` out of the engine rather than returning a
+    /// partial outcome that could read as a result.
+    @Test func aCancelledScanThrowsCancellationError() async throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try fm.createDirectory(at: root, withIntermediateDirectories: true)
+        defer { try? fm.removeItem(at: root) }
+        for index in 0..<300 {
+            try "\(index)".write(to: root.appendingPathComponent("f\(index).txt"), atomically: true, encoding: .utf8)
+        }
+        let locations = [ProtectionLocation(id: "test", label: "Test", kind: .directPath(root.path))]
+        let scanner = ProtectionScanner(locations: locations, signatureDatabase: .empty)
+
+        let task = Task { try await scanner.scan(onProgress: { _ in }) }
+        task.cancel()
+
+        await #expect(throws: CancellationError.self) { try await task.value }
+    }
 }
 
 /// Helper class for capturing progress reports in tests (avoids Swift 6 Sendable capture issues).

@@ -101,6 +101,9 @@ public struct ProtectionScanner: Sendable {
             }
         }
 
+        // A cancelled task ends the `for await` loops quietly (no element, no throw), so
+        // without this a cancelled scan would return a partial outcome that reads as a result.
+        try Task.checkCancellation()
         return ProtectionScanOutcome(findings: findings, unreadableRoots: unreadableRoots)
     }
 
@@ -117,6 +120,7 @@ public struct ProtectionScanner: Sendable {
                 try Task.checkCancellation()
                 count += 1
             }
+            try Task.checkCancellation()
         }
         return count
     }
