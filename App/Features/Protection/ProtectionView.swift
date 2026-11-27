@@ -408,7 +408,7 @@ private struct ProtectionScreen: View {
             title = "\(quarantinedCount) quarantined, \(failedCount) couldn't be moved"
         }
         var stats: [DoneView.Stat] = [
-            .init(label: "Quarantined", value: "\(quarantinedCount)", isBytes: true),
+            .init(label: "Quarantined", value: "\(quarantinedCount)", isBytes: false),
             .init(label: "In quarantine", value: "\(viewModel.quarantinedRecords.count)"),
         ]
         if failedCount > 0 {
