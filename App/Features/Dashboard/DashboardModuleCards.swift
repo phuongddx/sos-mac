@@ -7,7 +7,7 @@ struct DashboardModuleCard: View {
     let destination: SidebarDestination
     let description: String
     var extraLine: String?
-    let action: () -> Void
+    let action: @MainActor () -> Void
 
     @State private var isHovering = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -77,7 +77,7 @@ struct DashboardModuleSection: View {
 
     let title: String
     let entries: [Entry]
-    let open: (SidebarDestination) -> Void
+    let open: @MainActor (SidebarDestination) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {

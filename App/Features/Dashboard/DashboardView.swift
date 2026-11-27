@@ -21,21 +21,10 @@ struct DashboardView: View {
 
     @Environment(ModuleStore.self) private var store
     @State private var storage: VolumeStorageInfo?
-    @State private var snapshot: DashboardSnapshot
+    @State private var snapshot: DashboardSnapshot?
 
     init(onSelect: @escaping @MainActor (SidebarDestination) -> Void) {
         self.onSelect = onSelect
-        // Both are read once, when the page opens (the prototype's "Read when this page opened").
-        var storage = VolumeStorageInfo.current()
-        var snapshot = DashboardSnapshot.capture()
-#if DEBUG
-        if UITestHooks.current.fixtures {
-            storage = .fixture
-            snapshot = .fixture
-        }
-#endif
-        _storage = State(initialValue: storage)
-        _snapshot = State(initialValue: snapshot)
     }
 
     /// The prototype's `.dash` padding: 4 pt top, 32 pt sides and bottom.
@@ -52,8 +41,8 @@ struct DashboardView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
                 hero
-                if !snapshot.isEmpty {
-                    snapshotRow.padding(.top, 14)
+                if let snapshot, !snapshot.isEmpty {
+                    snapshotRow(snapshot).padding(.top, 14)
                 }
                 DashboardModuleSection(title: "Clean", entries: cleanEntries, open: launcher.open)
                     .padding(.top, Theme.Spacing.s6)
@@ -66,7 +55,27 @@ struct DashboardView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .auroraBackground(hue: Theme.Hue.smartcare)
         .background(Theme.Color.bgBase)
+        // Both hero figures are read once, when the page opens (the prototype's
+        // "Read when this page opened") — never on re-renders, which used to re-run the
+        // engine reads in `init` only for `@State` to ignore every result but the first.
+        // The sidebar's `switch` gives the page a fresh identity (fresh `@State`) every
+        // time it is opened, so each open takes exactly one reading.
+        .onAppear(perform: captureSnapshotAndStorage)
         .accessibilityIdentifier("dashboard-screen")
+    }
+
+    private func captureSnapshotAndStorage() {
+        guard storage == nil, snapshot == nil else { return }
+        var storage = VolumeStorageInfo.current()
+        var snapshot = DashboardSnapshot.capture()
+    #if DEBUG
+        if UITestHooks.current.fixtures {
+            storage = .fixture
+            snapshot = .fixture
+        }
+    #endif
+        self.storage = storage
+        self.snapshot = snapshot
     }
 
     // MARK: Hero
@@ -180,7 +189,7 @@ struct DashboardView: View {
 
     // MARK: Snapshot
 
-    private var snapshotRow: some View {
+    private func snapshotRow(_ snapshot: DashboardSnapshot) -> some View {
         HStack(alignment: .top, spacing: Theme.Spacing.s3) {
             if let load = snapshot.loadText {
                 DashboardSnapshotTile(symbol: "cpu", label: "Load average (1 min)", value: load, unit: nil)
@@ -214,7 +223,8 @@ struct DashboardView: View {
             .init(destination: .updater, description: "See which apps have updates"),
             // "Live system metrics" describes the Performance screen (it polls every 2 s); the
             // line under it repeats the snapshot's figures and carries no "live" dot (spec §5.1).
-            .init(destination: .performance, description: "Live system metrics", extraLine: snapshot.performanceLine),
+            .init(destination: .performance, description: "Live system metrics",
+                  extraLine: snapshot?.performanceLine),
             .init(destination: .protection, description: "Known-signature malware scan"),
         ]
     }
