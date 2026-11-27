@@ -18,7 +18,9 @@ public enum ThermalState: String, Sendable {
 /// supported thermal-pressure signal, identical on both architectures, and
 /// always available — used here instead.
 public enum IOKitSensors {
-    public static func isAppleSilicon() -> Bool {
+    /// `nil` when the underlying sysctl cannot be read — fail closed, never a guessed
+    /// chip family (see `SysctlReader.isAppleSilicon()`).
+    public static func isAppleSilicon() -> Bool? {
         SysctlReader.isAppleSilicon()
     }
 
