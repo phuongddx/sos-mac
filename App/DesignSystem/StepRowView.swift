@@ -1,14 +1,40 @@
 import SwiftUI
 
-/// Matches the mockup's `.step-row` — shared scan-progress row used by
-/// Junk Cleaner, Duplicate Finder, and Smart Care while scanning.
+/// One row of a scan's step list (spec §4.9 "Step row"): a pending, active, done or failed step,
+/// shared by every module that scans.
+///
+/// | State | Dot (18 pt) | Label |
+/// |---|---|---|
+/// | pending | 1.5 pt `hairlineStrong` ring | `textSecondary` |
+/// | active | `neonCyan` ring, a 3 pt cyan halo at 18 %, a 6 pt cyan dot pulsing every 2.4 s | `textPrimary` |
+/// | done | `success` disc, check in `bgBase` | `textPrimary` |
+/// | failed | `danger` ring, `xmark` in `danger` | `textPrimary` |
+///
+/// Only the active row gets the `card` fill and 1 pt `hairline`. The pulsing dot stops under
+/// Reduce Motion; the cyan ring stays, because it carries state.
 struct StepRowView: View {
-    enum StepState { case pending, active, done }
+    enum StepState {
+        case pending, active, done, failed
+    }
+
+    static let dotSide: CGFloat = 18
+    static let dotColumn: CGFloat = 22
+    static let spacing: CGFloat = 10
+    static let horizontalPadding: CGFloat = 12
+    static let verticalPadding: CGFloat = 8
+    static let cornerRadius: CGFloat = 9
+    static let outlineWidth: CGFloat = 1.5
+    static let haloWidth: CGFloat = 3
+    static let haloAlpha: Double = 0.18
+    static let pulseDotSide: CGFloat = 6
+    /// The pulsing dot's opacity at the middle of each cycle.
+    static let pulseLowOpacity: Double = 0.35
 
     let name: String
     let meta: String?
     let state: StepState
     @State private var pulse = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(name: String, meta: String?, state: StepState) {
         self.name = name
@@ -17,55 +43,107 @@ struct StepRowView: View {
     }
 
     var body: some View {
-        HStack(spacing: Theme.Spacing.md) {
-            ZStack {
-                Circle()
-                    .strokeBorder(state == .active ? Theme.accent : Theme.border, lineWidth: 1.5)
-                    .background(
-                        Circle().fill(
-                            state == .done
-                                ? AnyShapeStyle(LinearGradient(colors: [Theme.success, Theme.success.opacity(0.75)], startPoint: .topLeading, endPoint: .bottomTrailing))
-                                : AnyShapeStyle(Theme.background)
-                        )
-                    )
-                    .frame(width: 20, height: 20)
-                    .shadow(color: state == .done ? Theme.success.opacity(0.4) : .clear, radius: 4, x: 0, y: 2)
-                if state == .done {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 10, weight: .bold))
-                        .foregroundStyle(.white)
-                } else if state == .active {
-                    Circle()
-                        .fill(Theme.accentGradient)
-                        .frame(width: 8, height: 8)
-                        .scaleEffect(pulse ? 0.78 : 1)
-                        .opacity(pulse ? 0.4 : 1)
-                        .onAppear {
-                            withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) {
-                                pulse = true
-                            }
-                        }
-                }
-            }
+        HStack(spacing: Self.spacing) {
+            dot
             Text(name)
-                .font(.system(size: Theme.TextSize.sm, weight: .medium))
-                .foregroundStyle(Theme.foreground)
+                .font(Theme.Font.body)
+                .foregroundStyle(state == .pending ? Theme.Color.textSecondary : Theme.Color.textPrimary)
+                .lineLimit(1)
+                .truncationMode(.tail)
             Spacer(minLength: 0)
             if let meta {
                 Text(meta)
-                    .font(.system(size: 12.5))
-                    .foregroundStyle(Theme.muted)
+                    .font(Theme.Font.callout)
+                    .foregroundStyle(Theme.Color.textSecondary)
                     .monospacedDigit()
             }
         }
-        .padding(.horizontal, Theme.Spacing.lg)
-        .padding(.vertical, Theme.Spacing.md)
-        .background(Theme.surface)
-        .overlay(
-            RoundedRectangle(cornerRadius: Theme.Radius.md)
-                .strokeBorder(state == .active ? Theme.accent.opacity(0.45) : Theme.border, lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: Theme.Radius.md))
-        .elevation(.raised)
+        .padding(.horizontal, Self.horizontalPadding)
+        .padding(.vertical, Self.verticalPadding)
+        .background {
+            if state == .active {
+                Theme.Color.card
+            }
+        }
+        .overlay {
+            if state == .active {
+                RoundedRectangle(cornerRadius: Self.cornerRadius, style: .continuous)
+                    .strokeBorder(Theme.Derived.hairline, lineWidth: 1)
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    // MARK: - Dot
+
+    private var ringColor: Color {
+        switch state {
+        case .pending: Theme.Derived.hairlineStrong
+        case .active: Theme.Color.neonCyan
+        case .done: .clear
+        case .failed: Theme.Color.danger
+        }
+    }
+
+    @ViewBuilder
+    private var dot: some View {
+        ZStack {
+            switch state {
+            case .pending:
+                ring
+            case .active:
+                // The halo is a 3 pt ring outside the dot; the dot's inside stays clear.
+                Circle().strokeBorder(Theme.Color.neonCyan.opacity(Self.haloAlpha), lineWidth: Self.haloWidth)
+                    .frame(width: Self.dotSide + Self.haloWidth * 2, height: Self.dotSide + Self.haloWidth * 2)
+                ring
+                Circle()
+                    .fill(Theme.Color.neonCyan)
+                    .frame(width: Self.pulseDotSide, height: Self.pulseDotSide)
+                    .opacity(pulse ? Self.pulseLowOpacity : 1)
+                    .onAppear(perform: startPulsing)
+            case .done:
+                Circle()
+                    .fill(Theme.Color.success)
+                    .frame(width: Self.dotSide, height: Self.dotSide)
+                Image(systemName: "checkmark")
+                    .font(Theme.Font.subheadline.weight(.bold))
+                    .foregroundStyle(Theme.Color.bgBase)
+            case .failed:
+                ring
+                Image(systemName: "xmark")
+                    .font(.system(size: 16))
+                    .foregroundStyle(Theme.Color.danger)
+            }
+        }
+        .frame(width: Self.dotColumn, height: Self.dotSide)
+    }
+
+    private var ring: some View {
+        Circle().strokeBorder(ringColor, lineWidth: Self.outlineWidth)
+            .frame(width: Self.dotSide, height: Self.dotSide)
+    }
+
+    /// `pulse 2.4s ease-in-out infinite`: the dot fades to 35 % and back, one full cycle in `Motion.pulseDuration`.
+    private func startPulsing() {
+        guard !reduceMotion else { return }
+        withAnimation(.easeInOut(duration: Theme.Motion.pulseDuration / 2).repeatForever(autoreverses: true)) {
+            pulse = true
+        }
+    }
+
+    // MARK: - Accessibility
+
+    private var stateWord: String {
+        switch state {
+        case .pending: "waiting"
+        case .active: "in progress"
+        case .done: "done"
+        case .failed: "failed"
+        }
+    }
+
+    private var accessibilityLabel: String {
+        [name, stateWord, meta].compactMap { $0 }.joined(separator: ", ")
     }
 }

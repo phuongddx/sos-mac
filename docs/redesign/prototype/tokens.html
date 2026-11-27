@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOS Mac Redesign v1 — Tokens &amp; Components</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { background: var(--bg-base); overflow: auto; height: auto; }
+  header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 16px; padding: 14px 28px; background: color-mix(in srgb, var(--bg-base) 92%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--hairline); }
+  header h1 { font: var(--f-title2); margin: 0; }
+  header nav a { color: var(--primary-bright); text-decoration: none; font: var(--f-callout); margin-left: 12px; }
+  header .sp { flex: 1; }
+  main { padding: 24px 28px 64px; max-width: 1240px; }
+  h2 { font: var(--f-title1); margin: 36px 0 4px; }
+  h2:first-child { margin-top: 0; }
+  .lead { color: var(--text-2); margin: 0 0 16px; max-width: 820px; }
+  h3 { font: var(--f-eyebrow); text-transform: uppercase; letter-spacing: .04em; color: var(--text-2); margin: 22px 0 10px; }
+  .sw { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 10px; }
+  .s { border-radius: 10px; border: 1px solid var(--hairline); background: var(--card); overflow: hidden; }
+  .s .c { height: 54px; display: flex; }
+  .s .c i { flex: 1; }
+  .s .m { padding: 8px 10px; display: grid; gap: 2px; }
+  .s .m b { font: var(--f-headline); }
+  .s .m code { font: var(--f-mono); color: var(--text-2); }
+  .s .m .hx { display: flex; justify-content: space-between; align-items: center; }
+  .copy { font: var(--f-subhead); color: var(--primary-bright); padding: 2px 6px; border-radius: 5px; }
+  .copy:hover { background: var(--row-hover); }
+  .legend { font: var(--f-subhead); color: var(--text-3); margin-top: 6px; }
+  .tbl { width: 100%; border-collapse: collapse; }
+  .tbl td, .tbl th { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--hairline); vertical-align: middle; }
+  .tbl th { font: var(--f-eyebrow); color: var(--text-2); text-transform: uppercase; letter-spacing: .03em; }
+  .tbl code { font: var(--f-mono); color: var(--text-2); }
+  .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .panel { background: var(--card); border: 1px solid var(--hairline); border-radius: 14px; padding: 18px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cap { font: var(--f-subhead); color: var(--text-2); margin-top: 8px; }
+  .bar { height: 10px; background: var(--primary); border-radius: 3px; }
+  .rad { width: 64px; height: 44px; background: var(--glass); border: 1px solid var(--hairline-strong); }
+  .mat { height: 120px; border-radius: 14px; position: relative; overflow: hidden; display: grid; place-items: center; text-align: center; font: var(--f-callout); padding: 10px; }
+  .mat::before { content: ""; position: absolute; inset: 0; background: var(--gradient-aurora); opacity: .55; z-index: -2; }
+  .mat .in { position: absolute; inset: 22px; border-radius: 12px; display: grid; place-items: center; padding: 8px; }
+  .mat.glass .in { background: color-mix(in srgb, var(--bg-elevated) 30%, transparent); backdrop-filter: blur(18px) saturate(1.6); border: 1px solid rgba(255,255,255,.16); }
+  .mat.vfx .in { background: var(--glass-a); backdrop-filter: blur(24px); border: 1px solid var(--hairline-strong); }
+  .mat.solid .in { background: var(--glass); border: 1px solid var(--hairline-strong); }
+  .ctas { display: flex; gap: 40px; align-items: center; padding: 18px 10px; }
+  .ctas .cta { position: relative; }
+  .ctas figure { margin: 0; display: grid; justify-items: center; gap: 12px; }
+  .ctas figcaption { font: var(--f-subhead); color: var(--text-2); }
+  .demo-irows { border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; background: var(--card); }
+  .demo-alert { position: relative; height: 300px; border-radius: 12px; overflow: hidden; background: var(--bg-base); border: 1px solid var(--hairline); }
+  .demo-alert .scrim { position: absolute; }
+  .rt { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .rt .rtile { grid-column: auto; }
+  #toast { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: var(--bg-elevated); border: 1px solid var(--hairline-strong); padding: 8px 14px; border-radius: 8px; font: var(--f-callout); opacity: 0; transition: opacity .2s; pointer-events: none; }
+  #toast.on { opacity: 1; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Tokens &amp; Components · Aurora Indigo</h1>
+  <span class="sp"></span>
+  <div class="row" role="group" aria-label="Appearance">
+    <button class="btn" data-theme-set="dark">Dark</button>
+    <button class="btn" data-theme-set="light">Light</button>
+  </div>
+  <nav><a href="index.html">Prototype</a><a href="board.html">All screens</a><a href="palettes.html">Palettes</a></nav>
+</header>
+<main>
+  <h2>Colour</h2>
+  <p class="lead">Every token has the Swift name it should get in <code>Theme.swift</code>. Each swatch shows dark | light. Click a name to copy it. A matching <code>Theme.swift</code> and a W3C tokens JSON sit next to this prototype in <code>tokens/</code>.</p>
+  <div id="colors"></div>
+
+  <h3>Module hues (tile backgrounds; same in both appearances)</h3>
+  <div class="sw" id="hues"></div>
+
+  <h2>Type</h2>
+  <p class="lead">macOS text styles. In SwiftUI use the system style named in the right column, so Dynamic Type and accessibility sizes keep working.</p>
+  <table class="tbl" id="type"></table>
+
+  <h2>Spacing, radius, motion</h2>
+  <div class="grid2">
+    <div class="panel"><table class="tbl" id="space"></table></div>
+    <div class="panel"><table class="tbl" id="radius"></table><table class="tbl" id="motion" style="margin-top:14px"></table></div>
+  </div>
+
+  <h2>Materials</h2>
+  <p class="lead">Liquid Glass is only on macOS 26. Use <code>.glassEffect()</code> when it's there, the system material on 14–15, and a solid fill when Reduce Transparency is on. The prototype draws the middle one.</p>
+  <div class="grid2" style="grid-template-columns: repeat(3, 1fr)">
+    <div><div class="mat glass"><div class="in"><b>macOS 26</b><br>Liquid Glass<br><code>.glassEffect(.regular)</code></div></div><div class="cap">Toolbar, floating review bar, popover. Never on content rows or lists.</div></div>
+    <div><div class="mat vfx"><div class="in"><b>macOS 14–15</b><br>System material<br><code>.background(.regularMaterial)</code></div></div><div class="cap">NSVisualEffectView, .sidebar for the sidebar, .popover for the menu bar.</div></div>
+    <div><div class="mat solid"><div class="in"><b>Reduce Transparency</b><br>Solid<br><code>Theme.Color.glass</code></div></div><div class="cap">Check <code>accessibilityReduceTransparency</code> and swap to the solid colour.</div></div>
+  </div>
+
+  <h2>Components</h2>
+  <h3>Buttons</h3>
+  <div class="panel"><div class="row" id="buttons"></div><div class="cap">Danger is only for actions that can't be undone in SOS Mac (Cloud delete). Move to Trash stays prominent purple because Trash can be emptied later.</div></div>
+
+  <h3>Badges</h3>
+  <div class="panel"><div class="row" id="badges"></div></div>
+
+  <h3>Checkboxes</h3>
+  <div class="panel"><div class="row" id="cbs"></div><div class="cap">A Keep item shows a disabled dashed checkbox and the Keep badge. It can't be selected anywhere.</div></div>
+
+  <h3>Main action (CTA)</h3>
+  <div class="panel"><div class="ctas" id="ctas"></div></div>
+
+  <h3>Banners</h3>
+  <div class="panel" style="display:grid; gap:10px" id="banners"></div>
+
+  <h3>Result tiles</h3>
+  <div class="rt" id="rtiles"></div>
+
+  <h3>Review rows and review bar</h3>
+  <div class="demo-irows" id="irows"></div>
+
+  <h3>Confirmation</h3>
+  <div class="grid2"><div class="demo-alert" id="alert1"></div><div class="demo-alert" id="alert2"></div></div>
+</main>
+<div id="toast" role="status"></div>
+<script>window.SOS = {};</script>
+<script src="data.js"></script>
+<script src="ui.js"></script>
+<script>
+(function () {
+  const S = window.SOS;
+  const G = [
+    ['Surfaces', [['bg-base', 'bgBase', 'Window background'], ['bg-elevated', 'bgElevated', 'Sheets, popover, dialogs'], ['card', 'card', 'Cards, tiles, lists'], ['glass', 'glass', 'Solid fallback for materials'], ['sidebar', 'sidebar', 'Sidebar fallback']]],
+    ['Brand', [['primary', 'primary', 'Fills and icons, never small text'], ['primary-deep', 'primaryDeep', 'Prominent button fill'], ['primary-bright', 'primaryBright', 'Links, selected labels']]],
+    ['Neon (verbs only)', [['neon-cyan', 'neonCyan', 'Scanning / working'], ['neon-lime', 'neonLime', 'Done'], ['neon-magenta', 'neonMagenta', 'Space Lens only']]],
+    ['Text', [['text-1', 'textPrimary', 'Body and titles'], ['text-2', 'textSecondary', 'Captions, paths'], ['text-3', 'textTertiary', 'Disabled, placeholder']]],
+    ['Status', [['success', 'success', 'Safe, Keep'], ['warning', 'warning', 'Caution, needs approval'], ['danger', 'danger', 'Threat, error text'], ['danger-fill', 'dangerFill', 'Irreversible button']]],
+    ['Treemap (Space Lens)', [['tm-1', 'treemap1', ''], ['tm-2', 'treemap2', ''], ['tm-3', 'treemap3', ''], ['tm-4', 'treemap4', ''], ['tm-5', 'treemap5', ''], ['tm-6', 'treemap6', ''], ['tm-7', 'treemap7', ''], ['tm-8', 'treemap8', '']]]
+  ];
+  const probe = theme => { const d = document.createElement('div'); d.setAttribute('data-theme', theme); d.style.display = 'none'; document.body.appendChild(d); const cs = getComputedStyle(d); const get = v => cs.getPropertyValue('--' + v).trim().toUpperCase(); return { get, done: () => d.remove() }; };
+  const dk = probe('dark'), lt = probe('light');
+  document.getElementById('colors').innerHTML = G.map(([g, list]) => `<h3>${g}</h3><div class="sw">${list.map(([v, sw, use]) => `
+    <div class="s"><div class="c"><i style="background:${dk.get(v)}"></i><i style="background:${lt.get(v)}"></i></div>
+      <div class="m"><div class="hx"><b>${sw}</b><button class="copy" data-copy="Theme.Color.${sw}">Copy</button></div>
+      <code>--${v}</code><code>${dk.get(v)} · ${lt.get(v)}</code>${use ? `<span class="legend">${use}</span>` : ''}</div></div>`).join('')}</div>`).join('');
+  dk.done(); lt.done();
+  document.getElementById('hues').innerHTML = Object.entries(S.MODS).filter(([k]) => k !== 'dashboard').map(([k, m]) => `
+    <div class="s"><div class="c" style="align-items:center; padding-left:12px; gap:10px">${S.tile(m.hue, m.icon)}<span style="font:var(--f-headline)">${m.label}</span></div>
+    <div class="m"><div class="hx"><b>hue.${k}</b><button class="copy" data-copy="Theme.Hue.${k}">Copy</button></div><code>${m.hue} · ink ${m.ink}</code></div></div>`).join('');
+  const T = [['f-numeral-xl', 'Numeral XL', '24.6 GB', '.system(size: 40, weight: .semibold).monospacedDigit()'], ['f-display', 'Display', 'Your Mac is ready', '.largeTitle'], ['f-title1', 'Title 1', 'Junk & Cache', '.title'], ['f-title2', 'Title 2', 'Review items', '.title2'], ['f-title3', 'Title 3', 'System Caches', '.title3'], ['f-headline', 'Headline', 'Xcode DerivedData', '.headline'], ['f-body', 'Body', 'Files in Trash can be restored until you empty it.', '.body'], ['f-callout', 'Callout', '1,284 files in 3 locations', '.callout'], ['f-subhead', 'Subheadline', 'Last checked just now', '.subheadline'], ['f-eyebrow', 'Eyebrow', 'CLEAN', '.caption.weight(.semibold)'], ['f-mono', 'Mono', '~/Library/Caches/com.apple.dt.Xcode', '.system(.caption, design: .monospaced)']];
+  document.getElementById('type').innerHTML = `<tr><th>Token</th><th>Sample</th><th>SwiftUI</th></tr>` + T.map(([v, n, s, sw]) => `<tr><td><b>${n}</b><br><code>--${v}</code></td><td style="font:var(--${v})">${s}</td><td><code>${sw}</code></td></tr>`).join('');
+  const sp = [1, 2, 3, 4, 5, 6, 8, 12];
+  document.getElementById('space').innerHTML = `<tr><th>Spacing</th><th></th><th>Swift</th></tr>` + sp.map(k => `<tr><td><code>--sp-${k}</code></td><td><div class="bar" style="width:var(--sp-${k})"></div></td><td><code>Theme.Spacing.s${k} = ${k * 4}</code></td></tr>`).join('');
+  const rd = [['xs', 5], ['sm', 7], ['md', 10], ['lg', 14], ['xl', 20]];
+  document.getElementById('radius').innerHTML = `<tr><th>Radius</th><th></th><th>Use</th></tr>` + rd.map(([k, v], i) => `<tr><td><code>--r-${k}</code> ${v}</td><td><div class="rad" style="border-radius:var(--r-${k})"></div></td><td>${['Badges', 'Buttons, checkboxes', 'Rows, banners, inputs', 'Cards, tiles, dialogs', 'Window, popover'][i]}</td></tr>`).join('');
+  document.getElementById('motion').innerHTML = `<tr><th>Motion</th><th>Value</th><th>SwiftUI</th></tr>
+    <tr><td><code>--dur-quick</code></td><td>150 ms</td><td><code>.easeOut(duration: 0.15)</code> hover, press</td></tr>
+    <tr><td><code>--dur-standard</code></td><td>250 ms</td><td><code>.snappy</code> state changes</td></tr>
+    <tr><td><code>--dur-emphasized</code></td><td>450 ms</td><td><code>.spring(duration: 0.45, bounce: 0.2)</code> Results → Done</td></tr>
+    <tr><td><code>--pulse</code></td><td>2.4 s</td><td>Scanning glow; off with Reduce Motion</td></tr>`;
+  document.getElementById('buttons').innerHTML = [S.btn('Move to Trash…', { cls: 'prominent' }), S.btn('Delete from Google Drive', { cls: 'danger' }), S.btn('Review Items'), S.btn('Open Space Lens', { cls: 'plain', icon: 'grid' }), S.btn('Move to Trash…', { cls: 'prominent', disabled: true }), S.btn('Scanning', { spin: true, disabled: true }), S.btn('Scan Again', { cls: 'large prominent' })].join('');
+  document.getElementById('badges').innerHTML = [S.badge('safe', 'Safe'), S.badge('caution', 'Caution'), S.badge('caution', 'Needs approval'), S.badge('keep', 'Keep', 'check'), S.badge('threat', 'Threat'), S.badge('neutral', 'Helper'), S.badge('accent', 'Newest'), S.badge('cyan', 'Scanning')].join('');
+  document.getElementById('cbs').innerHTML = [['false', 'Off'], ['true', 'On'], ['mixed', 'Some'], ['false', 'Keep (disabled)', true]].map(([s, l, d]) => `<span class="row" style="gap:6px">${S.cb(s, { disabled: d, label: l })}<span style="font:var(--f-callout)">${l}</span></span>`).join('');
+  document.getElementById('ctas').innerHTML = [[{ label: 'Scan' }, 'Idle'], [{ label: 'Stop', stop: true, ring: 'indet' }, 'Scanning, unknown length'], [{ label: 'Stop', stop: true, ring: 0.62 }, 'Scanning 62 %'], [{ label: 'Review', disabled: true }, 'Disabled']].map(([o, c]) => `<figure>${S.cta(o)}<figcaption>${c}</figcaption></figure>`).join('');
+  document.getElementById('banners').innerHTML = [S.banner('info', 'info', 'Files go to the Trash', 'You can put them back until you empty the Trash.'), S.banner('warn', 'warn', 'System caches need your approval', 'Nothing here is selected for you.'), S.banner('err', 'x', "Couldn't read 3 folders", 'SOS Mac needs Full Disk Access to scan them.', S.btn('Open Settings')), S.banner('ok', 'check', 'Restored to its original location', '')].join('');
+  const j = S.MODS.junk, d = S.MODS.duplicates;
+  document.getElementById('rtiles').innerHTML = S.rtile({ hue: j.hue, icon: j.icon, label: 'Junk & Cache', big: '3.4', unit: 'GB', cap: 'selected of 4.1 GB · 1,284 files in 3 locations', foot: S.btn('Review Items') }) + S.rtile({ hue: d.hue, icon: d.icon, label: 'Duplicates', big: '0', unit: 'KB', cap: 'Nothing left to clean', cls: 'done-t', check: true });
+  document.getElementById('irows').innerHTML = `
+    <div class="irow">${S.cb('true')}<div><div class="nm">DerivedData</div><div class="pt">~/Library/Developer/Xcode/DerivedData</div></div><div class="bd">${S.badge('safe', 'Safe')}</div><div class="sz">2.1 GB</div></div>
+    <div class="irow" aria-current="true">${S.cb('false')}<div><div class="nm">com.apple.Safari</div><div class="pt">/Library/Caches/com.apple.Safari</div></div><div class="bd">${S.badge('caution', 'Needs approval')}</div><div class="sz">412 MB</div></div>
+    <div class="irow kept">${S.cb('false', { disabled: true, label: 'Kept copy' })}<div><div class="nm">holiday-2024.mov</div><div class="pt">~/Movies</div></div><div class="bd">${S.badge('keep', 'Keep', 'check')}</div><div class="sz">1.3 GB</div></div>
+    ${S.reviewbar({ left: S.btn('Deselect All', { cls: 'plain' }), sum: '<b>1 item</b> · <b>2.1 GB</b> selected', cta: S.btn('Move to Trash…', { cls: 'prominent' }) })}`;
+  document.getElementById('alert1').innerHTML = S.alertBox({ icon: 'trash', title: 'Move 12 items to the Trash?', body: '<p>3.4 GB. You can put them back from the Trash until you empty it.</p>', buttons: S.btn('Move to Trash', { cls: 'prominent' }) + S.btn('Cancel') });
+  document.getElementById('alert2').innerHTML = S.alertBox({ icon: 'cloud', warn: true, title: 'Delete 2 files from Google Drive?', body: '<p>This deletes them on Google\'s servers. They won\'t go to your Mac\'s Trash.</p>', buttons: S.btn('Delete from Google Drive', { cls: 'danger', disabled: true }) + S.btn('Cancel', { cls: 'prominent' }) });
+  const toast = document.getElementById('toast');
+  document.addEventListener('click', e => {
+    const c = e.target.closest('[data-copy]');
+    if (c) { navigator.clipboard?.writeText(c.dataset.copy).catch(() => {}); toast.textContent = 'Copied ' + c.dataset.copy; toast.classList.add('on'); setTimeout(() => toast.classList.remove('on'), 1400); }
+    const t = e.target.closest('[data-theme-set]');
+    if (t) { document.documentElement.dataset.theme = t.dataset.themeSet; document.body.dataset.theme = t.dataset.themeSet; }
+  });
+  const q = new URLSearchParams(location.search).get('theme');
+  if (q) { document.documentElement.dataset.theme = q; document.body.dataset.theme = q; }
+})();
+</script>
+</body>
+</html>

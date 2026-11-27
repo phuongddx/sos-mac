@@ -1,0 +1,363 @@
+{
+  "$description": "SOS Mac \u2014 Aurora Indigo (Palette A). Generated from prototype tokens.css. Proposal, not yet in the repo.",
+  "color": {
+    "bgBase": {
+      "$type": "color",
+      "$value": {
+        "dark": "#0B0A14",
+        "light": "#F7F5FF"
+      },
+      "css": "--bg-base"
+    },
+    "bgElevated": {
+      "$type": "color",
+      "$value": {
+        "dark": "#151327",
+        "light": "#FFFFFF"
+      },
+      "css": "--bg-elevated"
+    },
+    "glass": {
+      "$type": "color",
+      "$value": {
+        "dark": "#1D1A33",
+        "light": "#FFFFFF"
+      },
+      "css": "--glass"
+    },
+    "card": {
+      "$type": "color",
+      "$value": {
+        "dark": "#16142A",
+        "light": "#FFFFFF"
+      },
+      "css": "--card"
+    },
+    "sidebar": {
+      "$type": "color",
+      "$value": {
+        "dark": "#100E1E",
+        "light": "#EEEAFB"
+      },
+      "css": "--sidebar"
+    },
+    "primary": {
+      "$type": "color",
+      "$value": {
+        "dark": "#8B5CF6",
+        "light": "#7C3AED"
+      },
+      "css": "--primary"
+    },
+    "primaryDeep": {
+      "$type": "color",
+      "$value": {
+        "dark": "#6D28D9",
+        "light": "#7C3AED"
+      },
+      "css": "--primary-deep"
+    },
+    "primaryBright": {
+      "$type": "color",
+      "$value": {
+        "dark": "#A78BFA",
+        "light": "#6D28D9"
+      },
+      "css": "--primary-bright"
+    },
+    "onPrimary": {
+      "$type": "color",
+      "$value": {
+        "dark": "#FFFFFF",
+        "light": "#FFFFFF"
+      },
+      "css": "--on-primary"
+    },
+    "neonCyan": {
+      "$type": "color",
+      "$value": {
+        "dark": "#22D3EE",
+        "light": "#0E7490"
+      },
+      "css": "--neon-cyan"
+    },
+    "neonLime": {
+      "$type": "color",
+      "$value": {
+        "dark": "#A3E635",
+        "light": "#4D7C0F"
+      },
+      "css": "--neon-lime"
+    },
+    "neonMagenta": {
+      "$type": "color",
+      "$value": {
+        "dark": "#E879F9",
+        "light": "#A21CAF"
+      },
+      "css": "--neon-magenta"
+    },
+    "textPrimary": {
+      "$type": "color",
+      "$value": {
+        "dark": "#F4F2FF",
+        "light": "#1A1333"
+      },
+      "css": "--text-1"
+    },
+    "textSecondary": {
+      "$type": "color",
+      "$value": {
+        "dark": "#B8B2D9",
+        "light": "#56506E"
+      },
+      "css": "--text-2"
+    },
+    "textTertiary": {
+      "$type": "color",
+      "$value": {
+        "dark": "#7A73A8",
+        "light": "#8B86A3"
+      },
+      "css": "--text-3"
+    },
+    "success": {
+      "$type": "color",
+      "$value": {
+        "dark": "#34D399",
+        "light": "#047857"
+      },
+      "css": "--success"
+    },
+    "warning": {
+      "$type": "color",
+      "$value": {
+        "dark": "#FBBF24",
+        "light": "#B45309"
+      },
+      "css": "--warning"
+    },
+    "danger": {
+      "$type": "color",
+      "$value": {
+        "dark": "#F87171",
+        "light": "#B91C1C"
+      },
+      "css": "--danger"
+    },
+    "dangerFill": {
+      "$type": "color",
+      "$value": {
+        "dark": "#B91C1C",
+        "light": "#B91C1C"
+      },
+      "css": "--danger-fill"
+    },
+    "treemap1": {
+      "$type": "color",
+      "$value": {
+        "dark": "#4A3A9E",
+        "light": "#DDD6FE"
+      },
+      "css": "--tm-1"
+    },
+    "treemap2": {
+      "$type": "color",
+      "$value": {
+        "dark": "#3D3F95",
+        "light": "#E0E7FF"
+      },
+      "css": "--tm-2"
+    },
+    "treemap3": {
+      "$type": "color",
+      "$value": {
+        "dark": "#34509C",
+        "light": "#DBEAFE"
+      },
+      "css": "--tm-3"
+    },
+    "treemap4": {
+      "$type": "color",
+      "$value": {
+        "dark": "#2E5B8F",
+        "light": "#E0F2FE"
+      },
+      "css": "--tm-4"
+    },
+    "treemap5": {
+      "$type": "color",
+      "$value": {
+        "dark": "#463C82",
+        "light": "#EDE9FE"
+      },
+      "css": "--tm-5"
+    },
+    "treemap6": {
+      "$type": "color",
+      "$value": {
+        "dark": "#3A4780",
+        "light": "#D9E2FF"
+      },
+      "css": "--tm-6"
+    },
+    "treemap7": {
+      "$type": "color",
+      "$value": {
+        "dark": "#353A6E",
+        "light": "#E9E5FF"
+      },
+      "css": "--tm-7"
+    },
+    "treemap8": {
+      "$type": "color",
+      "$value": {
+        "dark": "#2D2A55",
+        "light": "#ECE7FA"
+      },
+      "css": "--tm-8"
+    },
+    "treemapText": {
+      "$type": "color",
+      "$value": {
+        "dark": "#F4F2FF",
+        "light": "#1A1333"
+      },
+      "css": "--tm-text"
+    }
+  },
+  "spacing": {
+    "s1": {
+      "$type": "dimension",
+      "$value": "4px"
+    },
+    "s2": {
+      "$type": "dimension",
+      "$value": "8px"
+    },
+    "s3": {
+      "$type": "dimension",
+      "$value": "12px"
+    },
+    "s4": {
+      "$type": "dimension",
+      "$value": "16px"
+    },
+    "s5": {
+      "$type": "dimension",
+      "$value": "20px"
+    },
+    "s6": {
+      "$type": "dimension",
+      "$value": "24px"
+    },
+    "s8": {
+      "$type": "dimension",
+      "$value": "32px"
+    },
+    "s12": {
+      "$type": "dimension",
+      "$value": "48px"
+    }
+  },
+  "radius": {
+    "xs": {
+      "$type": "dimension",
+      "$value": "5px"
+    },
+    "sm": {
+      "$type": "dimension",
+      "$value": "7px"
+    },
+    "md": {
+      "$type": "dimension",
+      "$value": "10px"
+    },
+    "lg": {
+      "$type": "dimension",
+      "$value": "14px"
+    },
+    "xl": {
+      "$type": "dimension",
+      "$value": "20px"
+    },
+    "pill": {
+      "$type": "dimension",
+      "$value": "999px"
+    }
+  },
+  "motion": {
+    "durQuick": {
+      "$type": "duration",
+      "$value": "150ms"
+    },
+    "durStandard": {
+      "$type": "duration",
+      "$value": "250ms"
+    },
+    "durEmphasized": {
+      "$type": "duration",
+      "$value": "450ms"
+    },
+    "pulse": {
+      "$type": "duration",
+      "$value": "2400ms"
+    }
+  },
+  "hue": {
+    "smartcare": {
+      "$type": "color",
+      "$value": "#8B5CF6",
+      "ink": "#fff",
+      "label": "Smart Care"
+    },
+    "junk": {
+      "$type": "color",
+      "$value": "#6366F1",
+      "ink": "#fff",
+      "label": "Junk & Cache"
+    },
+    "duplicates": {
+      "$type": "color",
+      "$value": "#3B82F6",
+      "ink": "#fff",
+      "label": "Duplicate Finder"
+    },
+    "spacelens": {
+      "$type": "color",
+      "$value": "#E879F9",
+      "ink": "#140F26",
+      "label": "Space Lens"
+    },
+    "cloud": {
+      "$type": "color",
+      "$value": "#38BDF8",
+      "ink": "#140F26",
+      "label": "Cloud Cleanup"
+    },
+    "uninstaller": {
+      "$type": "color",
+      "$value": "#FB923C",
+      "ink": "#140F26",
+      "label": "Uninstaller"
+    },
+    "updater": {
+      "$type": "color",
+      "$value": "#FBBF24",
+      "ink": "#140F26",
+      "label": "Updater"
+    },
+    "performance": {
+      "$type": "color",
+      "$value": "#2DD4BF",
+      "ink": "#140F26",
+      "label": "Performance"
+    },
+    "protection": {
+      "$type": "color",
+      "$value": "#22D3EE",
+      "ink": "#140F26",
+      "label": "Protection"
+    }
+  }
+}

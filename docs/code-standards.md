@@ -270,6 +270,23 @@ struct XView: View {
 
 **Benefit**: UI state is explicit, single source of truth. No hidden state across multiple @State vars that can get out of sync.
 
+### Rule 8: Compose the DesignSystem — one frame, one vocabulary, tokens only
+
+Every scanning screen is a `ModuleScreen` driven by its ViewModel's `lifecycle: LifecycleState`; the screen supplies real values (`subtitle`, `selection`, `progress`, `Actions`) and the frame never invents a number. Colours, spacing, radii, type and elevation come from `Theme` tokens (Palette C); the pre-redesign shims were deleted in PR 16, so a new `Theme.accent` / `Theme.Spacing.md` / `TextSize` will not compile — and must not be re-added. Spec §2.6: `primaryDeep` is a fill (never text or an icon on a card), neon is a verb (never a surface), `textTertiary` is for large, bold, disabled or placeholder text only.
+
+Dock wording is data, not code: each module's labels live in `ModuleIdentity.dock` (`DockCopy`, spec Appendix A) and its defaults are the cleaner modules' text. A module that does not clean must not show a disabled "Clean" or "Open Trash" — set `resultsAction` / `doneSecondary` honestly and extend `DockCopyTests`.
+
+```swift
+ModuleScreen(module: ModuleIdentity(module: .protection),   // dock: "Review" + hint, no Open Trash
+             state: viewModel.lifecycle,
+             actions: actions,                              // primary = enterReview in results
+             selection: selectionSummary) { AnyView(content) }
+```
+
+Review checklist for UI changes: Cancel is the default button of every confirmation; every number on screen has an engine source; copy matches Appendix A; the screen is snapshotted in dark and light (`Scripts/ui-snapshots.sh`).
+
+---
+
 ## Cross-Cutting Implementation Patterns
 
 ### Pattern 1: Protocol-Based Conformance for Testability

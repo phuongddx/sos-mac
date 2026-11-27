@@ -18,65 +18,49 @@ sos-mac/
 
 ## App Target (`App/`)
 
-**Role**: SwiftUI-based user interface for all 8 feature modules.
+**Role**: SwiftUI-based user interface — the Dashboard plus nine modules (Smart Care, Junk & Cache, Duplicate Finder, Space Lens, Cloud Cleanup, Uninstaller, Updater, Performance, Protection), all on the Palette C design system.
 
-**Entry Point**: `SOSMacApp.swift` (20 lines)
-- Decorates `RootView()` with `NavigationSplitView` root
-- Attaches SwiftData `.modelContainer(for: IgnoredItem.self)`
-- Defines `SidebarDestination` enum with 9 cases (dashboard + 8 modules)
+**Entry Point**: `SOSMacApp.swift` — `NavigationSplitView` root, SwiftData `.modelContainer`, the `SidebarDestination` enum (dashboard + nine modules) and the module-tile hue mapping (`tileHue`).
 
 **Structure**:
 ```
 App/
-├── SOSMacApp.swift                  # @main, NavigationSplitView root, SidebarDestination enum
-└── Features/
-    ├── SmartCare/
-    │   ├── SmartCareView.swift
-    │   └── SmartCareViewModel.swift
-    ├── JunkCleaner/
-    │   ├── JunkCleanerView.swift
-    │   └── JunkCleanerViewModel.swift
-    ├── Duplicates/
-    │   ├── DuplicateFinderView.swift
-    │   └── DuplicateFinderViewModel.swift
-    ├── SpaceLens/
-    │   ├── SpaceLensView.swift
-    │   └── SpaceLensViewModel.swift
-    ├── Uninstaller/
-    │   ├── UninstallerView.swift
-    │   └── UninstallerViewModel.swift
-    ├── Updater/
-    │   ├── UpdaterView.swift
-    │   └── UpdaterViewModel.swift
-    ├── Performance/
-    │   ├── PerformanceView.swift
-    │   └── PerformanceViewModel.swift
-    └── CloudCleanup/
-        ├── CloudCleanupView.swift
-        ├── CloudCleanupViewModel.swift
-        └── ASWebAuthSessionPresenter.swift
+├── SOSMacApp.swift       # @main, shell, SidebarDestination
+├── DesignSystem/         # Palette C tokens + shared components (table below)
+├── Features/<Module>/    # One View + one @MainActor @Observable ViewModel (Phase enum) per module,
+│                         # plus module-only subviews (review detail, inspector, quarantine panel…)
+├── Services/             # PrivilegedHelperClient, ProgressiveCleaner
+├── State/                # ModuleStore (per-module state kept across navigation)
+└── Support/              # SwiftData models, ComponentGalleryView, UITestHooks/UITestFixtures (DEBUG)
 ```
+
+### `App/DesignSystem/` (post-PR 16 cleanup)
+
+| Group | Files | What they are |
+|---|---|---|
+| Tokens | `Theme.swift` (+ `ElevationModifier.swift` for `.elevation(_:)`) | Palette C: `Color` (28), `Derived`, `Gradient`, `Glow`, `Hue` / `Hue.Ink`, `Spacing` s1…s12, `Radius`, `Motion`, `Font`, `Elevation`. No deprecated shims remain. |
+| Frame | `ModuleScreen`, `LifecycleState` (`LifecycleState`, `DockCopy`, `ModuleIdentity`, `ModuleOverlay`, `ColorMix`), `ModuleToolbar`, `DockView`, `PrimaryCTAView`, `ReviewBarView`, `AuroraBackground`, `AuroraSurface` | The lifecycle frame (spec §4.1–4.2): toolbar, aurora canvas, dock with the round CTA, review bar, sheet presentation. Per-module dock labels come from `ModuleIdentity.dock` (Appendix A). |
+| State views | `StartView` (+ `ModuleOrbView`, its ring inset is a `Metrics` field), `ScanningView`, `DoneView`, `StatusStateView`, `StepRowView`, `ProgressBarView`, `ScanProgressTracker` | Start / scanning / done / empty / error content (spec §4.9). |
+| Results and review | `ResultsHeaderView`, `ResultTileView`, `ModuleTileView`, `ReviewFrameView`, `ReviewGroupRow`, `ReviewItemRow`, `ReviewDetailView` | Result tiles and the three-column review frame (spec §4.3, §4.5). |
+| Controls | `SOSButtonStyle`, `SOSCheckbox`, `BadgeView`, `KeepBadge`, `BannerView`, `SidebarNavRow` | Buttons, checkbox, badges, banners, sidebar rows (spec §3.2, §4.4–4.7). |
+| Confirmations | `ConfirmSheet`, `ConfirmItemList` | The one confirmation before anything leaves its place (spec §4.8). |
+
+Removed in PR 16 (no references remained): `HeroPanelView`, `HealthDialView`, `ModuleCardView`, `EmptyStateView`, `SummaryCardView`, `StickyFooterView`, `ScanProgressPanel`, `.careCard()`, `.auroraBloom()`, `TextSize`, `ModuleHue`, the legacy `Theme` colour/spacing names, `BadgeStyle.attention`/`.risk`, and `Theme.hue(for:)`/`ink(for:)`.
 
 **Module Architecture Pattern**:
 Each feature module follows a consistent pattern:
 
 1. **ViewModel** (`@MainActor @Observable final class XViewModel`):
-   - State machine via explicit `Phase` enum (idle → scanning → review → cleaning → done)
+   - State machine via explicit `Phase` enum, mapped to the shared vocabulary by a pure `var lifecycle: LifecycleState` (start · scanning · results · review · cleaning · done · empty · error)
    - `@ObservationIgnored` properties for non-observable refs (e.g., Task cancellation)
    - Async methods that transition phases and populate results
-   
+   - `loadFixture(_:)` under `#if DEBUG` for the snapshot harness
+
 2. **View** (`struct XView: View`):
-   - Declares `@State private var viewModel = XViewModel()`
-   - Binds UI to viewModel state
-   - Shows loading/results/error states by Phase
-   - Calls viewModel methods on user interaction
+   - Builds a `ModuleScreen` from `ModuleIdentity(module:)`, passes `state: viewModel.lifecycle`, the real `subtitle`/`selection`/`progress`, and an `Actions` value wired to ViewModel methods
+   - Content per state from the state views above; module-specific sub-views stay in `Features/<Module>/`
 
-3. **Special Case** (JunkCleaner only):
-   - Requires `@Environment(\.modelContext)` for SwiftData ignore list
-   - Lazy-initializes ViewModel in `.task` after context is available
-   - All other modules don't use SwiftData
-
-**Total Lines**: ~2,138 LOC (excluding generated assets).
+3. **Special Case** (JunkCleaner, Protection): needs SwiftData (`@Environment(\.modelContext)`) for the ignore list / quarantine records.
 
 ## MenuBarHelper Target (`MenuBarHelper/`)
 
@@ -334,7 +318,7 @@ public static func layout(
 ## Build Configuration
 
 **project.yml** (XcodeGen source of truth):
-- Targets: SOSMac (main), MenuBarHelper (embedded app)
+- Targets: SOSMac (main), MenuBarHelper (embedded app), SOSMacTests (unit tests), SOSMacUITests (UI smoke tests)
 - Packages: CleanCore, TreemapKit
 - Deployment target: macOS 14.0+
 - Bundle ID prefix: com.nextlabs
@@ -348,6 +332,12 @@ xcodegen generate              # Regenerate from project.yml
 xcodebuild build -scheme SOSMac
 xcodebuild test -scheme CleanCore
 ```
+
+## UI Test Harness (Debug only)
+
+**Hooks and fixtures** (`App/Support/UITestHooks.swift`, `UITestFixtures.swift`, both `#if DEBUG`). `UITestHooks.current` reads `SOSMAC_UITEST_*` launch variables once: `SCREEN` (prototype key such as `junk`), `STATE`, `APPEARANCE` (`light`/`dark`), `FIXTURES` (`1`), `WINDOW_SIZE` (`1200x760`, the outer window size in points, forced on the window rather than via `defaultSize`), `REDUCE_TRANSPARENCY` (`1`, exposed as `EnvironmentValues.uiTestReduceTransparency` because SwiftUI's own value is read-only) and `OUTPUT_DIR`. `RootView` uses them to pick the first screen and apply appearance and size. A launch with no variables behaves as before. `UITestFixtures` holds fictional sample data (4 junk rules, 6 exact and 2 similar duplicate sets, 10 apps, 8 updater rows, a small Space Lens tree, findings and quarantine records, system metrics) under `/Users/sample`; it never reads the real file system. Each screen supports a state by implementing `loadFixture(_ state: LifecycleState)` under `#if DEBUG` on its view model. Unit tests live in `SOSMacTests/` (Swift Testing, hosted by the app); `SOSMacUITests/RedesignSmokeTests.swift` clicks through the sidebar and captures only the window element, and should run only with the owner's go-ahead because XCUITest activates the app.
+
+**Snapshot script** (`Scripts/ui-snapshots.sh`, `Scripts/window-id.swift`). `Scripts/ui-snapshots.sh -p <name> -s <screen>=<state>[,…]` builds Debug into a throwaway derived-data folder, launches the build with `open -n -g --env SOSMAC_UITEST_…` so it stays in the background, finds the window by pid with `window-id.swift` (`CGWindowListCopyWindowInfo`, checked against bundle id `com.nextlabs.sosmac`), captures only that window with `screencapture -l<id> -o -x`, then kills the instance. For each appearance (`-a`, default `dark,light`) it writes `artifacts/ui-snapshots/<name>/<appearance>-<screen>-<state>.png` (display-native pixels, so 2400x1520 for 1200x760 points on a Retina display; `-1` downsizes to points), checks the images are not blank, and builds `contact-sheet.png` with `magick montage`. It stops if the app becomes frontmost. The process that runs it needs Screen Recording permission. `artifacts/` is git-ignored.
 
 ## Lines of Code Summary
 

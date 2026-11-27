@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOS Mac Redesign v1 — Needs engine work</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { background: var(--bg-base); height: auto; }
+  header { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 16px; padding: 14px 28px; background: color-mix(in srgb, var(--bg-base) 92%, transparent); backdrop-filter: blur(12px); border-bottom: 1px solid var(--hairline); }
+  header h1 { font: var(--f-title2); margin: 0; flex: 1; }
+  header nav a { color: var(--primary-bright); text-decoration: none; font: var(--f-callout); margin-left: 12px; }
+  main { padding: 22px 28px 64px; max-width: 1240px; }
+  .lead { color: var(--text-2); max-width: 860px; margin: 0 0 18px; }
+  h2 { font: var(--f-title1); margin: 34px 0 6px; }
+  .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--hairline); border-radius: 14px; padding: 16px 18px; display: grid; gap: 10px; align-content: start; }
+  .card h3 { font: var(--f-title3); margin: 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .card p { margin: 0; color: var(--text-2); font: var(--f-callout); }
+  .card dl { margin: 0; display: grid; grid-template-columns: 108px 1fr; gap: 6px 12px; font: var(--f-callout); }
+  .card dt { color: var(--text-3); }
+  .card dd { margin: 0; color: var(--text-1); }
+  .card code { font: var(--f-mono); color: var(--text-2); }
+  .mock { border: 1px dashed var(--hairline-strong); border-radius: 12px; padding: 14px; background: var(--bg-base); position: relative; }
+  .mock::after { content: "CONCEPT · not in v1"; position: absolute; top: -9px; right: 12px; font: var(--f-eyebrow); color: var(--warning); background: var(--bg-base); padding: 0 6px; }
+  .mock .irow { padding: 8px 4px; }
+  .pill { font: var(--f-eyebrow); padding: 3px 8px; border-radius: 999px; background: var(--row-selected); color: var(--primary-bright); }
+  .pill.bug { background: color-mix(in srgb, var(--danger) 18%, transparent); color: var(--danger); }
+  .pill.app { background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
+  .pill.no { background: color-mix(in srgb, var(--text-3) 22%, transparent); color: var(--text-2); }
+  .upd { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; font: var(--f-body); }
+  .list { margin: 0; padding-left: 18px; color: var(--text-2); font: var(--f-callout); display: grid; gap: 4px; }
+</style>
+</head>
+<body>
+<header><h1>Needs engine work</h1><nav><a href="index.html">Prototype</a><a href="board.html">All screens</a><a href="tokens.html">Tokens</a></nav></header>
+<main>
+  <p class="lead">Everything here was left out of the v1 screens because there is no data source for it today (inventory §4.1) or it is a known bug (§5). Each card says what the design would show, what <code>CleanCore</code> or the app would need to provide, and where it goes once it exists. Dashed boxes are concepts, not part of the prototype.</p>
+  <p class="lead" style="margin-top:-8px"><span class="pill bug">Bug fix</span> engine returns wrong data today &nbsp; <span class="pill">Engine</span> new CleanCore API &nbsp; <span class="pill app">App only</span> no engine change, app-target work &nbsp; <span class="pill no">Product call</span> Phương decides first</p>
+
+  <h2>Fix before shipping the redesign</h2>
+  <div class="cards">
+    <div class="card"><h3>Updater: "check failed" state <span class="pill bug">Bug fix · D3</span></h3>
+      <p>Today a failed feed check falls through to "Up to date" in green. The redesign has no failed state on the Updater screen until the view model can tell the two apart.</p>
+      <dl><dt>Engine needs</dt><dd>Feed check returns <code>.failed(Error)</code> per app; header count only after all checks finish.</dd><dt>Goes in</dt><dd>Updater results: per-row warning badge and a banner with Try Again.</dd></dl>
+      <div class="mock" id="m-upd"></div></div>
+    <div class="card"><h3>Uninstaller: real folder sizes <span class="pill bug">Bug fix · D1</span></h3>
+      <p>Associated folders report the size of the directory entry, not its contents. The prototype shows sizes for the app bundle and single files only; folders read "Folder" and totals read "At least …".</p>
+      <dl><dt>Engine needs</dt><dd>Recursive size for associated directories (same walker as the <code>.app</code> bundle), async per row.</dd><dt>Goes in</dt><dd>Uninstaller review: folder rows show "Measuring…" then the size; the review bar total updates as sizes arrive.</dd></dl>
+      <div class="mock" id="m-d1"></div></div>
+    <div class="card"><h3>Uninstaller: app is running <span class="pill app">App only · S8</span></h3>
+      <p>No check today. Moving a running app to the Trash leaves it running and its support files get recreated.</p>
+      <dl><dt>App needs</dt><dd><code>NSRunningApplication.runningApplications(withBundleIdentifier:)</code> before the confirm dialog.</dd><dt>Goes in</dt><dd>Uninstall confirm: a "Quit Slack first" step with Quit and Cancel.</dd></dl>
+      <div class="mock" id="m-s8"></div></div>
+    <div class="card"><h3>Keep results when you leave a screen <span class="pill app">App only · N1</span></h3>
+      <p>In the prototype you can leave a module and come back to the same results and selection. Today each view owns its view model, so everything resets (scans are cancelled too).</p>
+      <dl><dt>App needs</dt><dd>Lift view models into an app-level store; scans keep running in the background.</dd><dt>Goes in</dt><dd>Every module. Showing what each module found on the Dashboard or sidebar would also need this, and is a product call (§4.1 lists per-module status as not available).</dd></dl></div>
+  </div>
+
+  <h2>New data the design would use</h2>
+  <div class="cards">
+    <div class="card"><h3>Duplicates: thumbnails and similarity <span class="pill">Engine</span></h3>
+      <p>Similar Images pre-selects every non-keep copy with nothing to judge it by (S3). The prototype keeps today's selection and adds a warning banner.</p>
+      <dl><dt>Engine needs</dt><dd>QuickLook thumbnail per file, pixel size, similarity score per pair.</dd><dt>Goes in</dt><dd>Similar Images review: side-by-side compare in the detail panel.</dd></dl></div>
+    <div class="card"><h3>Duplicates: total per set <span class="pill no">Product call</span></h3>
+      <p>Derivable from the sizes we already have, so no engine work, but §4.1 lists it as not shown today. Left out of v1 to stay inside the brief.</p>
+      <dl><dt>App needs</dt><dd>Sum of non-keep copies per set in the view model.</dd><dt>Goes in</dt><dd>Group header in the duplicates review: "2 extra copies · 1.3 GB".</dd></dl></div>
+    <div class="card"><h3>Junk: totals per folder and per category <span class="pill">Engine</span></h3>
+      <p>The engine returns files only. The review groups by source rule (which we have), not by folder.</p>
+      <dl><dt>Engine needs</dt><dd>Aggregate per root folder and per rule category.</dd><dt>Goes in</dt><dd>Left column of the Junk review: size per group.</dd></dl></div>
+    <div class="card"><h3>Space Lens: Reveal in Finder, search, % of disk <span class="pill app">App only</span></h3>
+      <p>"Open Folder" drills in today (N7). The prototype keeps drill-in on double-click and drops the Finder button.</p>
+      <dl><dt>App needs</dt><dd><code>NSWorkspace.activateFileViewerSelecting</code>; a search over the scanned tree; % only once a total is known (§4.1).</dd><dt>Goes in</dt><dd>Inspector actions and the path bar.</dd></dl></div>
+    <div class="card"><h3>Cloud: Google Drive, OneDrive, Dropbox <span class="pill">Engine</span></h3>
+      <p>OAuth apps are not registered, so only iCloud works today (D5). The prototype shows Drive as the target design for server-side delete so the confirmation can be reviewed.</p>
+      <dl><dt>Engine needs</dt><dd>Registered OAuth clients, token kept in Keychain across launches, <code>result.failed</code> surfaced (S6).</dd><dt>Goes in</dt><dd>Cloud tabs: Connect state, review, server-side delete confirm.</dd></dl></div>
+    <div class="card"><h3>Protection: real coverage <span class="pill">Engine</span></h3>
+      <p>The database holds one hash (D4). The prototype calls it a "known-signature scan" and shows no coverage, database version or VirusTotal button.</p>
+      <dl><dt>Engine needs</dt><dd>Signature set with a version, YARA rules, optional VirusTotal key flow.</dd><dt>Goes in</dt><dd>Protection start screen: "Signatures updated …" line.</dd></dl></div>
+    <div class="card"><h3>Dashboard: live numbers <span class="pill app">App only</span></h3>
+      <p>Today's one-off CPU, memory and thermal reading is shown once. A live refresh only needs a timer on the existing API.</p>
+      <dl><dt>App needs</dt><dd>Poll <code>MachHostStats</code> every 2 s while visible; fix "Memory 99 %" (D2) by counting inactive pages as available.</dd><dt>Goes in</dt><dd>Dashboard system card, menu bar popover.</dd></dl></div>
+  </div>
+
+  <h2>Not designed on purpose (§4.4)</h2>
+  <div class="card"><p>These stay out until the engine has the data <b>and</b> Phương wants them. No mock is drawn so nobody builds them as decoration.</p>
+    <ul class="list"><li>Health score or dial, "last scanned" stamps, activity feed, scan history</li><li>Real-time protection toggle, Quick/Deep scan chooser</li><li>Cloud quota bars and folder browser</li><li>Updater "Update All", release notes, update size, install button</li><li>Uninstaller last-used column, Duplicate Finder location pills</li><li>Performance temperature, fans, disk/network graphs, process list</li><li>Settings, onboarding, paywall (Phase 9)</li></ul></div>
+</main>
+<script>window.SOS = {};</script>
+<script src="data.js"></script>
+<script src="ui.js"></script>
+<script>
+(function () {
+  const S = window.SOS;
+  document.getElementById('m-upd').innerHTML = S.banner('err', 'warn', "Couldn't check 2 apps for updates", 'The update feed did not answer. Your other apps were checked.', S.btn('Try Again')) +
+    `<div style="margin-top:10px; display:grid; gap:8px"><div class="upd"><span>Rectangle <span class="mono" style="color:var(--text-2)">0.80</span></span>${S.badge('caution', 'Check failed', 'warn')}</div><div class="upd"><span>Slack <span class="mono" style="color:var(--text-2)">4.41.97</span></span>${S.badge('safe', 'Up to date', 'check')}</div></div>`;
+  document.getElementById('m-d1').innerHTML = `
+    <div class="irow">${S.cb('true')}<div><div class="nm">Slack</div><div class="pt">~/Library/Application Support/Slack</div></div><div class="bd"></div><div class="sz">Measuring…</div></div>
+    <div class="irow">${S.cb('true')}<div><div class="nm">com.tinyspeck.slackmacgap</div><div class="pt">~/Library/Caches</div></div><div class="bd"></div><div class="sz">Measuring…</div></div>`;
+  document.getElementById('m-s8').innerHTML = `<div style="display:flex; gap:12px; align-items:flex-start">${S.tile('#FB923C', 'appx')}<div style="flex:1"><b style="font:var(--f-headline)">Quit Slack first</b><p style="margin:2px 0 10px">Slack is open. Quit it so its files can move to the Trash.</p><div class="row" style="display:flex; gap:8px; justify-content:flex-end">${S.btn('Cancel')}${S.btn('Quit Slack', { cls: 'prominent' })}</div></div></div>`;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" data-theme="dark" data-palette="a">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOS Mac Redesign v1 — Aurora Indigo · Prototype</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="dark" data-palette="a">
+<div id="devbar" role="toolbar" aria-label="Prototype controls"></div>
+<div id="desktop">
+  <div id="menubar">
+    <span class="app">SOS Mac</span><span>File</span><span>Edit</span><span>View</span><span>Window</span><span>Help</span>
+    <div class="right">
+      <button class="mbitem" data-act="pop" aria-expanded="false" aria-label="SOS Mac menu bar widget"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17a8 8 0 1 1 16 0 M12 17l3.5-4.5"/></svg><span class="cpu">CPU 23%</span></button>
+      <span class="clock">Thu Nov 26  10:43</span>
+    </div>
+  </div>
+  <div id="popover" hidden role="dialog" aria-label="SOS Mac widget"></div>
+  <div id="stage"></div>
+</div>
+<script src="data.js"></script>
+<script src="ui.js"></script>
+<script src="screens.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

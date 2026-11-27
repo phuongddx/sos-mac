@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SOS Mac Redesign v1 — Palette comparison</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { margin: 0; background: #07060d; color: var(--text-1); font: var(--f-body); }
+  header { display: flex; align-items: center; gap: 16px; padding: 16px 28px; border-bottom: 1px solid var(--hairline); }
+  header h1 { font: var(--f-title2); margin: 0; }
+  header a { color: var(--primary-bright); text-decoration: none; font: var(--f-callout); margin-left: 12px; }
+  main { padding: 20px 28px 48px; }
+  .intro { color: var(--text-2); max-width: 880px; margin: 0 0 20px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .col h2 { font: var(--f-title2); margin: 0 0 2px; display: flex; gap: 8px; align-items: center; }
+  .col h2 .pick { font: var(--f-eyebrow); color: #0B0A14; background: #A3E635; border-radius: 999px; padding: 3px 8px; }
+  .col p { margin: 0 0 10px; color: var(--text-2); font: var(--f-callout); }
+  .frame { position: relative; width: 100%; aspect-ratio: 1200 / 760; overflow: hidden; border-radius: 10px; border: 1px solid var(--hairline-strong); }
+  .frame iframe { position: absolute; left: 0; top: 0; width: 1200px; height: 760px; border: 0; transform-origin: 0 0; }
+  .sw { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .sw span { display: inline-flex; align-items: center; gap: 6px; font: var(--f-mono); color: var(--text-2); padding: 4px 6px; border-radius: 6px; background: #12101f; }
+  .sw i { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(255,255,255,.12); }
+  table { margin-top: 28px; border-collapse: collapse; width: 100%; max-width: 1100px; font: var(--f-callout); }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--hairline); vertical-align: top; }
+  th { color: var(--text-2); font: var(--f-eyebrow); text-transform: uppercase; letter-spacing: .03em; }
+  td:first-child { color: var(--text-2); width: 180px; }
+</style>
+</head>
+<body>
+<header><h1>Palette comparison · Smart Care Results</h1><nav><a href="index.html">Prototype</a><a href="board.html">All screens</a><a href="tokens.html">Tokens</a></nav></header>
+<main>
+  <p class="intro">Same screen, same data, three palettes from sos-mac-purple-neon-palette-g1.md. Only colour tokens change; layout, type and copy are identical. A is the one used across the prototype.</p>
+  <div class="grid">
+    <div class="col"><h2>A · Aurora Indigo <span class="pick">USED</span></h2><p>Indigo-violet base, cyan for progress, lime for done, magenta only in Space Lens.</p>
+      <div class="frame"><iframe title="Palette A" src="index.html?screen=smartcare&state=results&palette=a&chrome=0&freeze=1"></iframe></div>
+      <div class="sw"><span><i style="background:#0B0A14"></i>#0B0A14</span><span><i style="background:#8B5CF6"></i>#8B5CF6</span><span><i style="background:#22D3EE"></i>#22D3EE</span><span><i style="background:#A3E635"></i>#A3E635</span><span><i style="background:#E879F9"></i>#E879F9</span></div></div>
+    <div class="col"><h2>B · Neon Orchid</h2><p>Warmer, more saturated purple; pink-magenta accent. Loudest of the three.</p>
+      <div class="frame"><iframe title="Palette B" src="index.html?screen=smartcare&state=results&palette=b&chrome=0&freeze=1"></iframe></div>
+      <div class="sw"><span><i style="background:#12081F"></i>#12081F</span><span><i style="background:#A855F7"></i>#A855F7</span><span><i style="background:#67E8F9"></i>#67E8F9</span><span><i style="background:#BEF264"></i>#BEF264</span><span><i style="background:#FF6FD8"></i>#FF6FD8</span></div></div>
+    <div class="col"><h2>C · Midnight Glass</h2><p>Blue-indigo base, periwinkle primary. Calmest; least "dreamy purple".</p>
+      <div class="frame"><iframe title="Palette C" src="index.html?screen=smartcare&state=results&palette=c&chrome=0&freeze=1"></iframe></div>
+      <div class="sw"><span><i style="background:#0A0E1A"></i>#0A0E1A</span><span><i style="background:#818CF8"></i>#818CF8</span><span><i style="background:#22D3EE"></i>#22D3EE</span><span><i style="background:#A3E635"></i>#A3E635</span><span><i style="background:#A78BFA"></i>#A78BFA</span></div></div>
+  </div>
+  <table>
+    <tr><th></th><th>A · Aurora Indigo</th><th>B · Neon Orchid</th><th>C · Midnight Glass</th></tr>
+    <tr><td>Fits "tím mộng mơ + neon"</td><td>Yes: violet with cool neon accents</td><td>Most neon; risks reading as a pink→magenta look we must avoid</td><td>Reads blue more than purple</td></tr>
+    <tr><td>Module hues stay distinct</td><td>Yes: base is neutral enough for 10 hues</td><td>Purple modules blend into the base</td><td>Blue modules (Duplicates, Cloud) blend in</td></tr>
+    <tr><td>Long-session comfort</td><td>Good</td><td>Tiring: high chroma everywhere</td><td>Best</td></tr>
+    <tr><td>Recommendation</td><td><b>Ship this</b></td><td>Use only for marketing moments</td><td>Fallback if A feels too purple in testing</td></tr>
+  </table>
+</main>
+<script>
+  const fit = () => document.querySelectorAll('.frame').forEach(f => { f.querySelector('iframe').style.transform = `scale(${f.clientWidth / 1200})`; });
+  addEventListener('resize', fit); fit();
+</script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+/* SOS Mac — Aurora Indigo tokens (Palette A, default) + B / C overrides for comparison.
+   Names mirror the proposed Swift names: --bg-base -> Theme.Color.bgBase, etc.
+   Every hex comes from sos-mac-purple-neon-palette-g1.md (contrast computed there). */
+
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+  /* surfaces */
+  --bg-base: #0B0A14;          /* Theme.Color.bgBase */
+  --bg-elevated: #151327;      /* Theme.Color.bgElevated — sheets, popovers, dialogs */
+  --glass: #1D1A33;            /* Theme.Color.glass — Reduce Transparency fallback */
+  --glass-a: rgba(29, 26, 51, 0.72); /* material look in prototype (regular material + tint) */
+  --card: #16142A;             /* Theme.Color.card */
+  --sidebar: #100E1E;          /* sidebar fallback under system sidebar material */
+  --row-hover: rgba(167, 139, 250, 0.08);
+  --row-selected: rgba(139, 92, 246, 0.18);
+  /* brand */
+  --primary: #8B5CF6;          /* Theme.Color.primary — icon/fill-safe, never small text */
+  --primary-deep: #6D28D9;     /* Theme.Color.primaryDeep — filled buttons, white label 7.10:1 */
+  --primary-bright: #A78BFA;   /* Theme.Color.primaryBright — links, selected labels */
+  --on-primary: #FFFFFF;
+  /* neon (verbs, not surfaces) */
+  --neon-cyan: #22D3EE;        /* scanning / cleaning in progress */
+  --neon-lime: #A3E635;        /* done / optimized */
+  --neon-magenta: #E879F9;     /* Space Lens signature only */
+  /* text */
+  --text-1: #F4F2FF;           /* 17.79:1 on base */
+  --text-2: #B8B2D9;           /* 9.75:1 */
+  --text-3: #7A73A8;           /* 4.54:1 — disabled / placeholder only, >= 13 pt */
+  /* status */
+  --success: #34D399;
+  --warning: #FBBF24;
+  --danger: #F87171;
+  --danger-fill: #B91C1C;      /* irreversible action button, white label 6.47:1 */
+  /* lines */
+  --hairline: rgba(184, 178, 217, 0.12);
+  --hairline-strong: rgba(184, 178, 217, 0.22);
+  /* gradients */
+  --gradient-aurora: linear-gradient(120deg, #6366F1 0%, #8B5CF6 50%, #22D3EE 100%);
+  --gradient-soft: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #6366F1 100%);
+  /* elevation */
+  --shadow-raised: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 2px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-float: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 2px 6px rgba(0, 0, 0, 0.5), 0 24px 60px rgba(0, 0, 0, 0.55);
+  --glow-alpha: 0.32;          /* idle glow budget <= 35 % */
+  --aurora-alpha: 0.16;        /* background aurora on content canvas */
+  /* treemap ramp (By Folder): one family, white labels >= 7:1 */
+  --tm-1: #4A3A9E; --tm-2: #3D3F95; --tm-3: #34509C; --tm-4: #2E5B8F;
+  --tm-5: #463C82; --tm-6: #3A4780; --tm-7: #353A6E; --tm-8: #2D2A55;
+  --tm-text: #F4F2FF;
+  --tm-mix: #16142A;           /* By Type: hue 42 % mixed into card */
+  --tm-mix-pct: 42%;
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+  --bg-base: #F7F5FF;
+  --bg-elevated: #FFFFFF;
+  --glass: #FFFFFF;
+  --glass-a: rgba(255, 255, 255, 0.78);
+  --card: #FFFFFF;
+  --sidebar: #EEEAFB;
+  --row-hover: rgba(109, 40, 217, 0.06);
+  --row-selected: rgba(124, 58, 237, 0.12);
+  --primary: #7C3AED;
+  --primary-deep: #7C3AED;     /* button fill, white label 5.70:1 */
+  --primary-bright: #6D28D9;   /* purple as text/links 6.58:1 */
+  --on-primary: #FFFFFF;
+  /* neon always darkens in light */
+  --neon-cyan: #0E7490;
+  --neon-lime: #4D7C0F;
+  --neon-magenta: #A21CAF;
+  --text-1: #1A1333;
+  --text-2: #56506E;           /* 7.03:1 */
+  --text-3: #8B86A3;           /* 3.22:1 — disabled / decorative only */
+  --success: #047857;
+  --warning: #B45309;
+  --danger: #B91C1C;
+  --danger-fill: #B91C1C;
+  --hairline: rgba(26, 19, 51, 0.09);
+  --hairline-strong: rgba(26, 19, 51, 0.16);
+  --gradient-aurora: linear-gradient(120deg, #6366F1 0%, #7C3AED 50%, #0E7490 100%);
+  --gradient-soft: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6366F1 100%);
+  --shadow-raised: 0 1px 2px rgba(26, 19, 51, 0.06), 0 6px 18px rgba(26, 19, 51, 0.06);
+  --shadow-float: 0 2px 6px rgba(26, 19, 51, 0.08), 0 22px 48px rgba(26, 19, 51, 0.14);
+  --glow-alpha: 0;             /* glow effects stay in dark mode only */
+  --aurora-alpha: 0.07;
+  --tm-1: #DDD6FE; --tm-2: #E0E7FF; --tm-3: #DBEAFE; --tm-4: #E0F2FE;
+  --tm-5: #EDE9FE; --tm-6: #D9E2FF; --tm-7: #E9E5FF; --tm-8: #ECE7FA;
+  --tm-text: #1A1333;
+  --tm-mix: #FFFFFF;
+  --tm-mix-pct: 24%;
+}
+
+/* ---------- Palette B — Neon Orchid (comparison only) ---------- */
+[data-palette="b"][data-theme="dark"], [data-palette="b"] [data-theme="dark"] {
+  --bg-base: #12081F; --bg-elevated: #1D1030; --glass: #251540; --glass-a: rgba(37, 21, 64, 0.72);
+  --card: #1A0E2C; --sidebar: #170B27;
+  --primary: #A855F7; --primary-deep: #7C3AED; --primary-bright: #C084FC;
+  --neon-cyan: #67E8F9; --neon-magenta: #FF6FD8; --neon-lime: #BEF264;
+  --text-1: #FAF5FF; --text-2: #C4B5E0; --text-3: #9287B8;
+  --success: #4ADE80; --warning: #FBBF24; --danger: #FB7185;
+  --gradient-aurora: linear-gradient(120deg, #C084FC 0%, #A855F7 50%, #7C3AED 100%);
+  --row-selected: rgba(168, 85, 247, 0.2);
+}
+/* ---------- Palette C — Midnight Glass · DARK (chosen 2026-11-26) ---------- */
+[data-palette="c"][data-theme="dark"], [data-palette="c"] [data-theme="dark"] {
+  --bg-base: #0A0E1A; --bg-elevated: #131A2E; --glass: #18213A; --glass-a: rgba(24, 33, 58, 0.72);
+  --card: #111829; --sidebar: #0E1424;
+  --primary: #818CF8; --primary-deep: #4F46E5; --primary-bright: #A5B4FC;
+  --neon-cyan: #22D3EE; --neon-magenta: #A78BFA; --neon-lime: #A3E635;
+  --text-1: #EEF2FF; --text-2: #A5ADC8; --text-3: #6E7799;
+  --success: #34D399; --warning: #F59E0B; --danger: #F87171;
+  --gradient-aurora: linear-gradient(120deg, #A5B4FC 0%, #818CF8 50%, #6366F1 100%);
+  --row-selected: rgba(129, 140, 248, 0.2);
+  /* spec §2.4 [D]: lines and row hover take C's own hues instead of A literals */
+  --row-hover: rgba(165, 180, 252, 0.08);              /* primaryBright @ 8 % */
+  --hairline: rgba(165, 173, 200, 0.12);               /* textSecondary @ 12 % */
+  --hairline-strong: rgba(165, 173, 200, 0.22);        /* textSecondary @ 22 % */
+  --tm-mix: #111829;                                    /* card */
+}
+/* ---------- Palette C — Midnight Glass · LIGHT (chosen 2026-11-26) ----------
+   All 28 Theme.Color tokens + the §2.4 additions. Contrast is WCAG 2.x, computed 2026-11-26
+   on base #F4F6FF / card #FFFFFF / sidebar #EEF2FF / selected row #EAE9FC.
+   Every text token reaches >= 4.5:1 on all four, except --text-3 (large/bold/disabled only, >= 3.09:1). */
+[data-palette="c"][data-theme="light"], [data-palette="c"] [data-theme="light"] {
+  color-scheme: light;
+  /* surfaces */
+  --bg-base: #F4F6FF;          /* Theme.Color.bgBase [R] */
+  --bg-elevated: #FFFFFF;      /* bgElevated */
+  --glass: #FFFFFF;            /* glass — Reduce Transparency fill */
+  --glass-a: rgba(255, 255, 255, 0.78);
+  --card: #FFFFFF;             /* card */
+  --sidebar: #EEF2FF;          /* sidebar fallback (indigo-50) */
+  --row-hover: rgba(67, 56, 202, 0.06);   /* primaryBright @ 6 % */
+  --row-selected: rgba(79, 70, 229, 0.12); /* primary @ 12 % -> #EAE9FC on card */
+  /* brand */
+  --primary: #4F46E5;          /* 5.83:1 on base */
+  --primary-deep: #4F46E5;     /* fill; white label 6.29:1 */
+  --primary-bright: #4338CA;   /* links / selected labels 7.33:1 */
+  --on-primary: #FFFFFF;
+  /* neon always darkens in light */
+  --neon-cyan: #155E75;        /* 6.74:1 */
+  --neon-lime: #3F6212;        /* 6.56:1 */
+  --neon-magenta: #6D28D9;     /* violet in C, 6.59:1 */
+  /* text */
+  --text-1: #141A33;           /* 15.89:1 */
+  --text-2: #4A5273;           /* 7.09:1 */
+  --text-3: #7C84A3;           /* 3.42:1 — large / bold / disabled / placeholder only */
+  /* status */
+  --success: #047857;          /* 5.09:1 base, 4.59:1 selected row */
+  --warning: #A14A06;          /* CHANGED from report #B45309 (4.20:1 on selected row, 4.32:1 badge tint, 4.49:1 sidebar) -> 5.57:1 base, >= 5.02:1 everywhere */
+  --danger: #B91C1C;           /* 6.00:1 */
+  --danger-fill: #B91C1C;      /* white label 6.47:1 */
+  /* lines — C text-1 hue */
+  --hairline: rgba(20, 26, 51, 0.09);
+  --hairline-strong: rgba(20, 26, 51, 0.16);
+  /* gradients */
+  --gradient-aurora: linear-gradient(120deg, #6366F1 0%, #4F46E5 50%, #155E75 100%);
+  --gradient-soft: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6366F1 100%);
+  /* elevation — C ink #141A33 instead of A's #1A1333 */
+  --shadow-raised: 0 1px 2px rgba(20, 26, 51, 0.06), 0 6px 18px rgba(20, 26, 51, 0.06);
+  --shadow-float: 0 2px 6px rgba(20, 26, 51, 0.08), 0 22px 48px rgba(20, 26, 51, 0.14);
+  --glow-alpha: 0;             /* no glow in light */
+  --aurora-alpha: 0.07;
+  /* treemap ramp (labels 12.3–14.9:1) */
+  --tm-1: #DDD6FE; --tm-2: #E0E7FF; --tm-3: #DBEAFE; --tm-4: #E0F2FE;
+  --tm-5: #EDE9FE; --tm-6: #D9E2FF; --tm-7: #E9E5FF; --tm-8: #ECE7FA;
+  --tm-text: #141A33;          /* CHANGED from A ink #1A1333 to C text-1 */
+  --tm-mix: #FFFFFF;
+  --tm-mix-pct: 24%;
+}
+
+/* ---------- geometry ---------- */
+:root {
+  /* Theme.Spacing */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 20px; --sp-6: 24px; --sp-8: 32px; --sp-12: 48px;
+  /* Theme.Radius */
+  --r-xs: 5px; --r-sm: 7px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px; --r-pill: 999px;
+  /* Theme.Motion */
+  --dur-quick: 150ms; --dur-standard: 250ms; --dur-emphasized: 450ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.36, 0.64, 1);
+  --pulse: 2400ms;
+  /* Theme.Font (macOS text styles) */
+  --f-display: 600 30px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  --f-title1: 600 22px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  --f-title2: 600 17px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --f-title3: 600 15px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --f-headline: 600 13px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --f-body: 400 13px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --f-callout: 400 12px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --f-subhead: 400 11px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --f-eyebrow: 600 11px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  --f-mono: 400 11px/1.35 ui-monospace, "SF Mono", Menlo, monospace;
+  --f-numeral-xl: 600 40px/1.05 -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+  --f-numeral-l: 600 28px/1.1 -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-quick: 0ms; --dur-standard: 0ms; --dur-emphasized: 0ms; }
+}

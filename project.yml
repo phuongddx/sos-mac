@@ -3,6 +3,13 @@ options:
   bundleIdPrefix: com.nextlabs
   deploymentTarget:
     macOS: "14.0"
+settings:
+  base:
+    # arm64-only, every target and configuration. Homebrew's libyara bottle (linked by
+    # CYara in Packages/CleanCore) is arm64-only, so the default ARCHS_STANDARD universal
+    # Release build fails to link the x86_64 slice. Intel would need a vendored universal
+    # libyara — see docs/superpowers/specs/2026-11-27-release-followups-a-f-design.md (B).
+    EXCLUDED_ARCHS: x86_64
 
 packages:
   CleanCore:
@@ -57,6 +64,8 @@ targets:
     platform: macOS
     sources:
       - path: MenuBarHelper
+      - path: App/DesignSystem/Theme.swift
+      - path: App/DesignSystem/AuroraSurface.swift
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac.menubarhelper
@@ -72,6 +81,23 @@ targets:
     dependencies:
       - package: CleanCore
         product: CleanCore
+
+  SOSMacTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: SOSMacTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac.tests
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/SOSMac.app/Contents/MacOS/SOSMac"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+    dependencies:
+      - target: SOSMac
 
   SOSMacUITests:
     type: bundle.ui-testing
@@ -113,10 +139,12 @@ schemes:
     build:
       targets:
         SOSMac: all
+        SOSMacTests: [test]
         SOSMacUITests: [test]
     run:
       config: Debug
     test:
       config: Debug
       targets:
+        - SOSMacTests
         - SOSMacUITests
