@@ -140,10 +140,17 @@ struct ModuleIdentity: Hashable, Sendable {
 struct ModuleOverlay: Identifiable {
     let id: AnyHashable
     let content: AnyView
+    /// The exit a system-initiated dismissal takes (Escape, `performCancel`): the same
+    /// closure Cancel runs, wired by `ModuleSheetDismissal.wrap`. `nil` for overlays
+    /// that have no such exit.
+    var onSystemDismiss: (@MainActor () -> Void)?
 
-    init(id: AnyHashable, @ViewBuilder content: () -> some View) {
+    init(id: AnyHashable,
+         onSystemDismiss: (@MainActor () -> Void)? = nil,
+         @ViewBuilder content: () -> some View) {
         self.id = id
         self.content = AnyView(content())
+        self.onSystemDismiss = onSystemDismiss
     }
 }
 
