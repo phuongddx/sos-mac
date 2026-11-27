@@ -82,6 +82,40 @@ struct ConfirmSheetTests {
         #expect(spy.confirmCalls.count == 1)
     }
 
+    @Test("the cleanup list draws every row; read-only variants keep the first-5 preview")
+    func cleanupListDrawsEveryRow() {
+        let many = (0..<7).map { ConfirmItem(id: "item-\($0)", name: "file\($0).bin", size: 1_024) }
+
+        let selectable = ConfirmItemList.drawnRows(for: many, isSelectable: true)
+        #expect(selectable.rows.count == 7)
+        #expect(selectable.overflowCount == 0)
+
+        let readOnly = ConfirmItemList.drawnRows(for: many, isSelectable: false)
+        #expect(readOnly.rows.map(\.id) == many.prefix(ConfirmItemList.previewLimit).map(\.id))
+        #expect(readOnly.overflowCount == 2)
+    }
+
+    @Test("the cleanup-list title count follows the checked rows, past the old preview too")
+    func cleanupTitleCountIsLive() {
+        let spy = Spy()
+        let many = (0..<7).map { ConfirmItem(id: "item-\($0)", name: "file\($0).bin", size: 1_024) }
+        let state = ConfirmSheetState(model: makeModel(variant: .cleanupList, items: many, spy: spy))
+
+        // Every row starts checked — the title shows the model's own count at first.
+        #expect(state.titleCount == 7)
+        #expect(state.isConfirmEnabled)
+
+        // D7: rows beyond the old 5-row preview are real, checkable rows; unchecking one
+        // moves the title (the stale-title regression).
+        state.toggleItem("item-5")
+        state.toggleItem("item-6")
+        #expect(state.titleCount == 5)
+
+        let confirmed = state.confirm()
+        #expect(confirmed?.itemIDs == Set((0..<5).map { "item-\($0)" }))
+        #expect(spy.confirmCalls.count == 1)
+    }
+
     @Test("local variants confirm the full item list")
     func localVariantsConfirmEverything() {
         for variant in [ConfirmSheet.Variant.trash, .uninstall, .quarantine] {

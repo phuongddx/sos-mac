@@ -203,7 +203,12 @@ struct ConfirmSheet: View {
         case .quarantine:
             return Text("Quarantine ") + count + Text(" item\(model.count == 1 ? "" : "s")?")
         case .cleanupList:
-            return Text("Move ") + count + Text(" item\(model.count == 1 ? "" : "s") to the Trash?")
+            // D7: the count follows the checked rows (state.titleCount), so the title,
+            // the list and the Total row always show the one number that matters — the
+            // number that will move.
+            let liveCount = state.titleCount
+            let live = Text("\(liveCount)").fontWeight(.semibold)
+            return Text("Move ") + live + Text(" item\(liveCount == 1 ? "" : "s") to the Trash?")
         }
     }
 
@@ -357,6 +362,12 @@ final class ConfirmSheetState {
         case .cleanupList: return !checkedItemIDs.isEmpty
         case .trash, .uninstall, .quarantine: return true
         }
+    }
+
+    /// D7: the number the title shows. The cleanup list's follows the checked rows live;
+    /// every other variant shows the model's own count.
+    var titleCount: Int {
+        model.variant == .cleanupList ? checkedItemIDs.count : model.count
     }
 
     func toggleAcknowledgement() {
