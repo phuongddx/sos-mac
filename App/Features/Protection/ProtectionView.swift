@@ -188,6 +188,8 @@ private struct ProtectionScreen: View {
             VStack(alignment: .leading, spacing: 0) {
                 disclaimer
                     .padding(.horizontal, -Self.contentPadding)
+                unreadableBanner
+                    .padding(.horizontal, -Self.contentPadding)
                 ResultsHeaderView(
                     hue: module.hue,
                     title: "\(findings.count) \(findings.count == 1 ? "threat" : "threats") found",
@@ -210,11 +212,37 @@ private struct ProtectionScreen: View {
 
     /// The engine's own file count; omitted (never invented) when it reported none.
     private var resultsSub: String {
-        let places = "\(viewModel.locationCount) \(viewModel.locationCount == 1 ? "location" : "locations")"
-        let checked = viewModel.checkedFileCount > 0
-            ? "\(Self.number(viewModel.checkedFileCount)) files checked in \(places). "
-            : "Checked \(places). "
-        return checked + "Nothing is selected for you."
+        checkedSummary + " Nothing is selected for you."
+    }
+
+    /// "N files checked in 5 of 6 locations." — the "x of" only when the engine reported a
+    /// location it could not read (D10); never a claim about places it did not look into.
+    private var checkedSummary: String {
+        let total = viewModel.locationCount
+        let checked = viewModel.checkedLocationCount
+        let places = checked == total
+            ? "\(total) \(total == 1 ? "location" : "locations")"
+            : "\(checked) of \(total) \(total == 1 ? "location" : "locations")"
+        return viewModel.checkedFileCount > 0
+            ? "\(Self.number(viewModel.checkedFileCount)) files checked in \(places)."
+            : "Checked \(places)."
+    }
+
+    /// Names every location the engine could not read, with its own reason (§6.3).
+    @ViewBuilder
+    private var unreadableBanner: some View {
+        let unreadable = viewModel.unreadableLocations
+        if !unreadable.isEmpty {
+            BannerView(
+                kind: .warn,
+                title: unreadable.count == 1
+                    ? "Couldn't check \(unreadable[0].label)"
+                    : "Couldn't check \(unreadable.count) locations",
+                text: unreadable
+                    .map { "\($0.label) — \($0.reasons.joined(separator: " "))" }
+                    .joined(separator: "\n"))
+                .padding(EdgeInsets(top: Theme.Spacing.s3, leading: Self.contentPadding, bottom: 0, trailing: Self.contentPadding))
+        }
     }
 
     private func threatTile(findings: [ThreatFinding], groupCount: Int) -> some View {
@@ -253,16 +281,14 @@ private struct ProtectionScreen: View {
     // MARK: Empty / Error
 
     private var emptyContent: some View {
-        let places = "\(viewModel.locationCount) \(viewModel.locationCount == 1 ? "location" : "locations")"
-        return VStack(spacing: 0) {
+        VStack(spacing: 0) {
             disclaimer
+            unreadableBanner
             StatusStateView(
                 kind: .ok,
                 symbol: "shield",
                 title: "No known threats found",
-                text: viewModel.checkedFileCount > 0
-                    ? "\(Self.number(viewModel.checkedFileCount)) files checked in \(places)."
-                    : "Checked \(places).")
+                text: checkedSummary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
