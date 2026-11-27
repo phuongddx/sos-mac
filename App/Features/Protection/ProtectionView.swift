@@ -7,14 +7,19 @@ import CleanCore
 /// into `ModuleScreen` (toolbar, aurora canvas, dock, sheet).
 ///
 /// Documented deviations from the prototype (also in the PR 13 gallery README):
-/// - `results` keeps the frame's hard-coded "Clean" CTA, disabled: a finding is quarantined
-///   from its own review, never in bulk. `done` keeps the frame's "Open Trash" dock button,
-///   disabled: quarantine is not the Trash. The frame has no label overrides and
-///   `ModuleScreen` is outside this PR's write set.
+/// - Dock wording comes from `ModuleIdentity.dock` (§5.10), not from this view: `results` has
+///   one round CTA "Review" plus a fixed hint ("Review the finding, then quarantine it") in
+///   place of a selection meta and a separate "Review Items…" button, and "Scan Again" as
+///   the trailing button; `done` has no "Open Trash" secondary, because quarantine is not
+///   the Trash (the Done card's own "Open Quarantine" button leads instead).
+/// - The review bar's CTA is "Quarantine…" and it is only offered once the user has checked a
+///   finding — nothing is ever pre-selected, and a finding is quarantined from its own
+///   review, never in bulk from `results`. Every quarantine opens the confirmation first.
 /// - The Quarantine sub-screen has no lifecycle state, so it composes the aurora canvas and
 ///   toolbar itself (back button "Protection") instead of using the dock.
-/// - Review is nothing-pre-selected: the review bar's "Quarantine…" stays disabled until the
-///   user checks a finding (spec: never auto-select a quarantine target).
+/// - Locations the engine could not read are named in a banner on `results` and `empty`
+///   (D10; §6.3 engine reasons only) — the prototype's "4 of 6 locations were checked" copy
+///   is now backed by the engine's own report of unreadable roots.
 /// - "Check VirusTotal" is removed (OD-15).
 struct ProtectionView: View {
     @Environment(ModuleStore.self) private var store
@@ -188,6 +193,8 @@ private struct ProtectionScreen: View {
             VStack(alignment: .leading, spacing: 0) {
                 disclaimer
                     .padding(.horizontal, -Self.contentPadding)
+                unreadableBanner
+                    .padding(.horizontal, -Self.contentPadding)
                 ResultsHeaderView(
                     hue: module.hue,
                     title: "\(findings.count) \(findings.count == 1 ? "threat" : "threats") found",
@@ -210,11 +217,37 @@ private struct ProtectionScreen: View {
 
     /// The engine's own file count; omitted (never invented) when it reported none.
     private var resultsSub: String {
-        let places = "\(viewModel.locationCount) \(viewModel.locationCount == 1 ? "location" : "locations")"
-        let checked = viewModel.checkedFileCount > 0
-            ? "\(Self.number(viewModel.checkedFileCount)) files checked in \(places). "
-            : "Checked \(places). "
-        return checked + "Nothing is selected for you."
+        checkedSummary + " Nothing is selected for you."
+    }
+
+    /// "N files checked in 5 of 6 locations." — the "x of" only when the engine reported a
+    /// location it could not read (D10); never a claim about places it did not look into.
+    private var checkedSummary: String {
+        let total = viewModel.locationCount
+        let checked = viewModel.checkedLocationCount
+        let places = checked == total
+            ? "\(total) \(total == 1 ? "location" : "locations")"
+            : "\(checked) of \(total) \(total == 1 ? "location" : "locations")"
+        return viewModel.checkedFileCount > 0
+            ? "\(Self.number(viewModel.checkedFileCount)) files checked in \(places)."
+            : "Checked \(places)."
+    }
+
+    /// Names every location the engine could not read, with its own reason (§6.3).
+    @ViewBuilder
+    private var unreadableBanner: some View {
+        let unreadable = viewModel.unreadableLocations
+        if !unreadable.isEmpty {
+            BannerView(
+                kind: .warn,
+                title: unreadable.count == 1
+                    ? "Couldn't check \(unreadable[0].label)"
+                    : "Couldn't check \(unreadable.count) locations",
+                text: unreadable
+                    .map { "\($0.label) — \($0.reasons.joined(separator: " "))" }
+                    .joined(separator: "\n"))
+                .padding(EdgeInsets(top: Theme.Spacing.s3, leading: Self.contentPadding, bottom: 0, trailing: Self.contentPadding))
+        }
     }
 
     private func threatTile(findings: [ThreatFinding], groupCount: Int) -> some View {
@@ -253,16 +286,14 @@ private struct ProtectionScreen: View {
     // MARK: Empty / Error
 
     private var emptyContent: some View {
-        let places = "\(viewModel.locationCount) \(viewModel.locationCount == 1 ? "location" : "locations")"
-        return VStack(spacing: 0) {
+        VStack(spacing: 0) {
             disclaimer
+            unreadableBanner
             StatusStateView(
                 kind: .ok,
                 symbol: "shield",
                 title: "No known threats found",
-                text: viewModel.checkedFileCount > 0
-                    ? "\(Self.number(viewModel.checkedFileCount)) files checked in \(places)."
-                    : "Checked \(places).")
+                text: checkedSummary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -382,7 +413,7 @@ private struct ProtectionScreen: View {
             title = "\(quarantinedCount) quarantined, \(failedCount) couldn't be moved"
         }
         var stats: [DoneView.Stat] = [
-            .init(label: "Quarantined", value: "\(quarantinedCount)", isBytes: true),
+            .init(label: "Quarantined", value: "\(quarantinedCount)", isBytes: false),
             .init(label: "In quarantine", value: "\(viewModel.quarantinedRecords.count)"),
         ]
         if failedCount > 0 {

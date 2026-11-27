@@ -12,6 +12,10 @@ import CleanCore
 /// | `scanning` | `scanning` | "Checking files…" · six step rows · "n of N files" + ETA · current path · **Stop** |
 /// | `results` | `results` (findings) | tiles **Known threats** / **Already in quarantine** · Review Items… · Scan Again |
 /// | `empty` | `results` (no findings) | "No known threats found" + the engine's file count · Scan Again |
+///
+/// `results` and `empty` also carry a banner naming any location the engine could not read
+/// (D10), and say "N files checked in 5 of 6 locations" when there is one. If *no* location
+/// could be read the scan is `failed`, never an empty "all clear".
 /// | `review` | `review` | groups = locations with findings · detail (Detection, Identifier, Found, Path, Size) · **Quarantine…** |
 /// | `cleaning` | `quarantining(selectedCount:)` | "Moving n of N items to quarantine…" |
 /// | `done` | `done(quarantinedCount:failedCount:)` | stats · failure banners (F4) · quarantine panel · Scan Again |
@@ -68,6 +72,15 @@ final class ProtectionViewModel {
         let reason: String
     }
 
+    /// A location the last scan could not read, with the engine's own reasons (one per
+    /// unreadable root). `id` is the location's id; a root no location claims (never expected)
+    /// is listed under its own path so it is shown, never dropped.
+    struct UnreadableLocation: Identifiable, Equatable, Sendable {
+        let id: String
+        let label: String
+        let reasons: [String]
+    }
+
     /// A restore (or record-save) problem, drawn as a banner next to the quarantine list.
     struct ActionError: Equatable, Sendable {
         let title: String
@@ -88,6 +101,8 @@ final class ProtectionViewModel {
     /// The engine's own count of files walked by the last scan (0 until one finishes).
     private(set) var checkedFileCount = 0
     private(set) var locationSummaries: [LocationSummary]
+    /// Locations the last scan could not read (empty when every one was checked).
+    private(set) var unreadableLocations: [UnreadableLocation] = []
     /// The home folder the displayed paths are abbreviated against (`~/Downloads`).
     private(set) var homeDirectory: String = NSHomeDirectory()
     /// The Quarantine sub-screen (toolbar back button "Protection"). Independent of `phase`,
@@ -104,20 +119,25 @@ final class ProtectionViewModel {
     private let locations: [ProtectionLocation]
     private let scanner: ProtectionScanner
     private let quarantineManager: QuarantineManager
+    private let persistQuarantine: (@MainActor (QuarantinedFile) throws -> Void)?
     private var scanTask: Task<Void, Never>?
 
+    /// `persistQuarantine` is a test seam for the record-save step: `nil` (the default) inserts
+    /// a `QuarantineRecord` into `modelContext` and saves it.
     init(
         modelContext: ModelContext,
         locations: [ProtectionLocation] = ProtectionLocation.allowlist,
         signatureDatabase: SignatureDatabase = .bundledBaseline,
         quarantineManager: QuarantineManager = QuarantineManager(),
-        progressTracker: ScanProgressTracker = ScanProgressTracker()
+        progressTracker: ScanProgressTracker = ScanProgressTracker(),
+        persistQuarantine: (@MainActor (QuarantinedFile) throws -> Void)? = nil
     ) {
         self.modelContext = modelContext
         self.locations = locations
         self.scanner = ProtectionScanner(locations: locations, signatureDatabase: signatureDatabase)
         self.quarantineManager = quarantineManager
         self.progressTracker = progressTracker
+        self.persistQuarantine = persistQuarantine
         self.locationSummaries = locations.map { LocationSummary(id: $0.id, label: $0.label, roots: []) }
         self.quarantinedRecords = Self.fetchRecords(from: modelContext)
     }
@@ -152,6 +172,13 @@ final class ProtectionViewModel {
 
     /// The location count the copy uses ("6 locations").
     var locationCount: Int { locations.count }
+
+    /// How many locations the last scan really looked into: a location with any unreadable
+    /// root does not count.
+    var checkedLocationCount: Int {
+        let known = Set(locationSummaries.map(\.id))
+        return max(0, locationCount - unreadableLocations.filter { known.contains($0.id) }.count)
+    }
 
     var selectedFindings: [ThreatFinding] {
         findings.filter { selectedPaths.contains($0.path) }
@@ -234,6 +261,27 @@ final class ProtectionViewModel {
         return groups
     }
 
+    /// Groups the engine's unreadable roots by the location that owns them, in scan order,
+    /// keeping the engine's own reasons. A root no location claims is listed under its path.
+    static func unreadableLocations(from roots: [UnreadableRoot],
+                                    locations: [LocationSummary]) -> [UnreadableLocation] {
+        var reasonsByLocation = [[String]](repeating: [], count: locations.count)
+        var unmatched: [UnreadableLocation] = []
+        for root in roots {
+            if let index = locationIndex(forPath: root.path, in: locations) {
+                reasonsByLocation[index].append(root.reason)
+            } else {
+                unmatched.append(UnreadableLocation(id: root.path, label: root.path, reasons: [root.reason]))
+            }
+        }
+        let matched = locations.enumerated().compactMap { index, location -> UnreadableLocation? in
+            reasonsByLocation[index].isEmpty
+                ? nil
+                : UnreadableLocation(id: location.id, label: location.label, reasons: reasonsByLocation[index])
+        }
+        return matched + unmatched
+    }
+
     /// `/Users/me/Downloads/a.zip` → `~/Downloads/a.zip` against `home`; any other path as is.
     static func displayPath(_ path: String, home: String) -> String {
         let base = home.hasSuffix("/") ? String(home.dropLast()) : home
@@ -292,12 +340,23 @@ final class ProtectionViewModel {
         // returns — so the file count is tracked here, not read back from the tracker.
         let reported = OSAllocatedUnfairLock(initialState: 0)
         do {
-            let scanned = try await scanner.scan(onProgress: { [weak self] progress in
+            let outcome = try await scanner.scan(onProgress: { [weak self] progress in
                 reported.withLock { $0 = max($0, progress.itemsProcessed) }
                 Task { @MainActor in self?.progressTracker.record(progress, generation: generation) }
             })
             guard !Task.isCancelled else { return }
-            findings = scanned
+            let unreadable = Self.unreadableLocations(from: outcome.unreadableRoots, locations: locationSummaries)
+            if !outcome.unreadableRoots.isEmpty,
+               outcome.unreadableRoots.count >= locationSummaries.flatMap(\.roots).count {
+                // Every root failed to open, so nothing was looked into and an empty list would
+                // read as an all-clear. §6.3: the engine's own reason, nothing invented.
+                let reason = outcome.unreadableRoots.first?.reason ?? ""
+                phase = .failed(message: "None of the locations could be read. \(reason)"
+                    .trimmingCharacters(in: .whitespaces))
+                return
+            }
+            unreadableLocations = unreadable
+            findings = outcome.findings
             selectedPaths = [] // never auto-select a quarantine target
             checkedFileCount = reported.withLock { $0 }
             currentGroupID = nil
@@ -305,8 +364,7 @@ final class ProtectionViewModel {
             phase = .results
         } catch {
             guard !Task.isCancelled else { return }
-            // §6.3: the engine's own reason, nothing invented (the engine does not report how
-            // many locations completed).
+            // §6.3: the engine's own reason, nothing invented.
             phase = .failed(message: error.localizedDescription)
         }
     }
@@ -318,6 +376,7 @@ final class ProtectionViewModel {
         focusedPath = nil
         quarantineProgress = nil
         checkedFileCount = 0
+        unreadableLocations = []
     }
 
     // MARK: - Review
@@ -514,6 +573,10 @@ final class ProtectionViewModel {
     // MARK: - SwiftData
 
     private func persist(_ file: QuarantinedFile) throws {
+        if let persistQuarantine {
+            try persistQuarantine(file)
+            return
+        }
         let record = QuarantineRecord(
             originalPath: file.originalPath,
             quarantinePath: file.quarantinePath,
@@ -622,6 +685,7 @@ final class ProtectionViewModel {
         findings = newFindings
         selectedPaths = []
         checkedFileCount = count
+        unreadableLocations = []
         currentGroupID = nil
         focusedPath = nil
         lastFailures = []
