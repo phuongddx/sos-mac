@@ -412,7 +412,10 @@ private struct UninstallerScreen: View {
             // S1: every removal path opens the confirmation first. A running app blocks it
             // (OD-9) — the review's banner says why, with Check Again.
             if !viewModel.selectedPaths.isEmpty, !viewModel.isReviewedAppRunning {
-                actions.primary = { presentUninstallConfirmation() }
+                actions.primary = {
+                guard store.pro.require(for: .uninstaller) else { return }
+                presentUninstallConfirmation()
+            }
             }
         case .cleaning:
             break

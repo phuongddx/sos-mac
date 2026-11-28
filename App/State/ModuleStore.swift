@@ -16,6 +16,11 @@ import CleanCore
 final class ModuleStore {
     private let modelContext: ModelContext
 
+    /// The app-wide Pro entitlement. Scans and results are always free; the
+    /// destructive actions every screen's confirmation sheet leads to are
+    /// gated through `require(for:)`.
+    let pro = ProAccess()
+
     #if MAS_BUILD
     /// The sandbox build's folder grants (home, Applications). View models are
     /// (re)built from the granted roots; until a grant exists the gating UI

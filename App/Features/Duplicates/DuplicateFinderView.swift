@@ -427,7 +427,10 @@ private struct DuplicateFinderScreen: View {
         case .results:
             // S1: every removal path opens the confirmation first.
             if !viewModel.selectedItems.isEmpty {
-                actions.primary = { presentTrashConfirmation(fromResults: true) }
+                actions.primary = {
+                guard store.pro.require(for: .duplicateFinder) else { return }
+                presentTrashConfirmation(fromResults: true)
+            }
             }
             if !viewModel.sets.isEmpty {
                 actions.reviewItems = { viewModel.enterReview() }
@@ -435,7 +438,10 @@ private struct DuplicateFinderScreen: View {
             actions.scanAgain = { viewModel.startScan() }
         case .review:
             if !viewModel.selectedItems.isEmpty {
-                actions.primary = { presentTrashConfirmation(fromResults: false) }
+                actions.primary = {
+                guard store.pro.require(for: .duplicateFinder) else { return }
+                presentTrashConfirmation(fromResults: false)
+            }
             }
         case .cleaning:
             break

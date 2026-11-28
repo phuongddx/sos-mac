@@ -162,6 +162,28 @@ targets:
           rm -rf "$DEST/MenuBarHelperMAS.app"
           cp -R "${BUILT_PRODUCTS_DIR}/MenuBarHelperMAS.app" "$DEST/MenuBarHelperMAS.app"
 
+  # StoreKit 2 tests run in the MAS app host so the real provider
+  # (MAS_BUILD) is what's under test; see StoreKitProTests.swift.
+  SOSMacMASTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: SOSMacMASTests
+      - path: StoreKit/SOSMacPro.storekit
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac.mastests
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/SOSMacMAS.app/Contents/MacOS/SOSMacMAS"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "DEBUG MAS_BUILD"
+    dependencies:
+      - target: SOSMacMAS
+
   SOSMacTests:
     type: bundle.unit-test
     platform: macOS
@@ -219,8 +241,15 @@ schemes:
     build:
       targets:
         SOSMacMAS: all
+        SOSMacMASTests: [test]
     run:
       config: Debug
+      # Local StoreKit testing (products above) without touching App Store Connect.
+      storeKitConfiguration: StoreKit/SOSMacPro.storekit
+    test:
+      config: Debug
+      targets:
+        - SOSMacMASTests
   SOSMac:
     build:
       targets:

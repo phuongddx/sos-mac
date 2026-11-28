@@ -1,0 +1,66 @@
+{
+  "identifier" : "6F7D2A90-9C51-4A1E-B0A4-1E0D0B7C5D11",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "29.99",
+      "familyShareable" : false,
+      "internalID" : "A1B2C3D4-0001-4E5F-8A9B-000000000001",
+      "localizations" : [
+        {
+          "description" : "Unlock every cleaning action forever. One purchase, no renewal.",
+          "displayName" : "SOS Mac Pro Lifetime",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.nextlabs.sosmac.pro.lifetime",
+      "referenceName" : "SOS Mac Pro Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "B2C3D4E5-0002-4F60-9BAC-000000000002",
+      "localizations" : [
+
+      ],
+      "name" : "SOS Mac Pro",
+      "subscriptions" : [
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "19.99",
+          "familyShareable" : false,
+          "groupNumber" : 1,
+          "internalID" : "C3D4E5F6-0003-4061-ACBD-000000000003",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Unlock every cleaning action for a year. Renews automatically, cancel anytime.",
+              "displayName" : "SOS Mac Pro Yearly",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "com.nextlabs.sosmac.pro.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "SOS Mac Pro Yearly",
+          "subscriptionGroupID" : "B2C3D4E5-0002-4F60-9BAC-000000000002",
+          "type" : "RecurringSubscription"
+        }
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

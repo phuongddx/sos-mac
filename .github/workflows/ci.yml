@@ -57,8 +57,21 @@ jobs:
           grep -q "com.apple.security.app-sandbox" /tmp/mas-entitlements.txt
           echo "app-sandbox entitlement present: OK"
 
+      - name: App unit tests (ProAccess, providers, view models)
+        run: |
+          xcodebuild test \
+            -project SOSMac.xcodeproj -scheme SOSMac \
+            -configuration Debug -destination 'platform=macOS' \
+            -only-testing:SOSMacTests \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            -quiet
+
       - name: CleanCore tests
         working-directory: Packages/CleanCore
         run: |
           set -o pipefail
           swift test 2>&1 | grep -vE "was built for newer|warning: object file|^\[" | tail -40
+
+      # Note: SOSMacMASTests (StoreKit/SKTestSession) runs locally against
+      # StoreKit/SOSMacPro.storekit — see docs/mas/paywall.md for why it is
+      # not part of CI.

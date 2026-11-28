@@ -7,10 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		00C977E53F0CE2984F663602 /* StoreKitProTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402ADA4E7497DB56B21C8981 /* StoreKitProTests.swift */; };
 		00F741E901C7A690EB8DAB91 /* UITestFixtures+Dashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 894C619B02C5F0C90D88DE74 /* UITestFixtures+Dashboard.swift */; };
+		018780DC1ED1A7D85C09A322 /* PaddleLicenseProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4271B01216254FA3FBA669B /* PaddleLicenseProvider.swift */; };
 		022F8931699A4D885B8B9DFA /* ScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 023817F2D9D285C011C0DA3F /* ScanningView.swift */; };
 		0252C1F2A81CB1D805D7CA81 /* ModuleSheetDismissalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB0E90A1A2D635D662C7166B /* ModuleSheetDismissalTests.swift */; };
 		03D89916AF1CF0691BB0B6FB /* StepRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C8BE73AC42934229155564A /* StepRowView.swift */; };
+		04B76DBB03926D7926FDC281 /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED24A693918E2CB1296504F /* PaywallView.swift */; };
+		0806AC313664C69C56A973C2 /* SOSMacPro.storekit in Resources */ = {isa = PBXBuildFile; fileRef = FF4886E65709E3F90EE9485D /* SOSMacPro.storekit */; };
 		08900F6991F02A43C569DDF4 /* CleanCore in Frameworks */ = {isa = PBXBuildFile; productRef = B0AE3ED04E1697D2D60C38DF /* CleanCore */; };
 		08C8721F31BAD4741D79A77D /* ConfirmItemList.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A59A503F6AE960C6CD51B4 /* ConfirmItemList.swift */; };
 		0B8EB0370E309D0D95DC67B3 /* SmartCareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19C39CA1766D163871E0E7CE /* SmartCareView.swift */; };
@@ -30,6 +34,7 @@
 		15E04AC47087D5EE0266CF32 /* ProgressiveCleaner.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0EF1DBAA9A5560ACF98A63C /* ProgressiveCleaner.swift */; };
 		16F32F11E98A8B00B1481998 /* UITestFixtures+Performance.swift in Sources */ = {isa = PBXBuildFile; fileRef = A267FF44B7289771B6AA7755 /* UITestFixtures+Performance.swift */; };
 		1B4936A4A6291F165CB9595D /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D556598CDC035EE94F81C8 /* DashboardView.swift */; };
+		1C1E77C4FFAAD41368087E42 /* ProAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C525F2674FB7A531433CAE6 /* ProAccess.swift */; };
 		1D06AB7F38F03BC556400EB7 /* ScanProgressTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC67E979C262C1B384952044 /* ScanProgressTracker.swift */; };
 		1F40A560B91FC884CF786AB5 /* ModuleStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1B843A3B926BEFB774274F /* ModuleStoreTests.swift */; };
 		1F57FAFAFF372F7BFFDF26AC /* UninstallerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1941F6225699920CDBD6068F /* UninstallerViewModelTests.swift */; };
@@ -110,6 +115,7 @@
 		7D5D3F7052BD076F8C2F70F4 /* SmartCareViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E244407C254EC7244F5679A6 /* SmartCareViewModel.swift */; };
 		7D6DCFA67BEF550AED2CFB2D /* ResultsHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61F9222D01A9BB3EFA06D707 /* ResultsHeaderView.swift */; };
 		7D9BBB20AB26D0CFE845E76D /* AuroraSurface.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8F91780FF146ADC79C0C93 /* AuroraSurface.swift */; };
+		7FEE953F5070BACC97D5C5CE /* StoreKitProProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A31D5744652172BEC4FE2ED /* StoreKitProProvider.swift */; };
 		820913CA36BBC59528083B95 /* MaintenanceRows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 199B48F767AD4F194E1E6C1A /* MaintenanceRows.swift */; };
 		83B2FDD49EC569C7ABB98D98 /* SOSMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B658F774CB266713577506C2 /* SOSMacApp.swift */; };
 		83FE256759C8CF700C9530FA /* ProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */; };
@@ -122,6 +128,7 @@
 		89A677FD9979FA784AE0C17A /* ASWebAuthSessionPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEE74DC5C8E5A6D70E4BDB9E /* ASWebAuthSessionPresenter.swift */; };
 		8A7D4331AFFDCB5D68F6FE3C /* JunkCleanerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 09BAF8424C039491F5324208 /* JunkCleanerViewModel.swift */; };
 		8AA61CB9664858415A409E9E /* StepRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C8BE73AC42934229155564A /* StepRowView.swift */; };
+		8AB99894972320FA59F12DBD /* ProAccessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27EB75C405F61CE4380FC90B /* ProAccessTests.swift */; };
 		8CB197C5A6E43082A88B95AE /* HelperOperations.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD009D570D83BC9D450F00E2 /* HelperOperations.swift */; };
 		8F86545DAEF9FE9A177FFFAD /* UITestFixtures+CloudCleanup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12C387D8F24CE868F9E1C4BA /* UITestFixtures+CloudCleanup.swift */; };
 		9048E53AD6C3B192A1A0A66D /* ModuleTileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A98E5B704E377BCA702F23AB /* ModuleTileView.swift */; };
@@ -194,6 +201,8 @@
 		D959F14D84EA12B2A74FCC32 /* JunkReviewDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50A367DBE053BD624FA25274 /* JunkReviewDetail.swift */; };
 		D98FF017AEDB981A91DC77F0 /* JunkCleanerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 186FF8423C720203B989511E /* JunkCleanerViewModelTests.swift */; };
 		DA3F33009217EFF6C0EDF5A3 /* ElevationModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73189B75ABC2BD11A9F61700 /* ElevationModifier.swift */; };
+		DA6B77A3D41382964A81D32C /* StoreKitProProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A31D5744652172BEC4FE2ED /* StoreKitProProvider.swift */; };
+		DC820FA44835B4278DDA29BF /* PaddleLicenseProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4271B01216254FA3FBA669B /* PaddleLicenseProvider.swift */; };
 		DCA7A1966B7B091F95B89898 /* UITestFixtures+Updater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23DEEAC73ABB4C256288697F /* UITestFixtures+Updater.swift */; };
 		DCBDB97B3029AF32E088BB1D /* MenuBarPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = 313B297F15BD7FB50466F914 /* MenuBarPopover.swift */; };
 		DDABCDA3D5687DA3D9226741 /* ProgressBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */; };
@@ -213,6 +222,8 @@
 		EF411F485D57410C2BA46851 /* MASAccessStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A2CA9E97646A1D527CFFF5 /* MASAccessStore.swift */; };
 		EFDE7593D4F73BCC2E1BEAF7 /* MenuBarHelperApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55FBEF13A614EB37E4296928 /* MenuBarHelperApp.swift */; };
 		F2F2D9337CA182C9FD55FD7D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB67B89413B962973465246B /* main.swift */; };
+		F7306422DB8081322163AD33 /* ProAccess.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C525F2674FB7A531433CAE6 /* ProAccess.swift */; };
+		F7F0AFB36E84512329668A0C /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED24A693918E2CB1296504F /* PaywallView.swift */; };
 		F8761A36E82DE110DDB6B68F /* JunkCleanerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 575242D8CA34B18FD76DD4FE /* JunkCleanerView.swift */; };
 		FA25CBA768BC9879F743EFDB /* ThemeContrastTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971904595BCAA22A152CEE4B /* ThemeContrastTests.swift */; };
 		FAEC8ADAB27FCD9F0593CD95 /* UninstallerReviewDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8C786373ED8EAC1859688C /* UninstallerReviewDetail.swift */; };
@@ -244,6 +255,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 80C8485EDEE67072AE469396;
 			remoteInfo = SOSMac;
+		};
+		B88F49B487D00FD42171B36F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1AE0FE96F145338D24088645 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3D59D9945D02A4929C4D743C;
+			remoteInfo = SOSMacMAS;
 		};
 		C01DE2D8B6FC01A6AE906E61 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -285,6 +303,7 @@
 		2212133287D5A40215D51B3F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		22EC34D67EBF39DAB19C31B7 /* SOSButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSButtonStyle.swift; sourceTree = "<group>"; };
 		23DEEAC73ABB4C256288697F /* UITestFixtures+Updater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UITestFixtures+Updater.swift"; sourceTree = "<group>"; };
+		27EB75C405F61CE4380FC90B /* ProAccessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProAccessTests.swift; sourceTree = "<group>"; };
 		2B37C16388088187F3EF7131 /* SmartCareViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCareViewModelTests.swift; sourceTree = "<group>"; };
 		2D1B843A3B926BEFB774274F /* ModuleStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleStoreTests.swift; sourceTree = "<group>"; };
 		2FA392DDD5F3B0F081667B3F /* DoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoneView.swift; sourceTree = "<group>"; };
@@ -292,12 +311,16 @@
 		313B297F15BD7FB50466F914 /* MenuBarPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarPopover.swift; sourceTree = "<group>"; };
 		3378D6B53CDCB0474385C0B8 /* CloudCleanupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCleanupView.swift; sourceTree = "<group>"; };
 		34D556598CDC035EE94F81C8 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		3A31D5744652172BEC4FE2ED /* StoreKitProProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitProProvider.swift; sourceTree = "<group>"; };
 		3BE8C8BA65A1959342CAFAD8 /* DuplicateFinderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateFinderViewModel.swift; sourceTree = "<group>"; };
+		3C525F2674FB7A531433CAE6 /* ProAccess.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProAccess.swift; sourceTree = "<group>"; };
+		402ADA4E7497DB56B21C8981 /* StoreKitProTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoreKitProTests.swift; sourceTree = "<group>"; };
 		40B2A8CBECAEB07E567C015B /* CloudCleanupViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCleanupViewModelTests.swift; sourceTree = "<group>"; };
 		410827EB99A79421DCD4BE06 /* AuroraBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuroraBackground.swift; sourceTree = "<group>"; };
 		4602316F2C4D26A19A7D0D74 /* ProgressBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressBarView.swift; sourceTree = "<group>"; };
 		46536D27681C822DDF6B6BA3 /* ComponentGalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGalleryView.swift; sourceTree = "<group>"; };
 		48E0272216431F2B9E4C753C /* StartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartView.swift; sourceTree = "<group>"; };
+		4DD5BA5B06CC59F0909F854B /* SOSMacMASTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SOSMacMASTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		50A367DBE053BD624FA25274 /* JunkReviewDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JunkReviewDetail.swift; sourceTree = "<group>"; };
 		50A9EF05480EB4C7B3C6623E /* UpdaterViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdaterViewModelTests.swift; sourceTree = "<group>"; };
 		5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuarantineRecord.swift; sourceTree = "<group>"; };
@@ -362,12 +385,14 @@
 		C8FAD68028AABF9C5B31041F /* ComponentGalleryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComponentGalleryTests.swift; sourceTree = "<group>"; };
 		C99BA9DCEA375A8537944594 /* UninstallerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallerView.swift; sourceTree = "<group>"; };
 		CF2B0BFC10865FD9AD02AB78 /* SOSMacMAS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SOSMacMAS.entitlements; sourceTree = "<group>"; };
+		D4271B01216254FA3FBA669B /* PaddleLicenseProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddleLicenseProvider.swift; sourceTree = "<group>"; };
 		D484F4538B320905C1A10F26 /* ProtectionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtectionViewModelTests.swift; sourceTree = "<group>"; };
 		D4D8888421C6C248085AA4EB /* ReviewFrameView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewFrameView.swift; sourceTree = "<group>"; };
 		D60AE4D0BE44E292519DD599 /* PerformanceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceViewModel.swift; sourceTree = "<group>"; };
 		D6A59A503F6AE960C6CD51B4 /* ConfirmItemList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmItemList.swift; sourceTree = "<group>"; };
 		D78116D60A7591C3E1D1E111 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		DC8C786373ED8EAC1859688C /* UninstallerReviewDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UninstallerReviewDetail.swift; sourceTree = "<group>"; };
+		DED24A693918E2CB1296504F /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
 		E244407C254EC7244F5679A6 /* SmartCareViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmartCareViewModel.swift; sourceTree = "<group>"; };
 		E4C7247C6125875E468D0056 /* PerformanceViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceViewModelTests.swift; sourceTree = "<group>"; };
 		E5454942F08539F2B5554DD6 /* SOSMacUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SOSMacUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -385,6 +410,7 @@
 		FD647C48FC2E703DF2569FA5 /* ReviewItemRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewItemRow.swift; sourceTree = "<group>"; };
 		FD7ECA1B33611E22001EF44C /* HelperXPCListenerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperXPCListenerDelegate.swift; sourceTree = "<group>"; };
 		FE065D77765989EBA1EA28F3 /* PerformanceMetricCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceMetricCards.swift; sourceTree = "<group>"; };
+		FF4886E65709E3F90EE9485D /* SOSMacPro.storekit */ = {isa = PBXFileReference; path = SOSMacPro.storekit; sourceTree = "<group>"; };
 		FFABD43DC705D2ADFED69B24 /* PerformanceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -434,6 +460,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		004F0D8395DB7AE58C21A421 /* SOSMacMASTests */ = {
+			isa = PBXGroup;
+			children = (
+				402ADA4E7497DB56B21C8981 /* StoreKitProTests.swift */,
+			);
+			path = SOSMacMASTests;
+			sourceTree = "<group>";
+		};
 		031D2175453B3650FA05DA1D /* MenuBarHelper */ = {
 			isa = PBXGroup;
 			children = (
@@ -463,8 +497,10 @@
 				3591A759099A03CB61D76D3E /* Packages */,
 				E611D953C857CEE55508FCE2 /* PrivilegedHelper */,
 				4F47A6308D18602C55C03F8C /* Resources */,
+				004F0D8395DB7AE58C21A421 /* SOSMacMASTests */,
 				5FD202B260011B119848872E /* SOSMacTests */,
 				BDC8CFB2E7DB46D06FD11255 /* SOSMacUITests */,
+				F3B84B09C7D92FBF98D33A2E /* StoreKit */,
 				2C72880C804DAEB47011B4D1 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -477,6 +513,7 @@
 				166E1A0591F7BDC42C0E7853 /* PrivilegedHelper */,
 				5C3280BFF2C7337B3913B507 /* SOSMac.app */,
 				A11F1DA79B177C51B56F98F3 /* SOSMacMAS.app */,
+				4DD5BA5B06CC59F0909F854B /* SOSMacMASTests.xctest */,
 				0A2A54290A0C90569DA0BE23 /* SOSMacTests.xctest */,
 				E5454942F08539F2B5554DD6 /* SOSMacUITests.xctest */,
 			);
@@ -528,8 +565,12 @@
 				C4A2CA9E97646A1D527CFFF5 /* MASAccessStore.swift */,
 				8B128E3913C34F7F5A978C9B /* MASGrantUI.swift */,
 				A12ED2821BCB6123C8CD0C52 /* MenuBarHelperMAS.entitlements */,
+				D4271B01216254FA3FBA669B /* PaddleLicenseProvider.swift */,
+				DED24A693918E2CB1296504F /* PaywallView.swift */,
+				3C525F2674FB7A531433CAE6 /* ProAccess.swift */,
 				5325AAC4BF630C9A4707EB99 /* QuarantineRecord.swift */,
 				CF2B0BFC10865FD9AD02AB78 /* SOSMacMAS.entitlements */,
+				3A31D5744652172BEC4FE2ED /* StoreKitProProvider.swift */,
 				BE83684E6FDF6AB08F134234 /* UITestFixtures.swift */,
 				12C387D8F24CE868F9E1C4BA /* UITestFixtures+CloudCleanup.swift */,
 				894C619B02C5F0C90D88DE74 /* UITestFixtures+Dashboard.swift */,
@@ -565,6 +606,7 @@
 				AB0E90A1A2D635D662C7166B /* ModuleSheetDismissalTests.swift */,
 				2D1B843A3B926BEFB774274F /* ModuleStoreTests.swift */,
 				E4C7247C6125875E468D0056 /* PerformanceViewModelTests.swift */,
+				27EB75C405F61CE4380FC90B /* ProAccessTests.swift */,
 				5ED4E6A0687F607625C13448 /* ProgressiveCleanerTests.swift */,
 				D484F4538B320905C1A10F26 /* ProtectionViewModelTests.swift */,
 				1528BAB4676A01E77E6B9BB1 /* ShellTests.swift */,
@@ -739,6 +781,14 @@
 			path = State;
 			sourceTree = "<group>";
 		};
+		F3B84B09C7D92FBF98D33A2E /* StoreKit */ = {
+			isa = PBXGroup;
+			children = (
+				FF4886E65709E3F90EE9485D /* SOSMacPro.storekit */,
+			);
+			path = StoreKit;
+			sourceTree = "<group>";
+		};
 		F85E9F32DD7D83C5989962AB /* Updater */ = {
 			isa = PBXGroup;
 			children = (
@@ -752,6 +802,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		0DE1651C8ECBC8E90302E930 /* SOSMacMASTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 22ED89C91FDD460F8AEDB2F7 /* Build configuration list for PBXNativeTarget "SOSMacMASTests" */;
+			buildPhases = (
+				8CD51AF6FA7955EB1B2A3753 /* Sources */,
+				11F7E402CF4F3B12C17231BD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				9693BD6A857F46463FD8799C /* PBXTargetDependency */,
+			);
+			name = SOSMacMASTests;
+			packageProductDependencies = (
+			);
+			productName = SOSMacMASTests;
+			productReference = 4DD5BA5B06CC59F0909F854B /* SOSMacMASTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		0F44861A6320DC1CC94A51C6 /* MenuBarHelper */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 95ECA58646F994FD067855E9 /* Build configuration list for PBXNativeTarget "MenuBarHelper" */;
@@ -902,6 +971,9 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					0DE1651C8ECBC8E90302E930 = {
+						ProvisioningStyle = Automatic;
+					};
 					0F44861A6320DC1CC94A51C6 = {
 						ProvisioningStyle = Automatic;
 					};
@@ -948,6 +1020,7 @@
 				0F44861A6320DC1CC94A51C6 /* MenuBarHelper */,
 				EF8E17F31A9A49D8BE247353 /* MenuBarHelperMAS */,
 				3D59D9945D02A4929C4D743C /* SOSMacMAS */,
+				0DE1651C8ECBC8E90302E930 /* SOSMacMASTests */,
 				DC2555E2A721C8CD296A66C0 /* SOSMacTests */,
 				DAAC64D4060DF2CB19ED3851 /* SOSMacUITests */,
 				1E8F47B298496F8078E1C1BB /* PrivilegedHelper */,
@@ -963,6 +1036,14 @@
 				EB92BC2935C2C878D16A34D0 /* Assets.xcassets in Resources */,
 				576FDBBB76738B610156C854 /* PrivacyInfo.xcprivacy in Resources */,
 				A5B7A84F1715A3A67CABBC43 /* MenuBarHelperMAS.app in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		11F7E402CF4F3B12C17231BD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0806AC313664C69C56A973C2 /* SOSMacPro.storekit in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1073,11 +1154,14 @@
 				CB9E65B31707640AFEA30196 /* ModuleStore.swift in Sources */,
 				9048E53AD6C3B192A1A0A66D /* ModuleTileView.swift in Sources */,
 				C1D306350EF9CCE179379F36 /* ModuleToolbar.swift in Sources */,
+				DC820FA44835B4278DDA29BF /* PaddleLicenseProvider.swift in Sources */,
+				04B76DBB03926D7926FDC281 /* PaywallView.swift in Sources */,
 				A16DB233ABA5B38CD5B9211A /* PerformanceMetricCards.swift in Sources */,
 				3E38F672530103701AC5A976 /* PerformanceView.swift in Sources */,
 				4E688FAFBD4C19198A4B7168 /* PerformanceViewModel.swift in Sources */,
 				B1517F9C831C6E782D623EFB /* PrimaryCTAView.swift in Sources */,
 				6C83EF8ADCC68D145197246A /* PrivilegedHelperClient.swift in Sources */,
+				F7306422DB8081322163AD33 /* ProAccess.swift in Sources */,
 				DDABCDA3D5687DA3D9226741 /* ProgressBarView.swift in Sources */,
 				15E04AC47087D5EE0266CF32 /* ProgressiveCleaner.swift in Sources */,
 				B8C5878B6778CB1B3A13E84F /* ProtectionView.swift in Sources */,
@@ -1106,6 +1190,7 @@
 				EF316611FC48AC42963F7DC0 /* StartView.swift in Sources */,
 				BD0660C71F18A02EB77215AA /* StatusStateView.swift in Sources */,
 				03D89916AF1CF0691BB0B6FB /* StepRowView.swift in Sources */,
+				DA6B77A3D41382964A81D32C /* StoreKitProProvider.swift in Sources */,
 				78879E5A7BE2B8C2721395E8 /* Theme.swift in Sources */,
 				920A4CDCE15A91C7105AF525 /* TreemapCanvasView.swift in Sources */,
 				8F86545DAEF9FE9A177FFFAD /* UITestFixtures+CloudCleanup.swift in Sources */,
@@ -1175,11 +1260,14 @@
 				0D34C366D2DDB67B8CD9AD30 /* ModuleStore.swift in Sources */,
 				316A195DF7C576593AFB3B7E /* ModuleTileView.swift in Sources */,
 				B3B9DDB66079DDE5D1701319 /* ModuleToolbar.swift in Sources */,
+				018780DC1ED1A7D85C09A322 /* PaddleLicenseProvider.swift in Sources */,
+				F7F0AFB36E84512329668A0C /* PaywallView.swift in Sources */,
 				2EB080A852DB8306CC7C1798 /* PerformanceMetricCards.swift in Sources */,
 				6EBA17007FEC03ECB5F61D60 /* PerformanceView.swift in Sources */,
 				D63B7D829012E047D8C0AFCF /* PerformanceViewModel.swift in Sources */,
 				38C8C7B0712E88096ED07738 /* PrimaryCTAView.swift in Sources */,
 				2501F8324BB0438EE779CFD3 /* PrivilegedHelperClient.swift in Sources */,
+				1C1E77C4FFAAD41368087E42 /* ProAccess.swift in Sources */,
 				83FE256759C8CF700C9530FA /* ProgressBarView.swift in Sources */,
 				368F3A1DC18C2E83B080691E /* ProgressiveCleaner.swift in Sources */,
 				FB9073EDDDEE23F193E85E75 /* ProtectionView.swift in Sources */,
@@ -1208,6 +1296,7 @@
 				2886F01C8BDDF62FBC9F825C /* StartView.swift in Sources */,
 				0F823B5F26BB5638931FEBAB /* StatusStateView.swift in Sources */,
 				8AA61CB9664858415A409E9E /* StepRowView.swift in Sources */,
+				7FEE953F5070BACC97D5C5CE /* StoreKitProProvider.swift in Sources */,
 				9B282130DCD4F8E45A091E89 /* Theme.swift in Sources */,
 				C50DCDB36C19CA59C3C6C18E /* TreemapCanvasView.swift in Sources */,
 				2DDFE02F36CCC8BDCA83B061 /* UITestFixtures+CloudCleanup.swift in Sources */,
@@ -1228,6 +1317,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8CD51AF6FA7955EB1B2A3753 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00C977E53F0CE2984F663602 /* StoreKitProTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A31F12539A07EC4BAE5BD9CF /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1241,6 +1338,7 @@
 				0252C1F2A81CB1D805D7CA81 /* ModuleSheetDismissalTests.swift in Sources */,
 				1F40A560B91FC884CF786AB5 /* ModuleStoreTests.swift in Sources */,
 				BCB5C36B7701589FAEFB21E6 /* PerformanceViewModelTests.swift in Sources */,
+				8AB99894972320FA59F12DBD /* ProAccessTests.swift in Sources */,
 				751DBBAC07B81E334E5C8F81 /* ProgressiveCleanerTests.swift in Sources */,
 				3DC8A397341EFA6E748E59B1 /* ProtectionViewModelTests.swift in Sources */,
 				BBF734014F4FBA38476B323D /* SOSCheckboxTests.swift in Sources */,
@@ -1308,6 +1406,11 @@
 			isa = PBXTargetDependency;
 			target = 80C8485EDEE67072AE469396 /* SOSMac */;
 			targetProxy = 5FE012B8D398D8E5565D8400 /* PBXContainerItemProxy */;
+		};
+		9693BD6A857F46463FD8799C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3D59D9945D02A4929C4D743C /* SOSMacMAS */;
+			targetProxy = B88F49B487D00FD42171B36F /* PBXContainerItemProxy */;
 		};
 		C8FD38DC553943131F958902 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1628,6 +1731,27 @@
 			};
 			name = Release;
 		};
+		AEB28F7F3F39BBC8121B5A5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nextlabs.sosmac.mastests;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG MAS_BUILD";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SOSMacMAS.app/Contents/MacOS/SOSMacMAS";
+			};
+			name = Debug;
+		};
 		C111C5204DF867A3C72D322B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1728,6 +1852,27 @@
 			};
 			name = Release;
 		};
+		E13EC205300E839B67FF3B8B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.nextlabs.sosmac.mastests;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG MAS_BUILD";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SOSMacMAS.app/Contents/MacOS/SOSMacMAS";
+			};
+			name = Release;
+		};
 		E4BE66DC3F832BE8A37AC457 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1753,6 +1898,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		22ED89C91FDD460F8AEDB2F7 /* Build configuration list for PBXNativeTarget "SOSMacMASTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AEB28F7F3F39BBC8121B5A5C /* Debug */,
+				E13EC205300E839B67FF3B8B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		365AE2D6451AF905DACD8782 /* Build configuration list for PBXNativeTarget "MenuBarHelperMAS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

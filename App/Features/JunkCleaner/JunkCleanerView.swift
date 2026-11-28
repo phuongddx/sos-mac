@@ -396,7 +396,10 @@ private struct JunkCleanerScreen: View {
         case .results:
             // S1: every removal path opens the confirmation first.
             if !viewModel.selectedPaths.isEmpty {
-                actions.primary = { presentTrashConfirmation(fromResults: true) }
+                actions.primary = {
+                guard store.pro.require(for: .junkCleaner) else { return }
+                presentTrashConfirmation(fromResults: true)
+            }
             }
             if !viewModel.items.isEmpty {
                 actions.reviewItems = { viewModel.enterReview() }
@@ -404,7 +407,10 @@ private struct JunkCleanerScreen: View {
             actions.scanAgain = { viewModel.startScan() }
         case .review:
             if !viewModel.selectedPaths.isEmpty {
-                actions.primary = { presentTrashConfirmation(fromResults: false) }
+                actions.primary = {
+                guard store.pro.require(for: .junkCleaner) else { return }
+                presentTrashConfirmation(fromResults: false)
+            }
             }
         case .cleaning:
             break

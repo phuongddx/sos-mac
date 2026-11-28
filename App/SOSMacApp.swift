@@ -165,8 +165,19 @@ struct RootView: View {
                     .masGrantBanner(store: store, destination: selection)
             }
             .environment(store)
+            .sheet(item: Binding<ProFeature?>(
+                get: { store.pro.paywallFeature },
+                set: { if $0 == nil { store.pro.dismissPaywall() } }
+            )) { feature in
+                PaywallView(feature: feature)
+                    .environment(store.pro)
+            }
             .frame(minWidth: 960, minHeight: 600)  // OD-5
             .uiTestHooks()
+            .task {
+                // Load entitlements + localized plan prices at launch.
+                await store.pro.start()
+            }
         } else {
             ProgressView()
         }

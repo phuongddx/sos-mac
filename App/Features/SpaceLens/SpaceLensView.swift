@@ -398,8 +398,14 @@ private struct SpaceLensScreen: View {
                 // S1: the CTA and the review button both open the cleanup-list sheet —
                 // the confirmation with checkboxes (the prototype's single "Review…").
                 if !viewModel.cleanupItems.isEmpty {
-                    actions.primary = { presentCleanupList() }
-                    actions.reviewItems = { presentCleanupList() }
+                    actions.primary = {
+                    guard store.pro.require(for: .spaceLens) else { return }
+                    presentCleanupList()
+                }
+                    actions.reviewItems = {
+                    guard store.pro.require(for: .spaceLens) else { return }
+                    presentCleanupList()
+                }
                 }
                 actions.scanAgain = { viewModel.scanAgain() }
             } else {

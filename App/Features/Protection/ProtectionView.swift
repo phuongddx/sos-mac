@@ -506,7 +506,10 @@ private struct ProtectionScreen: View {
         case .review:
             // Every quarantine opens the confirmation first (CF-1).
             if !viewModel.selectedPaths.isEmpty {
-                actions.primary = { presentQuarantineConfirmation() }
+                actions.primary = {
+                guard store.pro.require(for: .protection) else { return }
+                presentQuarantineConfirmation()
+            }
             }
         case .quarantining:
             break
