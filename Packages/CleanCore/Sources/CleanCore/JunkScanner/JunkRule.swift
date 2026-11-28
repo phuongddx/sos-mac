@@ -10,6 +10,10 @@ public struct JunkRule: Sendable, Identifiable {
         /// `~/Library/Application Support/*/Cache*` — never the app's whole
         /// Application Support root, only subfolders literally named "Cache*".
         case applicationSupportCacheGlob
+        /// Same glob, but anchored at a concrete home root the caller resolved
+        /// from a user-selected security-scoped bookmark (App Sandbox builds:
+        /// `~` expands to the container, so the real home must be injected).
+        case applicationSupportCacheGlobUnderRoot(String)
     }
 
     public let id: String
@@ -39,6 +43,16 @@ public struct JunkRule: Sendable, Identifiable {
 
         case .applicationSupportCacheGlob:
             let appSupport = ("~/Library/Application Support" as NSString).expandingTildeInPath
+            return Self.applicationSupportCacheRoots(appSupport, fileManager: fileManager)
+
+        case .applicationSupportCacheGlobUnderRoot(let homeRoot):
+            let appSupport = (homeRoot as NSString).appendingPathComponent("Library/Application Support")
+            return Self.applicationSupportCacheRoots(appSupport, fileManager: fileManager)
+        }
+    }
+
+    /// The shared `*/Cache*` glob walker for both app-support kinds.
+    private static func applicationSupportCacheRoots(_ appSupport: String, fileManager: FileManager) -> [String] {
             guard let appDirs = try? fileManager.contentsOfDirectory(atPath: appSupport) else {
                 return []
             }
@@ -53,7 +67,6 @@ public struct JunkRule: Sendable, Identifiable {
                 }
             }
             return roots
-        }
     }
 
     /// Most rules just carry a fixed severity; logs are the one case where
@@ -102,4 +115,39 @@ extension JunkRule {
     /// call site. Excludes anything requiring the not-yet-built privileged
     /// helper, so Smart Care never silently depends on it.
     public static let smartCareEligible: [JunkRule] = allowlist.filter { !$0.requiresPrivilegedHelper }
+
+    /// The App Sandbox allowlist: the same three user-domain rules, rooted at
+    /// the concrete home folder the caller resolved from a user-granted
+    /// (security-scoped) bookmark instead of `~` — inside App Sandbox
+    /// `NSHomeDirectory()` and `~` resolve to the app container, so the tilde
+    /// rules would silently walk nothing and report a fake "no junk found".
+    ///
+    /// System Caches (`/Library/Caches`) is deliberately absent: it needs the
+    /// PrivilegedHelper, which Mac App Store builds do not embed.
+    /// An empty `homeRoot` yields an empty list — the app layer gates scans
+    /// on the grant existing, so an un-granted sandbox build never scans at all.
+    public static func sandboxAllowlist(homeRoot: String) -> [JunkRule] {
+        let root = (homeRoot as NSString).standardizingPath
+        guard !root.isEmpty, root != "/" else { return [] }
+        return [
+            JunkRule(
+                id: "user-caches",
+                label: "User App Caches",
+                kind: .directPath((root as NSString).appendingPathComponent("Library/Caches")),
+                defaultSeverity: .safe
+            ),
+            JunkRule(
+                id: "user-logs",
+                label: "User Logs (7+ days old)",
+                kind: .directPath((root as NSString).appendingPathComponent("Library/Logs")),
+                defaultSeverity: .safe
+            ),
+            JunkRule(
+                id: "app-support-caches",
+                label: "App Support Cache Folders",
+                kind: .applicationSupportCacheGlobUnderRoot(root),
+                defaultSeverity: .safe
+            )
+        ]
+    }
 }
