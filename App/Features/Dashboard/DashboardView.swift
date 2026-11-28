@@ -238,8 +238,18 @@ struct DashboardView: View {
             // line under it repeats the snapshot's figures and carries no "live" dot (spec §5.1).
             .init(destination: .performance, description: "Live system metrics",
                   extraLine: snapshot?.performanceLine),
-            .init(destination: .protection, description: "Known-signature malware scan"),
+            .init(destination: .protection, description: protectionCardDescription),
         ]
+    }
+
+    /// Protection's card copy follows the build: the MAS build ships without
+    /// YARA rules, so it describes the hash check that actually runs.
+    private var protectionCardDescription: String {
+        #if MAS_BUILD
+        "Known-threat hash scan"
+        #else
+        "Known-signature malware scan"
+        #endif
     }
 }
 
