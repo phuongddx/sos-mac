@@ -12,18 +12,19 @@ concurrency:
 jobs:
   build-and-test:
     name: Build (Dev + MAS) and tests
-    runs-on: macos-26
+    runs-on: macos-27
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode 26.4.1
-        # 26.6 crashes swift-frontend in IRGen on this codebase; 26.4.1 is
-        # the newest stable that compiles it. Needs the macOS 26 SDK for
-        # glassEffect (main's AuroraSurface already requires it).
+      # macos-27 is required: main's own code needs the Xcode 27 SDK, and
+      # Xcode 26.x (newest on macos-26) crashes swift-frontend IRGen on
+      # ConfirmSheet.swift — proven pre-existing by bisect PR #28 (main +
+      # vendored libs only fails identically).
+      - name: Verify toolchain
         run: |
           ls -d /Applications/Xcode*.app || true
-          sudo xcode-select -s /Applications/Xcode_26.4.1.app
+          sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
           xcodebuild -version
           swift --version
 
