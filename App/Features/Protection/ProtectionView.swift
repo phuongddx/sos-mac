@@ -32,6 +32,7 @@ struct ProtectionView: View {
 
 private struct ProtectionScreen: View {
     @Bindable var viewModel: ProtectionViewModel
+    @Environment(ModuleStore.self) private var store
 
     private typealias ProtectionFrame = ModuleScreen<AnyView>
 
@@ -486,7 +487,12 @@ private struct ProtectionScreen: View {
         var actions = ProtectionFrame.Actions()
         switch viewModel.phase {
         case .idle:
-            actions.primary = { viewModel.startScan() }
+            actions.primary = {
+                #if MAS_BUILD
+                guard store.masEnsureHomeAccess() else { return }
+                #endif
+                viewModel.startScan()
+            }
         case .scanning:
             actions.stop = { viewModel.cancelScan() }
         case .results:

@@ -25,6 +25,7 @@ struct UninstallerView: View {
 
 private struct UninstallerScreen: View {
     @Bindable var viewModel: UninstallerViewModel
+    @Environment(ModuleStore.self) private var store
 
     private typealias UninstallerFrame = ModuleScreen<AnyView>
 
@@ -47,15 +48,30 @@ private struct UninstallerScreen: View {
             AnyView(content)
         }
         .accessibilityIdentifier("uninstaller-screen")
-        .task {
+        .task(id: appsTaskGate) {
             #if DEBUG
             if UITestHooks.current.fixtures, UITestHooks.current.destination == .uninstaller {
                 viewModel.loadFixtureFromLaunchHooks()
                 return
             }
             #endif
+            #if MAS_BUILD
+            // Fail closed: without the Applications grant the enumerator
+            // would walk nothing and report a fake "no apps".
+            guard !store.masAccess.needsApplicationsGrant else { return }
+            #endif
             viewModel.loadApps()
         }
+    }
+
+    /// MAS: re-runs `.task` when the Applications grant lands (the store
+    /// rebuilds the view model, and the fresh one has not loaded apps yet).
+    private var appsTaskGate: String {
+        #if MAS_BUILD
+        store.masAccess.applicationsRoot ?? ""
+        #else
+        ""
+        #endif
     }
 
     // MARK: - Content (one branch per Phase)
@@ -373,7 +389,12 @@ private struct UninstallerScreen: View {
             if viewModel.lifecycle == .error {
                 actions.primary = { Task { await viewModel.retryFailedInspects() } }
             } else {
-                actions.primary = { viewModel.startInspectAll() }
+                actions.primary = {
+                    #if MAS_BUILD
+                    guard store.masEnsureApplicationsAccess() else { return }
+                    #endif
+                    viewModel.startInspectAll()
+                }
                 // Empty's CTA is the frame's "Scan Again".
                 actions.scanAgain = { viewModel.checkAgain() }
             }

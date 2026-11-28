@@ -614,6 +614,8 @@ extension JunkRule {
         switch kind {
         case .directPath(let template): template
         case .applicationSupportCacheGlob: "~/Library/Application Support"
+        case .applicationSupportCacheGlobUnderRoot(let root):
+            (root as NSString).appendingPathComponent("Library/Application Support")
         }
     }
 }

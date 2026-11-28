@@ -18,6 +18,7 @@ struct JunkCleanerView: View {
 
 private struct JunkCleanerScreen: View {
     @Bindable var viewModel: JunkCleanerViewModel
+    @Environment(ModuleStore.self) private var store
 
     /// `ModuleScreen`'s nested types carry the frame's generic parameter, so a screen
     /// that computes its `Actions`/`SelectionSummary` in properties (rather than inline
@@ -384,7 +385,12 @@ private struct JunkCleanerScreen: View {
         var actions = JunkFrame.Actions()
         switch viewModel.phase {
         case .idle:
-            actions.primary = { viewModel.startScan() }
+            actions.primary = {
+                #if MAS_BUILD
+                guard store.masEnsureHomeAccess() else { return }
+                #endif
+                viewModel.startScan()
+            }
         case .scanning:
             actions.stop = { viewModel.cancelScan() }
         case .results:

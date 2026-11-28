@@ -144,8 +144,14 @@ final class SpaceLensViewModel {
     private var layoutCacheKey: LayoutCacheKey?
     private var layoutCacheResult: [DisplayItem] = []
 
-    init(rootPath: String = NSHomeDirectory()) {
+    /// MAS builds pass a closure that persists the chosen folder as a
+    /// security-scoped bookmark so it can be offered again on relaunch.
+    private let persistSelection: (@MainActor (URL) -> Void)?
+
+    init(rootPath: String = NSHomeDirectory(),
+         persistSelection: (@MainActor (URL) -> Void)? = nil) {
         self.rootPath = (rootPath as NSString).standardizingPath
+        self.persistSelection = persistSelection
     }
 
     // MARK: - Lifecycle mapping (pattern step 3)
@@ -279,6 +285,11 @@ final class SpaceLensViewModel {
         panel.allowsMultipleSelection = false
 
         guard panel.runModal() == .OK, let url = panel.url else { return }
+        #if MAS_BUILD
+        // Keep the NSOpenPanel grant across launches (bookmark) and hold the
+        // security scope for the session so scan and clean keep working.
+        persistSelection?(url)
+        #endif
         selectLocation(at: url.path)
     }
 

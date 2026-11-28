@@ -38,10 +38,14 @@ private struct PerformanceScreen: View {
                     unavailableBanner
                 }
                 PerformanceMetricGrid(sample: viewModel.currentSample, showsUnavailable: isUnavailable)
+                // MAS builds omit the maintenance card: both actions need the
+                // PrivilegedHelper, which the sandboxed target does not embed.
+                #if !MAS_BUILD
                 Text("Maintenance")
                     .font(Theme.Font.eyebrow)
                     .foregroundStyle(Theme.Color.textSecondary)
                 MaintenanceRows(viewModel: viewModel, isUnavailable: isUnavailable)
+                #endif
                 bottomCards
                 if let widgetError = viewModel.widgetError {
                     BannerView(kind: .err, title: "Couldn't open the menu bar widget", text: widgetError)
@@ -135,7 +139,9 @@ private struct PerformanceScreen: View {
                     .accessibilityLabel("Open SOS Mac at login")
                     .accessibilityIdentifier("performance-login-toggle")
             }
+                #if !MAS_BUILD
             launchAgentsList
+                #endif
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .performanceCard()

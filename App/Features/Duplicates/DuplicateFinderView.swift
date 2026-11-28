@@ -17,6 +17,7 @@ struct DuplicateFinderView: View {
 
 private struct DuplicateFinderScreen: View {
     @Bindable var viewModel: DuplicateFinderViewModel
+    @Environment(ModuleStore.self) private var store
 
     /// One concrete frame type, so `Actions`/`SelectionSummary` can be computed in properties
     /// (the spelling Junk & Cache set).
@@ -415,7 +416,12 @@ private struct DuplicateFinderScreen: View {
         var actions = DuplicateFrame.Actions()
         switch viewModel.phase {
         case .idle:
-            actions.primary = { viewModel.startScan() }
+            actions.primary = {
+                #if MAS_BUILD
+                guard store.masEnsureHomeAccess() else { return }
+                #endif
+                viewModel.startScan()
+            }
         case .scanning:
             actions.stop = { viewModel.cancelScan() }
         case .results:

@@ -26,6 +26,7 @@ struct UpdaterView: View {
 
 private struct UpdaterScreen: View {
     var viewModel: UpdaterViewModel
+    @Environment(ModuleStore.self) private var store
 
     private typealias UpdaterFrame = ModuleScreen<AnyView>
 
@@ -43,16 +44,31 @@ private struct UpdaterScreen: View {
             AnyView(content)
         }
         .accessibilityIdentifier("updater-screen")
-        .task {
+        .task(id: appsTaskGate) {
             #if DEBUG
             if UITestHooks.current.fixtures, UITestHooks.current.destination == .updater {
                 viewModel.loadFixtureFromLaunchHooks()
                 return
             }
             #endif
+            #if MAS_BUILD
+            // Fail closed: without the Applications grant the enumerator
+            // would walk nothing and report a fake "no apps".
+            guard !store.masAccess.needsApplicationsGrant else { return }
+            #endif
             // OD-10: only lists the installed apps. No update check runs on a visit.
             viewModel.loadApps()
         }
+    }
+
+    /// MAS: re-runs `.task` when the Applications grant lands (the store
+    /// rebuilds the view model, and the fresh one has not loaded apps yet).
+    private var appsTaskGate: String {
+        #if MAS_BUILD
+        store.masAccess.applicationsRoot ?? ""
+        #else
+        ""
+        #endif
     }
 
     // MARK: - Content (one branch per Phase)
@@ -307,7 +323,14 @@ private struct UpdaterScreen: View {
         switch viewModel.phase {
         case .idle:
             // With no apps there is nothing to check: the CTA stays disabled.
-            if !viewModel.rows.isEmpty { actions.primary = { viewModel.startCheck() } }
+            if !viewModel.rows.isEmpty {
+                actions.primary = {
+                    #if MAS_BUILD
+                    guard store.masEnsureApplicationsAccess() else { return }
+                    #endif
+                    viewModel.startCheck()
+                }
+            }
         case .checking:
             actions.stop = { viewModel.stopCheck() }
         case .results:

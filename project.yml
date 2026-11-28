@@ -23,6 +23,10 @@ targets:
     platform: macOS
     sources:
       - path: App
+        # The privacy manifest ships with the MAS target only; the Developer
+        # ID build stays byte-identical to its current bundle.
+        excludes:
+          - "Resources/**"
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac
@@ -82,6 +86,82 @@ targets:
       - package: CleanCore
         product: CleanCore
 
+  # Sandbox twin of the menu bar helper (same sources): launched standalone
+  # through NSWorkspace, so it carries its own app-sandbox entitlement rather
+  # than the inherit entitlement a directly-spawned child process would use.
+  MenuBarHelperMAS:
+    type: application
+    platform: macOS
+    sources:
+      - path: MenuBarHelper
+      - path: App/DesignSystem/Theme.swift
+      - path: App/DesignSystem/AuroraSurface.swift
+    settings:
+      base:
+        PRODUCT_NAME: MenuBarHelperMAS
+        PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac.menubarhelper
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_LSUIElement: YES
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_ENTITLEMENTS: App/Support/MenuBarHelperMAS.entitlements
+    dependencies:
+      - package: CleanCore
+        product: CleanCore
+
+  # Mac App Store build of the app: same App/ sources, sandboxed, no
+  # PrivilegedHelper and no helper-dependent features (gated with the
+  # MAS_BUILD compile condition in the app layer; CleanCore stays identical).
+  SOSMacMAS:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+        excludes:
+          - "Resources/**"
+      - path: App/Resources/PrivacyInfo.xcprivacy
+        buildPhase: resources
+    settings:
+      base:
+        PRODUCT_NAME: SOSMacMAS
+        PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "6.0"
+        SWIFT_STRICT_CONCURRENCY: complete
+        GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.utilities
+        INFOPLIST_KEY_ITSAppUsesNonExemptEncryption: NO
+        CODE_SIGN_STYLE: Automatic
+        ENABLE_HARDENED_RUNTIME: YES
+        CODE_SIGN_ENTITLEMENTS: App/Support/SOSMacMAS.entitlements
+      configs:
+        debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "DEBUG MAS_BUILD"
+        release:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "MAS_BUILD"
+    dependencies:
+      - package: CleanCore
+        product: CleanCore
+      - package: TreemapKit
+        product: TreemapKit
+      - target: MenuBarHelperMAS
+    postbuildScripts:
+      - name: Embed Menu Bar Helper (MAS)
+        script: |
+          set -e
+          DEST="${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/Library/LoginItems"
+          mkdir -p "$DEST"
+          rm -rf "$DEST/MenuBarHelperMAS.app"
+          cp -R "${BUILT_PRODUCTS_DIR}/MenuBarHelperMAS.app" "$DEST/MenuBarHelperMAS.app"
+
   SOSMacTests:
     type: bundle.unit-test
     platform: macOS
@@ -135,6 +215,12 @@ targets:
         product: CleanCore
 
 schemes:
+  SOSMacMAS:
+    build:
+      targets:
+        SOSMacMAS: all
+    run:
+      config: Debug
   SOSMac:
     build:
       targets:

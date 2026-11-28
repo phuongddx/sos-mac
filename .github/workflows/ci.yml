@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build (Dev + MAS) and CleanCore tests
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build Developer ID scheme (SOSMac)
+        run: |
+          xcodebuild build \
+            -project SOSMac.xcodeproj -scheme SOSMac \
+            -configuration Debug -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            2>&1 | grep -E "error:|warning:|BUILD" | tail -40
+          # Re-run quietly: the pipe above hides the exit code of xcodebuild,
+          # so run once more; it is incremental and cheap.
+          xcodebuild build \
+            -project SOSMac.xcodeproj -scheme SOSMac \
+            -configuration Debug -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            -quiet
+
+      - name: Build Mac App Store scheme (SOSMacMAS)
+        run: |
+          xcodebuild build \
+            -project SOSMac.xcodeproj -scheme SOSMacMAS \
+            -configuration Debug -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            -quiet
+
+      - name: Verify MAS app-sandbox entitlement
+        run: |
+          APP="$(xcodebuild -project SOSMac.xcodeproj -scheme SOSMacMAS \
+            -configuration Debug -destination 'platform=macOS' \
+            -showBuildSettings 2>/dev/null \
+            | awk '/ BUILT_PRODUCTS_DIR =/{sub(/^ +BUILT_PRODUCTS_DIR = /,"");print}' | tail -1)/SOSMacMAS.app"
+          echo "Checking entitlements on $APP"
+          codesign -d --entitlements - "$APP" 2>&1 | tee /tmp/mas-entitlements.txt
+          grep -q "com.apple.security.app-sandbox" /tmp/mas-entitlements.txt
+          echo "app-sandbox entitlement present: OK"
+
+      - name: CleanCore tests
+        working-directory: Packages/CleanCore
+        run: |
+          set -o pipefail
+          swift test 2>&1 | grep -vE "was built for newer|warning: object file|^\[" | tail -40

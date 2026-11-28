@@ -127,6 +127,7 @@ final class ProtectionViewModel {
     init(
         modelContext: ModelContext,
         locations: [ProtectionLocation] = ProtectionLocation.allowlist,
+        homeDirectory: String = NSHomeDirectory(),
         signatureDatabase: SignatureDatabase = .bundledBaseline,
         quarantineManager: QuarantineManager = QuarantineManager(),
         progressTracker: ScanProgressTracker = ScanProgressTracker(),
@@ -134,6 +135,7 @@ final class ProtectionViewModel {
     ) {
         self.modelContext = modelContext
         self.locations = locations
+        self.homeDirectory = homeDirectory
         self.scanner = ProtectionScanner(locations: locations, signatureDatabase: signatureDatabase)
         self.quarantineManager = quarantineManager
         self.progressTracker = progressTracker
