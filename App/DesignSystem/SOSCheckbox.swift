@@ -126,7 +126,6 @@ struct SOSCheckbox: View {
     /// No bezel: the mark is the whole button. Pressing dims it.
     private struct CheckboxButtonStyle: ButtonStyle {
         @MainActor
-        @ContentBuilder
         func makeBody(configuration: Configuration) -> some View {
             configuration.label
                 .opacity(configuration.isPressed ? 0.7 : 1)
