@@ -35,7 +35,7 @@ jobs:
 
       - name: Build Developer ID scheme (SOSMac)
         run: |
-          xcodebuild build \
+          xcodebuild build -jobs 2 \
             -project SOSMac.xcodeproj -scheme SOSMac \
             -configuration Debug -destination 'platform=macOS' \
             CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
@@ -43,7 +43,7 @@ jobs:
             2>&1 | grep -E "error:|warning:|BUILD" | tail -40
           # Re-run quietly: the pipe above hides the exit code of xcodebuild,
           # so run once more; it is incremental and cheap.
-          xcodebuild build \
+          xcodebuild build -jobs 2 \
             -project SOSMac.xcodeproj -scheme SOSMac \
             -configuration Debug -destination 'platform=macOS' \
             CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
@@ -52,7 +52,7 @@ jobs:
 
       - name: Build Mac App Store scheme (SOSMacMAS)
         run: |
-          xcodebuild build \
+          xcodebuild build -jobs 2 \
             -project SOSMac.xcodeproj -scheme SOSMacMAS \
             -configuration Debug -destination 'platform=macOS' \
             CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
@@ -72,7 +72,7 @@ jobs:
 
       - name: App unit tests (ProAccess, providers, view models)
         run: |
-          xcodebuild test \
+          xcodebuild test -jobs 2 \
             -project SOSMac.xcodeproj -scheme SOSMac \
             -configuration Debug -destination 'platform=macOS' \
             -only-testing:SOSMacTests \
