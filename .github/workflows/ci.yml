@@ -12,19 +12,21 @@ concurrency:
 jobs:
   build-and-test:
     name: Build (Dev + MAS) and tests
-    runs-on: macos-27
+    # xcode-27 is the GA label for the Xcode 27 runner image (macOS 27,
+    # arm64) — actions/runner-images #15397 / github.blog 2026-10-15. The
+    # codebase needs the Xcode 27 SDK; Xcode 26.x (macos-26) crashes
+    # swift-frontend IRGen on ConfirmSheet.swift — proven pre-existing by
+    # bisect PR #28.
+    runs-on: xcode-27
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
-      # macos-27 is required: main's own code needs the Xcode 27 SDK, and
-      # Xcode 26.x (newest on macos-26) crashes swift-frontend IRGen on
-      # ConfirmSheet.swift — proven pre-existing by bisect PR #28 (main +
-      # vendored libs only fails identically).
       - name: Verify toolchain
         run: |
           ls -d /Applications/Xcode*.app || true
           sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          echo "xcodebuild -version:"
           xcodebuild -version
           swift --version
 
