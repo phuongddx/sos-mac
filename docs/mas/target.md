@@ -17,7 +17,7 @@ is unchanged: same scheme, same signing, same helper embedding, same behavior.
 | Duplicate Finder | `NSHomeDirectory()` root | granted home root |
 | Space Lens | NSOpenPanel, no persistence | NSOpenPanel + app-scope bookmark (persists across launches) |
 | Uninstaller / Updater | `/Applications` + `~/Applications` | granted Applications folder (plus `~/Applications` under the granted home) |
-| Protection | 6 locations incl. `/Library/Launch*` | 4 user-domain locations rooted at the granted home (`ProtectionLocation.sandboxAllowlist`) |
+| Protection | 6 locations incl. `/Library/Launch*`; known-signature copy | 4 user-domain locations rooted at the granted home (`ProtectionLocation.sandboxAllowlist`); copy says "Known-threat hash check" |
 | Performance — Free RAM / Flush DNS | PrivilegedHelper | hidden (no helper in MAS) |
 | Performance — launch agents list | reads `/Library/Launch*` | hidden (not readable in sandbox) |
 | Performance — Open at login (SMAppService.mainApp), menu bar widget | works | works (helper is embedded with its own sandbox entitlement) |
@@ -27,6 +27,25 @@ is unchanged: same scheme, same signing, same helper embedding, same behavior.
 
 Gating is compile-time in the app layer only (`SWIFT_ACTIVE_COMPILATION_CONDITIONS = MAS_BUILD`);
 CleanCore compiles identically for both targets — sandbox scan roots are runtime-injected.
+
+## YARA rules and signature updates
+
+MAS build ships without YARA rules; ruleset selection is a follow-up.
+Protection in the MAS build detects against the built-in known-threat hash
+baseline only (`SignatureDatabase.bundledBaseline` has `yaraRuleSources: []`
+and no `.yar` file exists in the repo), and the UI copy says exactly that:
+"Known-threat hash check" / "built-in list of known threat hashes" — never
+malware-signature scanning or signature-database updates (guideline 2.3.1).
+`SignatureUpdateChecker` (the networked update path) has no call site in the
+app, and `SOSMacMASTests/SignatureUpdatePolicyTests.swift` fails the MAS build
+if any App source ever references it — rule and signature updates arrive with
+app updates, avoiding the guideline 2.5.2 gray zone. The DMG build keeps the
+known-signature wording and the future update path.
+
+When ruleset selection lands as a follow-up, it must only accept rules whose
+license permits commercial use and redistribution inside a paid app, and
+YARA-Forge sources must be filtered individually: some of its rule sources
+are non-commercial and cannot ship.
 
 ## Entitlements (MAS)
 
