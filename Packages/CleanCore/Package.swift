@@ -26,10 +26,15 @@ let package = Package(
                     // app in dyld before any window appeared (2026-11-27). With the
                     // static archives the only dylibs left are /usr/lib system
                     // libraries — platform binaries, which library validation always
-                    // accepts. The four formulas are yara's declared dependencies,
-                    // so `brew install yara` provides them.
+                    // accepts. The formulas are yara's declared dependencies, so
+                    // `brew install yara` provides them. Link the openssl@4 keg,
+                    // not openssl@3: yara 4.6.0's Homebrew bottle is built against
+                    // openssl@4 (its libyara.a references _OPENSSL_sk_set_*_thunks,
+                    // symbols that only exist in OpenSSL 4.x) — pointing at the
+                    // openssl@3 archive fails at link time with exactly those
+                    // undefined symbols (CI, 2026-11-27).
                     "/opt/homebrew/opt/yara/lib/libyara.a",
-                    "/opt/homebrew/opt/openssl@3/lib/libcrypto.a",
+                    "/opt/homebrew/opt/openssl@4/lib/libcrypto.a",
                     "/opt/homebrew/opt/libmagic/lib/libmagic.a",
                     "/opt/homebrew/opt/jansson/lib/libjansson.a",
                     // libmagic's compression backends (platform dylibs).

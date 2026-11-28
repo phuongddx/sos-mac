@@ -19,8 +19,11 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      - name: Install build dependencies (xcodegen, libyara)
-        run: brew install xcodegen yara
+      - name: Install build dependencies (xcodegen, yara, openssl@4)
+        # openssl@4 is linked statically with yara (Packages/CleanCore/Package.swift):
+        # yara 4.6.0's bottle is built against it. Installing it explicitly guards
+        # against runner images that ship a stale keg.
+        run: brew install xcodegen yara openssl@4
 
       # The repo's own merge gate: xcodegen, Debug + Release build, a
       # headless smoke launch of every shipped binary (dyld must load every
