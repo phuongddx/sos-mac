@@ -10,7 +10,7 @@ import Testing
 struct LicenseProviderTests {
 
     @Test("mock provider unlocks through the paywall purchase path")
-    func mockUnlocks() async {
+    func mockUnlocks() async throws {
         let pro = ProAccess(provider: MockLicenseProvider())
         await pro.start()
 
@@ -27,7 +27,7 @@ struct LicenseProviderTests {
     }
 
     @Test("mock restore without a purchase finds nothing")
-    func mockRestoreFindsNothing() async {
+    func mockRestoreFindsNothing() async throws {
         let pro = ProAccess(provider: MockLicenseProvider())
         await pro.start()
 
@@ -37,7 +37,7 @@ struct LicenseProviderTests {
     }
 
     @Test("Paddle stub with empty config stays free and fails closed")
-    func paddleStubFailClosed() async {
+    func paddleStubFailClosed() async throws {
         let provider = PaddleLicenseProvider(info: [:])
         let pro = ProAccess(provider: provider)
         await pro.start()
