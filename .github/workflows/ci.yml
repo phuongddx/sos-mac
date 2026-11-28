@@ -17,12 +17,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select the newest Xcode
+      - name: Select Xcode 26.4.1
+        # 26.6 crashes swift-frontend in IRGen on this codebase; 26.4.1 is
+        # the newest stable that compiles it. Needs the macOS 26 SDK for
+        # glassEffect (main's AuroraSurface already requires it).
         run: |
           ls -d /Applications/Xcode*.app || true
-          NEWEST=$(ls -d /Applications/Xcode*.app | sort -V | tail -1)
-          echo "Using $NEWEST"
-          sudo xcode-select -s "$NEWEST"
+          sudo xcode-select -s /Applications/Xcode_26.4.1.app
           xcodebuild -version
           swift --version
 
