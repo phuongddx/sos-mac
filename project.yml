@@ -23,6 +23,19 @@ targets:
     platform: macOS
     sources:
       - path: App
+    info:
+      path: App/Info.plist
+      properties:
+        # Sparkle feed for the app's own updates (the Updater module reads
+        # SUFeedURL from installed apps, including this one). Each release
+        # publishes a cumulative appcast.xml as a release asset, so the
+        # "latest download" URL always resolves to the newest feed.
+        SUFeedURL: https://github.com/phuongddx/sos-mac/releases/latest/download/appcast.xml
+        # EdDSA public key matching the login-keychain key
+        # "Private key for signing Sparkle updates" (service
+        # https://sparkle-project.org); the private half is the
+        # SPARKLE_EDDSA_PRIVATE_KEY secret in the `release` environment.
+        SUPublicEDKey: qr2BMxaHwjye57wI+y09YjC3u4xJi6cWUnYQzWDcCvM=
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nextlabs.sosmac
@@ -49,7 +62,11 @@ targets:
           DEST="${BUILT_PRODUCTS_DIR}/${CONTENTS_FOLDER_PATH}/Library/LoginItems"
           mkdir -p "$DEST"
           rm -rf "$DEST/MenuBarHelper.app"
-          cp -R "${BUILT_PRODUCTS_DIR}/MenuBarHelper.app" "$DEST/MenuBarHelper.app"
+          # ditto (not cp -R): with SKIP_INSTALL=YES the built product is a
+          # relative symlink into UninstalledProducts — ditto copies the real
+          # bundle, cp -R would copy the symlink itself and the app would ship
+          # a link that only resolves inside the build products directory.
+          ditto "${BUILT_PRODUCTS_DIR}/MenuBarHelper.app" "$DEST/MenuBarHelper.app"
       - name: Embed Privileged Helper
         script: |
           set -e
@@ -78,6 +95,12 @@ targets:
         INFOPLIST_KEY_NSHumanReadableCopyright: ""
         CODE_SIGN_STYLE: Automatic
         ENABLE_HARDENED_RUNTIME: YES
+        # Embedded into SOSMac.app by the post-build script (never an
+        # independently distributed product). Without this the helper also
+        # lands in the xcarchive's Products/Applications, turning the archive
+        # multi-product — and -exportArchive then rejects every distribution
+        # method ("expected one {}").
+        SKIP_INSTALL: YES
     dependencies:
       - package: CleanCore
         product: CleanCore
@@ -130,6 +153,10 @@ targets:
         SWIFT_STRICT_CONCURRENCY: complete
         CODE_SIGN_STYLE: Automatic
         ENABLE_HARDENED_RUNTIME: YES
+        # Same as MenuBarHelper: shipped inside SOSMac.app/Contents/Resources
+        # (the post-build script), never installed standalone — otherwise the
+        # tool lands in the xcarchive's Products/usr/local/bin.
+        SKIP_INSTALL: YES
     dependencies:
       - package: CleanCore
         product: CleanCore

@@ -137,6 +137,17 @@ struct RootView: View {
             if store == nil {
                 store = ModuleStore(modelContext: modelContext)
             }
+            // SMAppService.h requires a LaunchDaemon to be re-registered when
+            // its plist or executable changes; every launch checks the bundled
+            // helper's fingerprint against the last registration and repairs
+            // it only when they differ (see `PrivilegedHelperRegistration`).
+            // `recordSuccessfulRegistration` in Performance keeps the manual
+            // register path in sync.
+            if PrivilegedHelperRegistration.shouldRunAtLaunch {
+                _ = await PrivilegedHelperRegistration(
+                    seams: .live(client: PrivilegedHelperClient())
+                ).ensureCurrentHelperRegistered()
+            }
         }
     }
 

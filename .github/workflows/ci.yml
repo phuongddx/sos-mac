@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    # xcode-27 = GitHub-hosted arm64 runner image with Xcode 27 (public
+    # preview). The project is arm64-only (project.yml EXCLUDED_ARCHS).
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies (xcodegen, yara, openssl@4)
+        # openssl@4 is linked statically with yara (Packages/CleanCore/Package.swift):
+        # yara 4.6.0's bottle is built against it. Installing it explicitly guards
+        # against runner images that ship a stale keg.
+        run: brew install xcodegen yara openssl@4
+
+      # The repo's own merge gate: xcodegen, Debug + Release build, a
+      # headless smoke launch of every shipped binary (dyld must load every
+      # linked library), CleanCore's Swift Testing suite and the app unit
+      # tests. Unsigned: ad-hoc signing only, no secrets, no notarization.
+      - name: Gate (build + smoke launch + tests)
+        run: Scripts/verify-gate.sh CODE_SIGN_IDENTITY=-
