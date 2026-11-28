@@ -39,6 +39,7 @@ jobs:
             -project SOSMac.xcodeproj -scheme SOSMac \
             -configuration Debug -destination 'platform=macOS' \
             CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            SWIFT_ENABLE_BATCH_MODE=NO COMPILER_INDEX_STORE_ENABLE=NO \
             2>&1 | grep -E "error:|warning:|BUILD" | tail -40
           # Re-run quietly: the pipe above hides the exit code of xcodebuild,
           # so run once more; it is incremental and cheap.
@@ -46,6 +47,7 @@ jobs:
             -project SOSMac.xcodeproj -scheme SOSMac \
             -configuration Debug -destination 'platform=macOS' \
             CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            SWIFT_ENABLE_BATCH_MODE=NO COMPILER_INDEX_STORE_ENABLE=NO \
             -quiet
 
       - name: Build Mac App Store scheme (SOSMacMAS)
@@ -54,6 +56,7 @@ jobs:
             -project SOSMac.xcodeproj -scheme SOSMacMAS \
             -configuration Debug -destination 'platform=macOS' \
             CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            SWIFT_ENABLE_BATCH_MODE=NO COMPILER_INDEX_STORE_ENABLE=NO \
             -quiet
 
       - name: Verify MAS app-sandbox entitlement
@@ -74,6 +77,7 @@ jobs:
             -configuration Debug -destination 'platform=macOS' \
             -only-testing:SOSMacTests \
             CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            SWIFT_ENABLE_BATCH_MODE=NO COMPILER_INDEX_STORE_ENABLE=NO \
             -quiet
 
       - name: CleanCore tests
