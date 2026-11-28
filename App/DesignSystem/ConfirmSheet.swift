@@ -393,13 +393,17 @@ final class ConfirmSheetState {
             ids = Set(model.items.map(\.id))
         }
         let selection = ConfirmSelection(itemIDs: ids)
-        model.confirm(selection)
+        // Hoisted to a local: calling the @MainActor closure field directly
+        // crashes Xcode 26 IRGen (SyncCallEmission), Xcode 27 is fine.
+        let confirm = model.confirm
+        confirm(selection)
         return selection
     }
 
     /// CF-1: cancel only cancels — it never reaches `model.confirm`.
     func cancel() {
-        model.cancel()
+        let cancel = model.cancel
+        cancel()
     }
 }
 
