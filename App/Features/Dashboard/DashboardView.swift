@@ -132,6 +132,14 @@ struct DashboardView: View {
                     .padding(.top, 6)
 
                 Button {
+                    #if MAS_BUILD
+                    // Gate the one-click scan on the sandbox grant: open the
+                    // grant panel first; the scan starts on the next tap.
+                    guard store.masEnsureHomeAccess() else {
+                        onSelect(.smartCare)
+                        return
+                    }
+                    #endif
                     launcher.runSmartCare()
                 } label: {
                     Label("Run Smart Care", systemImage: SidebarDestination.smartCare.systemImage)
@@ -209,12 +217,17 @@ struct DashboardView: View {
     // MARK: Module cards
 
     private var cleanEntries: [DashboardModuleSection.Entry] {
-        [
+        var entries: [DashboardModuleSection.Entry] = [
             .init(destination: .junkCleaner, description: "Caches and old logs"),
             .init(destination: .duplicateFinder, description: "Exact copies and similar images"),
             .init(destination: .spaceLens, description: "See what fills your disk"),
-            .init(destination: .cloudCleanup, description: "Duplicates in iCloud Drive"),
         ]
+        #if !MAS_BUILD
+        // Cloud Cleanup's OAuth provider flows are out of scope for the
+        // sandboxed App Store target.
+        entries.append(.init(destination: .cloudCleanup, description: "Duplicates in iCloud Drive"))
+        #endif
+        return entries
     }
 
     private var manageEntries: [DashboardModuleSection.Entry] {
@@ -225,8 +238,18 @@ struct DashboardView: View {
             // line under it repeats the snapshot's figures and carries no "live" dot (spec §5.1).
             .init(destination: .performance, description: "Live system metrics",
                   extraLine: snapshot?.performanceLine),
-            .init(destination: .protection, description: "Known-signature malware scan"),
+            .init(destination: .protection, description: protectionCardDescription),
         ]
+    }
+
+    /// Protection's card copy follows the build: the MAS build ships without
+    /// YARA rules, so it describes the hash check that actually runs.
+    private var protectionCardDescription: String {
+        #if MAS_BUILD
+        "Known-threat hash scan"
+        #else
+        "Known-signature malware scan"
+        #endif
     }
 }
 

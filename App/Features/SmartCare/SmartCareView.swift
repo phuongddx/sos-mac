@@ -17,6 +17,7 @@ struct SmartCareView: View {
 
 private struct SmartCareScreen: View {
     @Bindable var viewModel: SmartCareViewModel
+    @Environment(ModuleStore.self) private var store
 
     /// `ModuleScreen`'s nested types carry the frame's generic parameter; a screen that
     /// computes its `Actions`/`SelectionSummary` in properties names them through one
@@ -497,13 +498,21 @@ private struct SmartCareScreen: View {
         var actions = SmartCareFrame.Actions()
         switch viewModel.phase {
         case .idle:
-            actions.primary = { viewModel.startScan() }
+            actions.primary = {
+                #if MAS_BUILD
+                guard store.masEnsureHomeAccess() else { return }
+                #endif
+                viewModel.startScan()
+            }
         case .scanning:
             actions.stop = { viewModel.cancelScan() }
         case .results:
             // S1: every removal path opens the confirmation first.
             if !viewModel.selectedPaths.isEmpty {
-                actions.primary = { presentTrashConfirmation(fromResults: true) }
+                actions.primary = {
+                guard store.pro.require(for: .smartCare) else { return }
+                presentTrashConfirmation(fromResults: true)
+            }
             }
             if !viewModel.reviewItems.isEmpty {
                 actions.reviewItems = { viewModel.enterReview() }
@@ -511,7 +520,10 @@ private struct SmartCareScreen: View {
             actions.scanAgain = { viewModel.startScan() }
         case .review:
             if !viewModel.selectedPaths.isEmpty {
-                actions.primary = { presentTrashConfirmation(fromResults: false) }
+                actions.primary = {
+                guard store.pro.require(for: .smartCare) else { return }
+                presentTrashConfirmation(fromResults: false)
+            }
             }
         case .cleaning:
             break

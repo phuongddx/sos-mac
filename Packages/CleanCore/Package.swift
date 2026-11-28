@@ -1,5 +1,14 @@
 // swift-tools-version: 6.0
+import Foundation
 import PackageDescription
+
+// Vendored, repo-relative static archives (see Vendor/README.md). SwiftPM's
+// unsafeFlags cannot use relative paths, so the manifest anchors on #filePath —
+// the Package.swift manifest itself — and joins the Vendor directory next to it.
+// This replaces the previous /opt/homebrew absolute paths, which only linked on
+// machines with the exact Homebrew prefix and broke CI/archive relocation.
+let packageRoot = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+let vendorRoot = packageRoot.appendingPathComponent("Vendor")
 
 let package = Package(
     name: "CleanCore",
@@ -13,7 +22,7 @@ let package = Package(
             name: "CYara",
             cSettings: [
                 .unsafeFlags([
-                    "-I/opt/homebrew/opt/yara/include"
+                    "-I\(vendorRoot.appendingPathComponent("include").path)"
                 ])
             ],
             linkerSettings: [
@@ -26,12 +35,13 @@ let package = Package(
                     // app in dyld before any window appeared (2026-11-27). With the
                     // static archives the only dylibs left are /usr/lib system
                     // libraries — platform binaries, which library validation always
-                    // accepts. The four formulas are yara's declared dependencies,
-                    // so `brew install yara` provides them.
-                    "/opt/homebrew/opt/yara/lib/libyara.a",
-                    "/opt/homebrew/opt/openssl@3/lib/libcrypto.a",
-                    "/opt/homebrew/opt/libmagic/lib/libmagic.a",
-                    "/opt/homebrew/opt/jansson/lib/libjansson.a",
+                    // accepts. The archives are vendored in Vendor/ (BSD/Apache/MIT,
+                    // permissive) so CI and the Mac App Store target build hermetically;
+                    // yara's declared dependencies are libcrypto, libmagic and jansson.
+                    vendorRoot.appendingPathComponent("lib/libyara.a").path,
+                    vendorRoot.appendingPathComponent("lib/libcrypto.a").path,
+                    vendorRoot.appendingPathComponent("lib/libmagic.a").path,
+                    vendorRoot.appendingPathComponent("lib/libjansson.a").path,
                     // libmagic's compression backends (platform dylibs).
                     "-llzma",
                     "-lbz2",

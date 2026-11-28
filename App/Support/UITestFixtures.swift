@@ -241,6 +241,17 @@ enum UITestFixtures {
 
     // MARK: Protection — findings and quarantine
 
+    /// Debug-only fixture copy, kept in sync with ProtectionView.methodName
+    /// (the MAS build says "Known threat hash" because it ships without a
+    /// signature rule set).
+    static var eicarMethodName: String {
+        #if MAS_BUILD
+        "Known threat hash"
+        #else
+        "Known signature"
+        #endif
+    }
+
     struct FindingFixture: Sendable, Identifiable {
         let id: String
         let path: String
@@ -258,7 +269,7 @@ enum UITestFixtures {
 
     static let findings: [FindingFixture] = [
         FindingFixture(id: "f1", path: "\(home)/Downloads/eicar_test.com", size: 68,
-                       method: "Known signature", identifier: "EICAR-Test-File"),
+                       method: Self.eicarMethodName, identifier: "EICAR-Test-File"),
     ]
 
     static let quarantine: [QuarantineFixture] = [

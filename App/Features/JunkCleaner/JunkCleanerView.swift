@@ -18,6 +18,7 @@ struct JunkCleanerView: View {
 
 private struct JunkCleanerScreen: View {
     @Bindable var viewModel: JunkCleanerViewModel
+    @Environment(ModuleStore.self) private var store
 
     /// `ModuleScreen`'s nested types carry the frame's generic parameter, so a screen
     /// that computes its `Actions`/`SelectionSummary` in properties (rather than inline
@@ -384,13 +385,21 @@ private struct JunkCleanerScreen: View {
         var actions = JunkFrame.Actions()
         switch viewModel.phase {
         case .idle:
-            actions.primary = { viewModel.startScan() }
+            actions.primary = {
+                #if MAS_BUILD
+                guard store.masEnsureHomeAccess() else { return }
+                #endif
+                viewModel.startScan()
+            }
         case .scanning:
             actions.stop = { viewModel.cancelScan() }
         case .results:
             // S1: every removal path opens the confirmation first.
             if !viewModel.selectedPaths.isEmpty {
-                actions.primary = { presentTrashConfirmation(fromResults: true) }
+                actions.primary = {
+                guard store.pro.require(for: .junkCleaner) else { return }
+                presentTrashConfirmation(fromResults: true)
+            }
             }
             if !viewModel.items.isEmpty {
                 actions.reviewItems = { viewModel.enterReview() }
@@ -398,7 +407,10 @@ private struct JunkCleanerScreen: View {
             actions.scanAgain = { viewModel.startScan() }
         case .review:
             if !viewModel.selectedPaths.isEmpty {
-                actions.primary = { presentTrashConfirmation(fromResults: false) }
+                actions.primary = {
+                guard store.pro.require(for: .junkCleaner) else { return }
+                presentTrashConfirmation(fromResults: false)
+            }
             }
         case .cleaning:
             break

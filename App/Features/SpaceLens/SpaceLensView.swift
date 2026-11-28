@@ -18,6 +18,7 @@ struct SpaceLensView: View {
 
 private struct SpaceLensScreen: View {
     @Bindable var viewModel: SpaceLensViewModel
+    @Environment(ModuleStore.self) private var store
 
     /// `ModuleScreen`'s nested types carry the frame's generic parameter — the same
     /// concrete-frame spelling every screen PR copies (PR 5's `JunkFrame` note).
@@ -104,6 +105,11 @@ private struct SpaceLensScreen: View {
         VStack(alignment: .leading, spacing: Theme.Spacing.s2) {
             sourceRow(symbol: "house", title: "Home", sub: "~ · recommended",
                       hue: Theme.Hue.spacelens, ink: Theme.Hue.Ink.spacelens) {
+                #if MAS_BUILD
+                // Gate the Home shortcut on the sandbox grant; the panel
+                // opens first and the row works on the next tap.
+                guard store.masEnsureHomeAccess() else { return }
+                #endif
                 viewModel.selectHomeFolder()
             }
             .accessibilityIdentifier("spacelens-source-home")
@@ -392,8 +398,14 @@ private struct SpaceLensScreen: View {
                 // S1: the CTA and the review button both open the cleanup-list sheet —
                 // the confirmation with checkboxes (the prototype's single "Review…").
                 if !viewModel.cleanupItems.isEmpty {
-                    actions.primary = { presentCleanupList() }
-                    actions.reviewItems = { presentCleanupList() }
+                    actions.primary = {
+                    guard store.pro.require(for: .spaceLens) else { return }
+                    presentCleanupList()
+                }
+                    actions.reviewItems = {
+                    guard store.pro.require(for: .spaceLens) else { return }
+                    presentCleanupList()
+                }
                 }
                 actions.scanAgain = { viewModel.scanAgain() }
             } else {

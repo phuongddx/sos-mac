@@ -126,7 +126,8 @@ struct SOSCheckbox: View {
     /// No bezel: the mark is the whole button. Pressing dims it.
     private struct CheckboxButtonStyle: ButtonStyle {
         @MainActor
-        @ContentBuilder
+        // No result-builder attribute: the body is a single expression, and
+        // @ContentBuilder is Xcode-27-SDK-only — CI's Xcode 26.6 rejects it.
         func makeBody(configuration: Configuration) -> some View {
             configuration.label
                 .opacity(configuration.isPressed ? 0.7 : 1)

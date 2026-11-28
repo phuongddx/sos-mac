@@ -17,6 +17,7 @@ struct DuplicateFinderView: View {
 
 private struct DuplicateFinderScreen: View {
     @Bindable var viewModel: DuplicateFinderViewModel
+    @Environment(ModuleStore.self) private var store
 
     /// One concrete frame type, so `Actions`/`SelectionSummary` can be computed in properties
     /// (the spelling Junk & Cache set).
@@ -415,13 +416,21 @@ private struct DuplicateFinderScreen: View {
         var actions = DuplicateFrame.Actions()
         switch viewModel.phase {
         case .idle:
-            actions.primary = { viewModel.startScan() }
+            actions.primary = {
+                #if MAS_BUILD
+                guard store.masEnsureHomeAccess() else { return }
+                #endif
+                viewModel.startScan()
+            }
         case .scanning:
             actions.stop = { viewModel.cancelScan() }
         case .results:
             // S1: every removal path opens the confirmation first.
             if !viewModel.selectedItems.isEmpty {
-                actions.primary = { presentTrashConfirmation(fromResults: true) }
+                actions.primary = {
+                guard store.pro.require(for: .duplicateFinder) else { return }
+                presentTrashConfirmation(fromResults: true)
+            }
             }
             if !viewModel.sets.isEmpty {
                 actions.reviewItems = { viewModel.enterReview() }
@@ -429,7 +438,10 @@ private struct DuplicateFinderScreen: View {
             actions.scanAgain = { viewModel.startScan() }
         case .review:
             if !viewModel.selectedItems.isEmpty {
-                actions.primary = { presentTrashConfirmation(fromResults: false) }
+                actions.primary = {
+                guard store.pro.require(for: .duplicateFinder) else { return }
+                presentTrashConfirmation(fromResults: false)
+            }
             }
         case .cleaning:
             break

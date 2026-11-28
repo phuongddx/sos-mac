@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: Build (Dev + MAS) and tests
+    # xcode-27 is the GA label for the Xcode 27 runner image (macOS 27,
+    # arm64) — actions/runner-images #15397 / github.blog 2026-10-15. The
+    # codebase needs the Xcode 27 SDK; Xcode 26.x (macos-26) crashes
+    # swift-frontend IRGen on ConfirmSheet.swift — proven pre-existing by
+    # bisect PR #28.
+    runs-on: xcode-27
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify toolchain
+        run: |
+          ls -d /Applications/Xcode*.app || true
+          sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          echo "xcodebuild -version:"
+          xcodebuild -version
+          swift --version
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build Developer ID scheme (SOSMac)
+        run: |
+          xcodebuild build -jobs 2 \
+            -project SOSMac.xcodeproj -scheme SOSMac \
+            -configuration Debug -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            SWIFT_ENABLE_BATCH_MODE=NO COMPILER_INDEX_STORE_ENABLE=NO \
+            2>&1 | grep -E "error:|warning:|BUILD" | tail -40
+          # Re-run quietly: the pipe above hides the exit code of xcodebuild,
+          # so run once more; it is incremental and cheap.
+          xcodebuild build -jobs 2 \
+            -project SOSMac.xcodeproj -scheme SOSMac \
+            -configuration Debug -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            SWIFT_ENABLE_BATCH_MODE=NO COMPILER_INDEX_STORE_ENABLE=NO \
+            -quiet
+
+      - name: Build Mac App Store scheme (SOSMacMAS)
+        run: |
+          xcodebuild build -jobs 2 \
+            -project SOSMac.xcodeproj -scheme SOSMacMAS \
+            -configuration Debug -destination 'platform=macOS' \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            SWIFT_ENABLE_BATCH_MODE=NO COMPILER_INDEX_STORE_ENABLE=NO \
+            -quiet
+
+      - name: Verify MAS app-sandbox entitlement
+        run: |
+          APP="$(xcodebuild -project SOSMac.xcodeproj -scheme SOSMacMAS \
+            -configuration Debug -destination 'platform=macOS' \
+            -showBuildSettings 2>/dev/null \
+            | awk '/ BUILT_PRODUCTS_DIR =/{sub(/^ +BUILT_PRODUCTS_DIR = /,"");print}' | tail -1)/SOSMacMAS.app"
+          echo "Checking entitlements on $APP"
+          codesign -d --entitlements - "$APP" 2>&1 | tee /tmp/mas-entitlements.txt
+          grep -q "com.apple.security.app-sandbox" /tmp/mas-entitlements.txt
+          echo "app-sandbox entitlement present: OK"
+
+      - name: App unit tests (ProAccess, providers, view models)
+        run: |
+          xcodebuild test -jobs 2 \
+            -project SOSMac.xcodeproj -scheme SOSMac \
+            -configuration Debug -destination 'platform=macOS' \
+            -only-testing:SOSMacTests \
+            CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM="" \
+            SWIFT_ENABLE_BATCH_MODE=NO COMPILER_INDEX_STORE_ENABLE=NO \
+            -quiet
+
+      - name: CleanCore tests
+        working-directory: Packages/CleanCore
+        run: |
+          set -o pipefail
+          swift test 2>&1 | grep -vE "was built for newer|warning: object file|^\[" | tail -40
+
+      # Note: SOSMacMASTests (StoreKit/SKTestSession) runs locally against
+      # StoreKit/SOSMacPro.storekit — see docs/mas/paywall.md for why it is
+      # not part of CI.

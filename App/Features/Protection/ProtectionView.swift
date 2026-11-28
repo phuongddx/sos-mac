@@ -32,6 +32,7 @@ struct ProtectionView: View {
 
 private struct ProtectionScreen: View {
     @Bindable var viewModel: ProtectionViewModel
+    @Environment(ModuleStore.self) private var store
 
     private typealias ProtectionFrame = ModuleScreen<AnyView>
 
@@ -96,9 +97,28 @@ private struct ProtectionScreen: View {
     /// D4: what Protection really is, said once on every state that shows a scan's outcome.
     private var disclaimer: some View {
         BannerView(kind: .info,
-                   title: "Known-signature scan",
-                   text: "Protection checks files against known malware signatures when you run a scan. It isn't real-time antivirus.")
+                   title: Self.disclaimerTitle,
+                   text: Self.disclaimerText)
             .padding(EdgeInsets(top: Theme.Spacing.s3, leading: Self.contentPadding, bottom: 0, trailing: Self.contentPadding))
+    }
+
+    /// The MAS build ships without YARA rules and without networked signature
+    /// updates, so its copy claims exactly what runs: a built-in list of known
+    /// threat hashes. The DMG build keeps the broader known-signature wording.
+    private static var disclaimerTitle: String {
+        #if MAS_BUILD
+        "Known-threat hash check"
+        #else
+        "Known-signature scan"
+        #endif
+    }
+
+    private static var disclaimerText: String {
+        #if MAS_BUILD
+        "Protection checks files against a built-in list of known threat hashes when you run a scan. It isn't real-time antivirus."
+        #else
+        "Protection checks files against known malware signatures when you run a scan. It isn't real-time antivirus."
+        #endif
     }
 
     // MARK: Start
@@ -108,7 +128,7 @@ private struct ProtectionScreen: View {
             module: module,
             title: "Check for known malware",
             lede: "Scans \(viewModel.locationCount) places where unwanted software usually hides. Anything found is quarantined, never deleted, so you can restore it.",
-            note: "Protection checks files against known malware signatures when you run a scan. It isn't real-time antivirus.") {
+            note: Self.disclaimerText) {
             VStack(alignment: .leading, spacing: Theme.Spacing.s4) {
                 locationChips
                 if !viewModel.quarantinedRecords.isEmpty {
@@ -486,7 +506,12 @@ private struct ProtectionScreen: View {
         var actions = ProtectionFrame.Actions()
         switch viewModel.phase {
         case .idle:
-            actions.primary = { viewModel.startScan() }
+            actions.primary = {
+                #if MAS_BUILD
+                guard store.masEnsureHomeAccess() else { return }
+                #endif
+                viewModel.startScan()
+            }
         case .scanning:
             actions.stop = { viewModel.cancelScan() }
         case .results:
@@ -500,7 +525,10 @@ private struct ProtectionScreen: View {
         case .review:
             // Every quarantine opens the confirmation first (CF-1).
             if !viewModel.selectedPaths.isEmpty {
-                actions.primary = { presentQuarantineConfirmation() }
+                actions.primary = {
+                guard store.pro.require(for: .protection) else { return }
+                presentQuarantineConfirmation()
+            }
             }
         case .quarantining:
             break
@@ -573,7 +601,12 @@ private struct ProtectionScreen: View {
 
     private static func methodName(_ method: DetectionMethod) -> String {
         switch method {
-        case .hash: "Known signature"
+        case .hash:
+            #if MAS_BUILD
+            "Known threat hash"
+            #else
+            "Known signature"
+            #endif
         case .yara: "Pattern rule"
         }
     }

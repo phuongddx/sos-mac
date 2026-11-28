@@ -95,12 +95,24 @@ struct SidebarGroup: Identifiable {
     var id: String { label ?? "" }
 
     static let all: [SidebarGroup] = [
-        SidebarGroup(label: nil, destinations: [.dashboard, .smartCare]),
-        SidebarGroup(label: "Clean", destinations: [.junkCleaner, .duplicateFinder, .spaceLens, .cloudCleanup]),
-        SidebarGroup(label: "Manage", destinations: [.uninstaller, .updater]),
+        SidebarGroup(label: nil, destinations: Self.top),
+        SidebarGroup(label: "Clean", destinations: Self.clean),
+        SidebarGroup(label: "Manage", destinations: Self.manage),
         SidebarGroup(label: "Speed", destinations: [.performance]),
         SidebarGroup(label: "Protect", destinations: [.protection]),
     ]
+
+    // Cloud Cleanup is hidden in MAS builds: its OAuth provider flows are
+    // out of scope for the sandboxed App Store target.
+    static let top: [SidebarDestination] = [.dashboard, .smartCare]
+    static let clean: [SidebarDestination] = {
+        #if MAS_BUILD
+        return [.junkCleaner, .duplicateFinder, .spaceLens]
+        #else
+        return [.junkCleaner, .duplicateFinder, .spaceLens, .cloudCleanup]
+        #endif
+    }()
+    static let manage: [SidebarDestination] = [.uninstaller, .updater]
 }
 
 struct RootView: View {
@@ -150,10 +162,22 @@ struct RootView: View {
             } detail: {
                 detail
                     .moduleToolbar(.shell(for: selection ?? .dashboard))
+                    .masGrantBanner(store: store, destination: selection)
             }
             .environment(store)
+            .sheet(item: Binding<ProFeature?>(
+                get: { store.pro.paywallFeature },
+                set: { if $0 == nil { store.pro.dismissPaywall() } }
+            )) { feature in
+                PaywallView(feature: feature)
+                    .environment(store.pro)
+            }
             .frame(minWidth: 960, minHeight: 600)  // OD-5
             .uiTestHooks()
+            .task {
+                // Load entitlements + localized plan prices at launch.
+                await store.pro.start()
+            }
         } else {
             ProgressView()
         }
@@ -179,7 +203,17 @@ struct RootView: View {
         case .performance:
             PerformanceView()
         case .cloudCleanup:
+            #if MAS_BUILD
+            // Unreachable (not in the MAS sidebar), but fail closed rather
+            // than presenting the OAuth screen the sandbox build excludes.
+            StatusStateView(
+                kind: .error,
+                symbol: "icloud.slash",
+                title: "Not available in this version",
+                text: "Cloud Cleanup isn't part of the App Store build.")
+            #else
             CloudCleanupView()
+            #endif
         case .protection:
             ProtectionView()
         }
